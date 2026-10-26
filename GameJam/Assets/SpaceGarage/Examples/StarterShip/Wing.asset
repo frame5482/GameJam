@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
   m_Name: Wing
   m_EditorClassIdentifier: 
+  partId: 74c1351ad30fceab8b372943594bff6c
+  displayName: Base Wing
+  icon: {fileID: 0}
   slot: 2
   partPrefab: {fileID: 100, guid: dab4aae17c9960291b38c6f195709004, type: 3}
   stats:
@@ -25,4 +28,3 @@ MonoBehaviour:
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
-  partId: 74c1351ad30fceab8b372943594bff6c

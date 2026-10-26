@@ -58,8 +58,16 @@ namespace SpaceGarage
             var selected = customization.SelectedPart;
             bool unlocked = resources.IsUnlocked(selected);
             bool priced = resources.CustomizationCatalog.TryGetPrice(selected != null ? selected.partId : null, out int price);
-            if (equipButton != null) equipButton.interactable = unlocked && resources.Equipped(selected.slot) != selected;
-            if (unlockButton != null) unlockButton.interactable = selected != null && !unlocked && priced && resources.Money >= price;
+            if (equipButton != null)
+            {
+                equipButton.gameObject.SetActive(selected != null && unlocked);
+                equipButton.interactable = unlocked && resources.Equipped(selected.slot) != selected;
+            }
+            if (unlockButton != null)
+            {
+                unlockButton.gameObject.SetActive(selected != null && !unlocked && priced);
+                unlockButton.interactable = selected != null && !unlocked && priced && resources.Money >= price;
+            }
             if (selectedNameText != null) selectedNameText.text = selected != null ? (string.IsNullOrWhiteSpace(selected.displayName) ? selected.name : selected.displayName) : string.Empty;
             if (unlockPriceText != null) unlockPriceText.text = selected != null && !unlocked && priced ? price.ToString("N0") : string.Empty;
             if (partContainer == null || partRowPrefab == null) return;

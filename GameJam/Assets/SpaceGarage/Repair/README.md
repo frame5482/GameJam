@@ -48,7 +48,7 @@ Canvas ต้องมี GraphicRaycaster ในฉากมี EventSystem พ
 
 ## กติกาและการเชื่อมระบบ
 
-ยานลูกค้าสุ่มสีแยก Gun / ArmorPlate / Wing / Jet ครั้งเดียวตอนประกอบ แต่ละส่วนใช้สีเดียวกันกับทุก material slot ของโมเดลส่วนนั้น คง alpha และ texture เดิม ใช้ MaterialPropertyBlock ไม่แก้ Material asset หรือสียานผู้เล่น สีสุ่มทำงานร่วมกับความหม่นตอนพังและไฮไลต์เดิม ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม ยังไม่ได้ตรวจภาพสีใน Play Mode
+ยานลูกค้าสุ่มสีทุก material slot ของทุก MeshRenderer/SkinnedMeshRenderer ใน Gun / ArmorPlate / Wing / Jet แยกกัน ครั้งเดียวตอนประกอบ คง alpha และ texture เดิม ใช้ MaterialPropertyBlock ไม่แก้ Material asset หรือสียานผู้เล่น สีสุ่มทำงานร่วมกับความหม่นตอนพังและไฮไลต์เดิม ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม ยังไม่ได้ตรวจภาพสีใน Play Mode
 
 Tooltip หลบกรอบโมเดลยานทั้งลำที่คำนวณจาก MeshRenderer/SkinnedMeshRenderer บนจอ เลือกด้านขวา ซ้าย บน หรือล่างที่มีพื้นที่แสดงมากที่สุด เว้นระยะอย่างน้อย 12 หน่วย Canvas (หรือค่า X ของ Tooltip Offset หากมากกว่า) ไม่ตามเมาส์ ไม่มีช่องใหม่ หากยานกินจอจนไม่มีพื้นที่พอ แผงอาจล้นขอบจอเพื่อไม่ให้ทับยาน ยังต้องตรวจภาพกับขนาด UI จริง
 

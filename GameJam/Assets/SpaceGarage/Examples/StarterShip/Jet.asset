@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
   m_Name: Jet
   m_EditorClassIdentifier: 
+  partId: d649b625e07028e2a39b2089f4c7401b
+  displayName: Base Jet
+  icon: {fileID: 0}
   slot: 3
   partPrefab: {fileID: 100, guid: 5a942b11c438ed71ad128337b4da46bf, type: 3}
   stats:
@@ -25,4 +28,3 @@ MonoBehaviour:
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
-  partId: d649b625e07028e2a39b2089f4c7401b

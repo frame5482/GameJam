@@ -10,19 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
-  m_Name: Jet
+  m_Name: HeavyArmorPlate
   m_EditorClassIdentifier: 
-  slot: 3
-  partPrefab: {fileID: 100, guid: 5a942b11c438ed71ad128337b4da46bf, type: 3}
+  partId: 6df484cdc708c8a458b834bff93f67a5
+  displayName: Heavy Plate
+  icon: {fileID: 0}
+  slot: 1
+  partPrefab: {fileID: 100, guid: 729a89bc716189d489e0a298c6d2d5a0, type: 3}
   stats:
     attack: 0
     defense: 0
     speed: 0
     handling: 0
-    health: 0
+    health: 100
     boosterCapacity: 0
   boostSpeedMultiplier: 2
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
-  partId: 13a701962ca666848b3fdff3bdf206fa

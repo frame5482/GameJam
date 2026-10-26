@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
   m_Name: Gun
   m_EditorClassIdentifier: 
+  partId: 208feaead0e9093aba00072e9e72cb4c
+  displayName: Base Gun
+  icon: {fileID: 0}
   slot: 0
   partPrefab: {fileID: 100, guid: 9031e55518c1ba192fffe9d668460a39, type: 3}
   stats:
@@ -25,4 +28,3 @@ MonoBehaviour:
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
-  partId: 208feaead0e9093aba00072e9e72cb4c

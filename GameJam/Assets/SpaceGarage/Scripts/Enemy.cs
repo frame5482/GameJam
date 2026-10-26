@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections.Generic;
 
 namespace SpaceGarage
 {
@@ -51,9 +52,13 @@ namespace SpaceGarage
         private ShipGun[] guns = new ShipGun[0];
         private ShipBoostEffect[] engineEffects = new ShipBoostEffect[0];
         private readonly GameObject[] parts = new GameObject[4];
-        private Renderer[] renderers = new Renderer[0];
-        private MaterialPropertyBlock[] originalBlocks = new MaterialPropertyBlock[0];
-        private MaterialPropertyBlock[] flashBlocks = new MaterialPropertyBlock[0];
+        private sealed class Surface
+        {
+            public Renderer renderer;
+            public int index;
+            public MaterialPropertyBlock original, flash;
+        }
+        private readonly List<Surface> surfaces = new List<Surface>();
         private bool configured, flashing, firing;
         private float nextTargetSearch, hitEndsAt;
         private readonly EnemyFireCycle fireCycle = new EnemyFireCycle();
@@ -112,17 +117,17 @@ namespace SpaceGarage
             guns = GetComponentsInChildren<ShipGun>(false);
             engineEffects = GetComponentsInChildren<ShipBoostEffect>(true);
             if (animator == null) animator = GetComponentInChildren<Animator>();
-            renderers = GetComponentsInChildren<Renderer>(false);
-            originalBlocks = new MaterialPropertyBlock[renderers.Length];
-            flashBlocks = new MaterialPropertyBlock[renderers.Length];
-            for (int i = 0; i < renderers.Length; i++)
+            surfaces.Clear();
+            foreach (var renderer in GetComponentsInChildren<Renderer>(false))
             {
-                originalBlocks[i] = new MaterialPropertyBlock();
-                flashBlocks[i] = new MaterialPropertyBlock();
-                renderers[i].GetPropertyBlock(originalBlocks[i]);
-                renderers[i].GetPropertyBlock(flashBlocks[i]);
-                flashBlocks[i].SetColor("_BaseColor", Color.white);
-                flashBlocks[i].SetColor("_Color", Color.white);
+                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) continue;
+                for (int i = 0; i < renderer.sharedMaterials.Length; i++)
+                {
+                    var original = new MaterialPropertyBlock(); var flash = new MaterialPropertyBlock();
+                    renderer.GetPropertyBlock(original, i); renderer.GetPropertyBlock(flash, i);
+                    flash.SetColor("_BaseColor", Color.white); flash.SetColor("_Color", Color.white);
+                    surfaces.Add(new Surface { renderer = renderer, index = i, original = original, flash = flash });
+                }
             }
             SetTarget(player);
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(true, false);
@@ -141,6 +146,7 @@ namespace SpaceGarage
             instance.transform.localPosition = Vector3.zero;
             instance.transform.localRotation = Quaternion.identity;
             instance.name = data.slot + "_" + data.partPrefab.name;
+            ShipRandomColors.Apply(instance);
             parts[(int)data.slot] = instance;
         }
 
@@ -276,8 +282,8 @@ namespace SpaceGarage
             StopFiring();
             hitEndsAt = Time.time + hitReactionDuration;
             knockback = (target != null ? transform.position - target.position : -transform.forward).normalized * hitKnockbackSpeed;
-            for (int i = 0; i < renderers.Length; i++)
-                if (renderers[i] != null && !(renderers[i] is LineRenderer)) renderers[i].SetPropertyBlock(flashBlocks[i]);
+            foreach (var surface in surfaces)
+                if (surface.renderer != null) surface.renderer.SetPropertyBlock(surface.flash, surface.index);
             flashing = true;
             if (Health > 0) return;
             body.linearVelocity = body.angularVelocity = Vector3.zero;
@@ -298,7 +304,8 @@ namespace SpaceGarage
         private void RestoreFlash()
         {
             if (!flashing) return;
-            for (int i = 0; i < renderers.Length; i++) if (renderers[i] != null) renderers[i].SetPropertyBlock(originalBlocks[i]);
+            foreach (var surface in surfaces)
+                if (surface.renderer != null) surface.renderer.SetPropertyBlock(surface.original, surface.index);
             flashing = false;
         }
 

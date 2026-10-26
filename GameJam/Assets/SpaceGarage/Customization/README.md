@@ -4,6 +4,8 @@
 
 ## ตั้งค่าพูลทั้งสี่หมวด
 
+แก้ Jet ต่อไม่ถึงตัวถัง: JetSpawnPoint ของ CustomizationPreview ใน Repair.unity และ prefab CustomerRepairShip/EnemyShip/StarterShip ทั้งสองชุดใช้ local (0,0,0) แทน z=-1.05 เพราะ mesh Jet และ ArmorPlate จาก Ship1.fbx ใช้ตำแหน่งประกอบในข้อมูลโมเดลอยู่แล้ว SampleScene มี Jet z=0 override เดิมอยู่แล้ว ไม่ขยับโมเดล/ไอพ่นหรือเปลี่ยน Material ไม่มีช่องใหม่ ตรวจค่าจุดติดตั้งแล้ว ยังไม่ได้ตรวจภาพ Play Mode หลังแก้
+
 เปิด `CustomizationCatalog.asset` มี Pools แยก Gun / ArmorPlate / Wing / Jet แต่ละหมวดมี Initially Unlocked (ใส่ฟรีตั้งแต่เริ่ม) และ Locked (Part กับ Price สำหรับปลดล็อกด้วยเงิน) ใส่ ShipPartStats ที่ Slot ตรงหมวด และมี Part Prefab ตัวอย่าง Initially Unlocked ใส่ StarterShip ทั้งสี่ส่วนแล้ว Locked ยังว่างให้เพิ่มชิ้นส่วน/ราคาเอง ไม่สร้างของขายสมมุติ
 
 ShipPartStats เพิ่ม Part ID, Display Name และ Icon: Part ID ต้องไม่ซ้ำและคงเดิมเพื่อใช้กับเซฟ ระบบกำหนดให้ข้อมูลเดิมแล้ว และสร้าง ID เมื่อสร้าง asset ใหม่ ถ้าทำ Duplicate asset ให้เปลี่ยน Part ID ของสำเนาเป็นค่าใหม่ก่อนเพิ่มใน catalog; Display Name ใช้ชื่อ ENG; Icon รับ Sprite รูปที่แสดงในรายการ ไม่ใส่ชื่อจะใช้ชื่อ asset
@@ -27,7 +29,7 @@ ResourceManager.prefab ผูก Customization Catalog แล้ว ถ้าเ
 - Gun / Armor / Wing / Jet Category Button: Button เลือกหมวดทั้งสี่
 - Part Container: RectTransform เดียวสำหรับรายการทั้งหมด จัด Grid/Vertical Layout เอง
 - Part Row Prefab: prefab UI ของคุณที่ติด CustomizationPartRow ช่อง Select Button รับ Button กดเลือก, Icon รับ Image, Name/Price Text รับ TMP_Text; Lock Icon รับ object รูปแม่กุญแจ เปิดเฉพาะอันที่ล็อก; Selected Indicator และ Equipped Indicator เป็น object แสดงสถานะตามที่คุณออกแบบ
-- Equip Button / Unlock Button: Button ใส่ชิ้นส่วนที่เลือก หรือปลดล็อกแยกกัน ปุ่มปลดล็อกปิดเมื่อเงินไม่พอ ปุ่มใส่ปิดเมื่อยังล็อกหรือใส่อยู่แล้ว ใช้ชื่อปุ่ม ENG เช่น Equip, Unlock
+- Equip Button / Unlock Button: ใส่ Button คนละ GameObject เป็นพี่น้องกัน ระบบสลับ SetActive: ชิ้นส่วนล็อกแสดง Unlock อย่างเดียว (เงินไม่พอยังแสดงแต่กดไม่ได้) ชิ้นส่วนปลดแล้วแสดง Equip อย่างเดียว ซื้อสำเร็จจะปิด Unlock และเปิด Equip ทันที ถ้าใส่อยู่แล้ว Equip ยังแสดงแต่กดไม่ได้ ไม่เลือกชิ้นส่วนจะซ่อนทั้งคู่ ใช้ชื่อปุ่ม ENG เช่น Equip, Unlock เก็บ CustomizationUI ไว้บน RepairSystems ที่เปิดอยู่เสมอ ไม่มีช่อง Inspector ใหม่
 - Money Text / Selected Name Text / Unlock Price Text: TMP_Text เงิน ชื่อชิ้นส่วนที่เลือก และราคา เฉพาะชิ้นส่วนที่ยังล็อก
 
 รายการในหมวดเรียงชิ้นส่วนที่ปลดแล้วก่อน ตามลำดับใน catalog แล้วต่อท้ายด้วยชิ้นส่วนที่ล็อกใน Container เดียว เมื่อซื้อจะย้ายเข้ากลุ่มปลดแล้วทันที ไม่หักเงินซ้ำและไม่ใส่ให้อัตโนมัติ กด Equip เพื่อใส่ ส่วนของยานที่ตรงหมวดที่เลือกจะสว่างและลอยขึ้นเล็กน้อย ใช้ MaterialPropertyBlock ไม่แก้ Material asset เดิม
