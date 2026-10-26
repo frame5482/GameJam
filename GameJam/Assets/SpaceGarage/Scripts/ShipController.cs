@@ -45,6 +45,7 @@ namespace SpaceGarage
         public bool IsAlive => Health > 0;
         public bool IsBoosting { get; private set; }
         public ShipInventory Inventory => inventory;
+        public float CurrentSpeed => flightSpeed;
 
         private Rigidbody body;
         private Vector2 flightInput;
@@ -61,6 +62,7 @@ namespace SpaceGarage
         private bool boostExhausted;
         private float recoveryAt;
         private float currentBank;
+        private ShipBoostEffect[] boostEffects = new ShipBoostEffect[0];
         // Saved preview instances are replaced on Awake so edit-mode assembly never duplicates parts in play.
         [SerializeField, HideInInspector] private GameObject[] assembledParts = new GameObject[4];
 
@@ -136,6 +138,7 @@ namespace SpaceGarage
                 body.MoveRotation(heading);
                 body.MovePosition(body.position + (heading * Vector3.forward) * (flightSpeed * step));
             }
+            UpdateBoostEffects(IsBoosting);
             boostChanged.Invoke(Boost, Stats.boosterCapacity);
         }
 
@@ -172,6 +175,13 @@ namespace SpaceGarage
             AssemblePart(wingPart, ShipPartSlot.Wing, wingMount);
             AssemblePart(jetPart, ShipPartSlot.Jet, jetMount);
             guns = GetComponentsInChildren<ShipGun>(false);
+            boostEffects = GetComponentsInChildren<ShipBoostEffect>(true);
+            UpdateBoostEffects(IsBoosting && IsAlive);
+        }
+
+        private void UpdateBoostEffects(bool active)
+        {
+            foreach (var effect in boostEffects) if (effect != null) effect.SetBoosting(active);
         }
 
         private void AssemblePart(ShipPartStats part, ShipPartSlot slot, Transform mount)
@@ -219,6 +229,7 @@ namespace SpaceGarage
             flightInput = Vector2.zero;
             boostHeld = false;
             IsBoosting = false;
+            UpdateBoostEffects(false);
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
             flightSpeed = 0;
@@ -241,6 +252,7 @@ namespace SpaceGarage
         private void OnDisable()
         {
             flightInput = Vector2.zero; boostHeld = false; fireHeld = false; IsBoosting = false;
+            UpdateBoostEffects(false);
             if (guns != null) foreach (var gun in guns) if (gun != null) gun.SetTrigger(false, 0, transform);
         }
 

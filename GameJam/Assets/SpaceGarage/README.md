@@ -26,6 +26,10 @@
 | Scripts/IShipDamageable.cs | สัญญาสำหรับสิ่งที่รับดาเมจผ่าน TakeDamage(float) |
 | Scripts/ShipInventory.cs | เก็บจำนวนวัสดุตาม Item ID ในรอบเล่น |
 | Scripts/ShipPickup.cs | ใส่ของดรอป กำหนด Item ID และจำนวน ให้ E เก็บได้ |
+| Scripts/ShipHUD.cs | ผูก UI ที่ผู้ใช้จัดไว้ แสดงเลือด เกจบูสต์ ความเร็ว และรับรายการวัสดุที่มาร์กจากระบบอื่น |
+| Scripts/ShipTrackedMaterialRow.cs | ผูกแถว UI ของวัสดุหนึ่งรายการ: รูป ชื่อ จำนวนที่มี/ต้องการ |
+| Scripts/ShipMaterialData.cs | ScriptableObject วัสดุ: รหัส ชื่อ และ Sprite |
+| Scripts/ShipBoostEffect.cs | เปิด/ปิดเอฟเฟกต์บูสต์ที่อยู่ในแต่ละ Part Prefab รองรับ VisualEffect/VFX Graph |
 | Editor/ShipPrototypeBuilder.cs | เมนูสร้างซีนและ Prefab ทดลองในโฟลเดอร์ใหม่ ไม่เขียนทับซีนเดิม |
 
 ## ทดลองแบบเตรียมให้
@@ -81,6 +85,56 @@
 ชุดทดลองประกอบด้วย PlayerShip.prefab, Bullet.prefab, ScrapPickup.prefab, Prefab ชิ้นส่วน 4 อัน และข้อมูลชิ้นส่วน 4 asset ที่ผูกไว้แล้ว ส่วน Armor/Wing/Jet เป็น GameObject เปล่าให้ใส่กราฟิกเอง ค่าเพิ่มสเตตัสเริ่มต้นของทุกส่วนเป็น 0 เพื่อคงค่าพื้นฐานยานไว้ก่อน
 
 ## ตั้งค่าเองและช่อง Inspector
+
+### HUD และวัสดุที่มาร์ก (2026-10-26)
+
+เพิ่มสคริปต์อย่างเดียว ไม่สร้าง Canvas/Panel/Layout หรือจัดหน้าตา UI ใหม่ ผู้ใช้ต้องมี UI แล้วลากช่องดังนี้:
+
+1. ติด **ShipHUD** บน GameObject UI ของผู้ใช้ ลาก PlayerShip ลง **Ship**
+2. **Health Text / Boost Text / Speed Text** รับ TMP_Text แสดงเลือดปัจจุบัน/สูงสุด เกจปัจจุบัน/สูงสุด และความเร็วที่ผ่านการหน่วงแล้ว หน่วย Unity ต่อวินาที ช่องที่ไม่ใช้ปล่อยว่างได้
+3. **Health Slider / Boost Slider** รับ Slider ของผู้ใช้ หรือใช้ **Health Fill / Boost Fill** รับ Image ที่ตั้ง Type = Filled ไว้เอง รองรับใส่ทั้งสองหรือเลือกอย่างใดอย่างหนึ่ง ไม่เปลี่ยนรูปแบบ/ช่วง min-max ของ Slider ไม่ยิง OnValueChanged ระหว่างอัปเดต
+4. สร้างแถววัสดุด้วยตัวเองแล้วติด **ShipTrackedMaterialRow** ในแต่ละแถว ลาก **Icon** (Image), **Material Name** (TMP_Text), **Amount Text** (TMP_Text) จาก UI ของแถวนั้น และใส่ component แถวทั้งหมดลง **Material Rows** บน ShipHUD ตามลำดับแสดง
+
+สร้างข้อมูลวัสดุด้วย **Create > Space Garage > Material Data**:
+
+- **Item Id**: รหัสคลังที่ไม่ซ้ำ เช่น `Scrap` ต้องตรงกันทั้งระบบดรอป คลัง และมาร์ก (ตัวเล็ก/ใหญ่มีผล)
+- **Display Name**: ชื่อที่แสดงให้ผู้เล่น ถ้าว่างใช้ Item Id
+- **Icon**: Sprite รูปวัสดุที่ผู้ใช้เตรียมไว้
+- ShipPickup เพิ่มช่อง **Material** ให้ลาก asset นี้ได้ ถ้าใส่จะใช้รหัสจาก asset; ถ้าไม่ใส่ยังใช้ Item Id เดิม จึงไม่กระทบของดรอปเก่า
+
+HUD ไม่เลือกวัสดุเอง และไม่แสดงทั้งคลัง ระบบมาร์กภายนอกเรียก:
+
+```csharp
+hud.SetTrackedMaterials(new[]
+{
+    new ShipMaterialRequirement { material = scrapMaterialAsset, requiredAmount = 10 },
+    new ShipMaterialRequirement { material = circuitMaterialAsset, requiredAmount = 5 }
+});
+```
+
+แต่ละแถวแสดงรูป ชื่อ และ `จำนวนใน ShipInventory/requiredAmount` อัปเดตเมื่อเก็บของ ระบบเก็บข้อมูลมาร์กเป็นสำเนาของรายการที่รับ ไม่สร้างระบบมาร์ก/เซฟมาร์กในงานนี้ เรียก `SetTrackedMaterials(null)` เพื่อล้างรายการ; `SetShip(newShip)` เพื่อเปลี่ยนยานที่ HUD ติดตาม
+
+แถวที่ไม่ใช้จะล้างข้อความและปิดเฉพาะ Image ของรูปที่ไม่มีข้อมูล ไม่ปิด GameObject แถว ไม่เปลี่ยน alpha ไม่สร้างหรือย้ายแถวอัตโนมัติ หากจำนวนรายการเกินช่อง Material Rows จะแจ้งเตือนและแสดงได้ตามจำนวนแถวที่ผู้ใช้ผูกไว้ ต้องเตรียมแถวให้เพียงพอ
+
+### เอฟเฟกต์บูสต์ในแต่ละชิ้นส่วน (2026-10-26)
+
+ใส่ **ShipBoostEffect** บน root ของ Part Prefab ที่ต้องการให้มีเอฟเฟกต์ จะเป็น Jet หรือส่วนอื่นก็ได้ แต่ละ Prefab ใช้ VFX คนละแบบได้ ไม่เก็บ VFX ไว้ใน ShipPartStats และไม่ต้องลากเอฟเฟกต์แต่ละอันบนสคริปต์กลาง
+
+- วิธีฝัง VFX Graph: เพิ่ม GameObject ลูกที่มี VisualEffect ตั้ง Graph Asset ที่ผู้ใช้เตรียม แล้วลาก GameObject ลูกนั้นลง **Effect Root** ของ ShipBoostEffect
+- วิธีเสกจาก Prefab: เว้น Effect Root ว่าง ลาก Prefab เอฟเฟกต์ที่มี VisualEffect ลง **Effect Prefab** และใส่ Transform ลูกของส่วนยานลง **Effect Spawn Point** ถ้าไม่ใส่จุด ใช้ตำแหน่ง root ส่วนนั้น
+- ถ้าใส่ทั้งสองแบบ ใช้ Effect Root เป็นหลัก ไม่เสกซ้ำ Effect Prefab ถูกเสกครั้งเดียวตอนประกอบชิ้นส่วน จากนั้นเปิด/ปิด object เดิม ไม่ Instantiate ทุกเฟรม
+- Effect Root ต้องเป็นลูกแยก ห้ามใส่ root ของชิ้นส่วนหรือตัวยาน เพื่อไม่ให้ระบบปิดยาน/ปืนไปด้วย ปรับตำแหน่งและทิศพ่นใน Prefab เอฟเฟกต์เอง
+- ตอนยังไม่บูสต์: Stop VisualEffect และ SetActive(false) ที่ Effect Root; ตอนบูสต์จริงและมีเกจ: SetActive(true) และ Play VisualEffect ภายใน; ปล่อย Space/เกจหมด/ยานตาย/ปิดสคริปต์จะหยุดและปิด Effect Root ทันที ไม่เพิ่มเฟดหรือปล่อยหางเอฟเฟกต์แทนเอง ใช้ event มาตรฐาน OnPlay/OnStop ของ VisualEffect
+- ShipController ค้น ShipBoostEffect ทุกส่วนหลังประกอบหรือเปลี่ยน Loadout ใหม่แล้วสั่งตาม IsBoosting โดยอัตโนมัติ ส่วนที่ไม่ใส่เอฟเฟกต์ไม่สร้างของสำรอง
+- ติด component นี้ไว้ใน **Examples/StarterShip/JetPart.prefab** แล้ว พร้อมลูก **BoostEffectPoint** ที่ `(0,0,-0.45)` ผู้ใช้ยังต้องใส่ Effect Prefab ของตนเอง หรือฝัง Graph แล้วลาก Effect Root ไม่มีการสร้าง/แก้ Graph ให้ในงานนี้
+
+ตรวจคอมไพล์กับ Unity/TextMeshPro/UGUI/VFX DLL จริงผ่าน ไม่มี error/warning ตรวจ reference ของ JetPart แล้ว ยังไม่ได้ทดสอบ HUD หรือภาพ VFX ใน Play Mode จริง เพราะยังไม่มี UI และ Graph ของผู้ใช้ให้ผูก
+
+### Space Bar บูสต์ความเร็ว (ตรวจยืนยัน 2026-10-26)
+
+ShipController อ่าน Space แบบกดค้าง และใช้ผลบูสต์กับความเร็วเคลื่อนที่จริง ไม่ใช่เปลี่ยนเฉพาะกล้อง ยานตัวอย่างผูก Jet.asset ไว้แล้ว: ความเร็วปกติ 8 หน่วย/วินาที บูสต์เป้าหมาย 16 หน่วย/วินาที (2 เท่า) ค่อยเร่ง/ผ่อนด้วย Speed Response Time 0.6 วินาทีตามการบินมีน้ำหนัก
+
+เกจเต็ม 100 ใช้ 25 ต่อวินาที บูสต์ต่อเนื่องได้ประมาณ 4 วินาที ปล่อย Space หน่วง 1 วินาทีแล้วฟื้น 15 ต่อวินาที เกจหมดต้องปล่อยปุ่มก่อนเริ่มรอบใหม่ ปรับค่าบูสต์ใน Jet.asset ได้ ไม่เพิ่มช่องสคริปต์ ไม่ต้องต่อ reference เพิ่ม ตรวจเส้นทาง Input → เกจ → speedTarget → SmoothDamp → Rigidbody.MovePosition และค่าที่ผูกบน Prefab แล้ว ยังไม่ได้ทดสอบกดปุ่มใน Play Mode จริง
 
 ### ShipPartStats: ข้อมูลชิ้นส่วนแต่ละแบบ
 
