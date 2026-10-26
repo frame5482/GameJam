@@ -1,0 +1,57 @@
+.combat-hud {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    color: rgb(225, 238, 247); -unity-font-style: normal; font-size: 16px;
+}
+.top-row { position: absolute; top: 40px; left: 48px; right: 48px; flex-direction: row; justify-content: space-between; }
+.eyebrow { font-size: 13px; letter-spacing: 2px; color: rgb(135, 177, 197); -unity-font-style: bold; }
+.title { margin-top: 5px; font-size: 27px; letter-spacing: 2px; -unity-font-style: bold; color: rgb(230, 246, 255); }
+.status-line { flex-direction: row; align-items: center; margin-top: 8px; }
+.status-dot { width: 6px; height: 6px; background-color: rgb(105, 231, 201); border-radius: 3px; margin-right: 9px; }
+.status-text { color: rgb(105, 231, 201); font-size: 12px; letter-spacing: 1px; }
+.prototype-tag { align-items: flex-end; opacity: 0.65; }
+.prototype-subtitle { font-size: 11px; color: rgb(122, 155, 173); margin-top: 5px; letter-spacing: 2px; }
+.panel { background-color: rgba(6, 17, 29, 0.84); border-color: rgba(115, 186, 213, 0.28); border-width: 1px; border-radius: 7px; }
+.materials-panel { position: absolute; right: 48px; top: 190px; width: 300px; padding: 22px; }
+.section-caption { font-size: 10px; color: rgb(88, 124, 144); letter-spacing: 1px; margin-top: 5px; margin-bottom: 15px; }
+.materials-list { flex-direction: column; }
+.empty-message { color: rgb(126, 153, 171); font-size: 13px; padding-top: 10px; padding-bottom: 8px; }
+.material-row { flex-direction: row; align-items: center; margin-top: 4px; padding: 6px 0; border-top-width: 1px; border-top-color: rgba(105, 153, 181, 0.15); }
+.material-icon { width: 28px; height: 28px; margin-right: 12px; background-color: rgba(99, 160, 189, 0.1); border-radius: 4px; flex-shrink: 0; }
+.material-name { flex-grow: 1; flex-shrink: 1; font-size: 14px; color: rgb(214, 231, 242); white-space: normal; }
+.material-count { font-size: 14px; color: rgb(248, 190, 110); margin-left: 10px; -unity-font-style: bold; }
+.material-complete .material-count { color: rgb(105, 231, 201); }
+.bottom-row { position: absolute; left: 48px; right: 48px; bottom: 74px; flex-direction: row; justify-content: space-between; align-items: flex-end; }
+.vitals-panel { width: 370px; padding: 24px; border-left-width: 3px; border-left-color: rgb(105, 231, 201); }
+.heading-row { flex-direction: row; justify-content: space-between; align-items: center; }
+.value { color: rgb(227, 247, 254); -unity-font-style: bold; }
+.health-value { font-size: 21px; }
+.bar-track { overflow: hidden; background-color: rgb(20, 43, 59); border-radius: 2px; }
+.bar-fill { height: 100%; width: 0; }
+.health-track { height: 9px; margin-top: 13px; }
+.health-fill { background-color: rgb(105, 231, 201); }
+.boost-heading { flex-direction: row; justify-content: space-between; align-items: center; margin-top: 24px; }
+.muted { color: rgb(125, 161, 185); }
+.small-value { font-size: 15px; }
+.boost-track { height: 5px; margin-top: 10px; }
+.boost-fill { background-color: rgb(93, 184, 246); }
+.control-hint { color: rgb(106, 142, 162); font-size: 10px; letter-spacing: 1px; margin-top: 12px; }
+.flight-readout { flex-direction: row; padding: 24px 28px; align-items: center; }
+.speed-column { min-width: 165px; }
+.speed-line { flex-direction: row; align-items: flex-end; margin-top: 8px; }
+.speed-value { font-size: 53px; color: rgb(232, 247, 254); -unity-font-style: bold; }
+.speed-unit { font-size: 11px; color: rgb(121, 163, 186); margin-left: 8px; margin-bottom: 10px; }
+.vertical-rule { width: 1px; height: 90px; margin-left: 20px; margin-right: 26px; background-color: rgba(116, 169, 199, 0.25); }
+.dodge-column { width: 150px; }
+.dodge-value { margin-top: 10px; font-size: 23px; -unity-font-style: bold; color: rgb(248, 190, 110); }
+.dodge-track { height: 4px; margin-top: 10px; }
+.dodge-fill { background-color: rgb(248, 190, 110); }
+.controls-footer { position: absolute; bottom: 27px; left: 48px; flex-direction: row; }
+.controls-footer > Label { color: rgb(136, 168, 186); font-size: 10px; letter-spacing: 1px; margin-right: 30px; }
+.mouse-reticle { position: absolute; width: 30px; height: 30px; }
+.reticle-ring { position: absolute; left: 7px; top: 7px; width: 16px; height: 16px; border-width: 1px; border-color: rgba(189, 234, 251, 0.85); border-radius: 8px; }
+.reticle-center { position: absolute; left: 14px; top: 14px; width: 2px; height: 2px; background-color: rgb(230, 248, 255); }
+.reticle-top { position: absolute; left: 14px; top: 0; width: 1px; height: 5px; background-color: rgba(189, 234, 251, 0.85); }
+.reticle-bottom { position: absolute; left: 14px; bottom: 0; width: 1px; height: 5px; background-color: rgba(189, 234, 251, 0.85); }
+.boosting .speed-value { color: rgb(93, 184, 246); }
+.low-health .health-fill { background-color: rgb(255, 113, 104); }
+.low-health .health-value { color: rgb(255, 148, 132); }

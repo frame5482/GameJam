@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace SpaceGarage
 {
     [RequireComponent(typeof(Rigidbody))]
-    public sealed class ShipController : MonoBehaviour, IShipDamageable
+    public sealed class ShipController : MonoBehaviour, IShipHitReceiver
     {
         [Header("Base stats + four equipped parts")]
         [SerializeField] private ShipStats baseStats = new ShipStats
@@ -28,6 +28,11 @@ namespace SpaceGarage
         [SerializeField, Min(0)] private float turnDegreesPerSecond = 45f;
         [SerializeField, Min(0.01f)] private float steeringResponseTime = 0.4f;
         [SerializeField, Min(0.01f)] private float speedResponseTime = 0.6f;
+        [Header("Dodge roll (Space + A/D)")]
+        [SerializeField, Min(0.01f)] private float dodgeDuration = 1.2f;
+        [SerializeField, Min(0.01f)] private float dodgeDashDuration = 0.6f;
+        [SerializeField, Min(0)] private float dodgeCooldown = 4f;
+        [SerializeField, Min(0)] private float dodgeDistance = 5f;
         [Header("References")]
         [SerializeField] private ShipGun[] guns;
         [SerializeField] private ShipInventory inventory;
@@ -46,6 +51,13 @@ namespace SpaceGarage
         public bool IsBoosting { get; private set; }
         public ShipInventory Inventory => inventory;
         public float CurrentSpeed => flightSpeed;
+        public bool IsRolling => dodge.IsInvulnerable(Time.timeAsDouble);
+        public bool IsInvulnerable => IsAlive && IsRolling;
+        public float DodgeCooldown => Mathf.Max(0, dodgeCooldown);
+        public float DodgeCooldownRemaining => Mathf.Min(DodgeCooldown, (float)dodge.CooldownRemaining(Time.timeAsDouble));
+        public bool CanDodge => isActiveAndEnabled && IsAlive && !IsRolling && dodge.CooldownRemaining(Time.timeAsDouble) <= 0;
+        public float DodgeReadyProgress => !isActiveAndEnabled || !IsAlive || IsRolling ? 0 :
+            DodgeCooldown > 0 ? Mathf.Clamp01(1 - DodgeCooldownRemaining / DodgeCooldown) : 1;
 
         private Rigidbody body;
         private Vector2 flightInput;
@@ -62,6 +74,9 @@ namespace SpaceGarage
         private bool boostExhausted;
         private float recoveryAt;
         private float currentBank;
+        private readonly ShipDodgeState dodge = new ShipDodgeState();
+        private Vector3 dodgeDirectionWorld;
+        private float dodgeDistanceMoved;
         private ShipBoostEffect[] boostEffects = new ShipBoostEffect[0];
         // Saved preview instances are replaced on Awake so edit-mode assembly never duplicates parts in play.
         [SerializeField, HideInInspector] private GameObject[] assembledParts = new GameObject[4];
@@ -90,7 +105,8 @@ namespace SpaceGarage
             {
                 flightInput = new Vector2((keyboard.dKey.isPressed ? 1 : 0) - (keyboard.aKey.isPressed ? 1 : 0),
                     (keyboard.sKey.isPressed ? 1 : 0) - (keyboard.wKey.isPressed ? 1 : 0));
-                boostHeld = keyboard.spaceKey.isPressed;
+                boostHeld = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+                if (keyboard.spaceKey.wasPressedThisFrame) TryDodge(Mathf.RoundToInt(flightInput.x));
                 if (keyboard.eKey.wasPressedThisFrame) CollectNearby();
             }
             fireHeld = IsAlive && Application.isFocused && Mouse.current != null && Mouse.current.leftButton.isPressed;
@@ -119,27 +135,52 @@ namespace SpaceGarage
             if (IsAlive)
             {
                 float step = Time.fixedDeltaTime;
-                currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle, bankDegreesPerSecond * step);
-                float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
-                pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond),
-                    ref pitchRateVelocity, steeringResponseTime, Mathf.Infinity, step);
-                turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond),
-                    ref turnRateVelocity, steeringResponseTime, Mathf.Infinity, step);
-                pitch = Mathf.Clamp(pitch + pitchRate * step, -maxPitchAngle, maxPitchAngle);
-                // Discard outward angular momentum at the pitch stop so reversing responds smoothly.
-                if ((pitch <= -maxPitchAngle && pitchRate < 0) || (pitch >= maxPitchAngle && pitchRate > 0))
-                { pitchRate = 0; pitchRateVelocity = 0; }
-                yaw = Mathf.Repeat(yaw + turnRate * step, 360f);
-                Quaternion heading = Quaternion.Euler(pitch, yaw, currentBank);
+                bool rollingThisStep = dodge.IsRolling;
+                dodge.Tick(Time.timeAsDouble);
+                float rollAngle = 0;
+                Vector3 dodgeStep = Vector3.zero;
+                if (rollingThisStep)
+                {
+                    rollAngle = -dodge.Direction * 360f * Mathf.SmoothStep(0, 1, dodge.Progress(Time.timeAsDouble));
+                    float traveled = dodgeDistance * dodge.TravelProgress(Time.timeAsDouble, dodgeDashDuration);
+                    dodgeStep = dodgeDirectionWorld * (traveled - dodgeDistanceMoved);
+                    dodgeDistanceMoved = traveled;
+                }
+                else
+                {
+                    currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle, bankDegreesPerSecond * step);
+                    float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
+                    pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond),
+                        ref pitchRateVelocity, steeringResponseTime, Mathf.Infinity, step);
+                    turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond),
+                        ref turnRateVelocity, steeringResponseTime, Mathf.Infinity, step);
+                    pitch = Mathf.Clamp(pitch + pitchRate * step, -maxPitchAngle, maxPitchAngle);
+                    // Discard outward angular momentum at the pitch stop so reversing responds smoothly.
+                    if ((pitch <= -maxPitchAngle && pitchRate < 0) || (pitch >= maxPitchAngle && pitchRate > 0))
+                    { pitchRate = 0; pitchRateVelocity = 0; }
+                    yaw = Mathf.Repeat(yaw + turnRate * step, 360f);
+                }
+                // Roll is around the forward axis only: flight direction and No-Roll camera remain stable.
+                Quaternion heading = Quaternion.Euler(pitch, yaw, currentBank + rollAngle);
                 float speedTarget = Stats.speed * (1 + boostedSeconds / step * (Mathf.Max(1, multiplier) - 1));
                 flightSpeed = Mathf.SmoothDamp(flightSpeed, speedTarget, ref speedVelocity,
                     speedResponseTime, Mathf.Infinity, step);
                 body.angularVelocity = Vector3.zero;
                 body.MoveRotation(heading);
-                body.MovePosition(body.position + (heading * Vector3.forward) * (flightSpeed * step));
+                body.MovePosition(body.position + (heading * Vector3.forward) * (flightSpeed * step) + dodgeStep);
             }
             UpdateBoostEffects(IsBoosting);
             boostChanged.Invoke(Boost, Stats.boosterCapacity);
+        }
+
+        public bool TryDodge(int direction)
+        {
+            if (!isActiveAndEnabled || !IsAlive || !dodge.TryBegin(direction, Time.timeAsDouble, dodgeDuration, DodgeCooldown))
+                return false;
+            pitchRate = turnRate = pitchRateVelocity = turnRateVelocity = 0;
+            dodgeDirectionWorld = Quaternion.Euler(0, yaw, 0) * Vector3.right * dodge.Direction;
+            dodgeDistanceMoved = 0;
+            return true;
         }
 
         // Customization can call this before spawning or while docked. Invalid loadouts leave the current one intact.
@@ -222,11 +263,17 @@ namespace SpaceGarage
         }
 
         public void TakeDamage(float amount)
+            => TakeHit(amount, ShipHitSource.Unknown, transform.position, -transform.forward);
+
+        public void TakeHit(float amount, ShipHitSource source, Vector3 point, Vector3 normal)
         {
-            if (!IsAlive || amount <= 0) return;
+            if (!IsAlive || IsInvulnerable || amount <= 0) return;
+            float previousHealth = Health;
             Health = Mathf.Max(0, Health - Mathf.Max(0, amount - Stats.defense));
+            ShipCombatFeedback.Report(source, true, previousHealth - Health, point, normal);
             healthChanged.Invoke(Health, Stats.health);
             if (IsAlive) return;
+            dodge.Cancel();
             flightInput = Vector2.zero;
             boostHeld = false;
             IsBoosting = false;
@@ -252,6 +299,9 @@ namespace SpaceGarage
 
         private void OnDisable()
         {
+            bool wasRolling = dodge.IsRolling;
+            dodge.Cancel();
+            if (wasRolling && body != null) body.rotation = Quaternion.Euler(pitch, yaw, currentBank);
             flightInput = Vector2.zero; boostHeld = false; fireHeld = false; IsBoosting = false;
             UpdateBoostEffects(false);
             if (guns != null) foreach (var gun in guns) if (gun != null) gun.SetTrigger(false, 0, transform);

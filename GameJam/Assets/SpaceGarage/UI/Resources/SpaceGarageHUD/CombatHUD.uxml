@@ -1,0 +1,79 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="CombatHUD.uss" />
+    <ui:VisualElement name="combat-hud" class="combat-hud">
+        <ui:VisualElement class="top-row">
+            <ui:VisualElement class="identity">
+                <ui:Label text="FLIGHT / COMBAT" class="eyebrow" />
+                <ui:Label text="PILOT SYSTEMS" class="title" />
+                <ui:VisualElement class="status-line">
+                    <ui:VisualElement class="status-dot" />
+                    <ui:Label name="mode-status" text="CONNECTING" class="status-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="prototype-tag">
+                <ui:Label text="HUD PROTOTYPE" class="eyebrow" />
+                <ui:Label text="FLIGHT TELEMETRY / 01" class="prototype-subtitle" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="mouse-reticle" class="mouse-reticle">
+            <ui:VisualElement class="reticle-ring" />
+            <ui:VisualElement class="reticle-center" />
+            <ui:VisualElement class="reticle-top" />
+            <ui:VisualElement class="reticle-bottom" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="materials-panel panel">
+            <ui:Label text="TRACKED MATERIALS" class="eyebrow" />
+            <ui:Label text="SALVAGE OBJECTIVES" class="section-caption" />
+            <ui:VisualElement name="materials-list" class="materials-list" />
+            <ui:Label name="materials-empty" text="No materials marked" class="empty-message" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="bottom-row">
+            <ui:VisualElement class="vitals-panel panel">
+                <ui:VisualElement class="heading-row">
+                    <ui:Label text="HULL INTEGRITY" class="eyebrow" />
+                    <ui:Label name="health-value" text="-- / --" class="value health-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="bar-track health-track">
+                    <ui:VisualElement name="health-fill" class="bar-fill health-fill" />
+                </ui:VisualElement>
+                <ui:VisualElement class="boost-heading">
+                    <ui:Label text="BOOST RESERVE" class="eyebrow muted" />
+                    <ui:Label name="boost-value" text="-- / --" class="value small-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="bar-track boost-track">
+                    <ui:VisualElement name="boost-fill" class="bar-fill boost-fill" />
+                </ui:VisualElement>
+                <ui:Label text="SHIFT  /  HOLD TO BOOST" class="control-hint" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="flight-readout panel">
+                <ui:VisualElement class="speed-column">
+                    <ui:Label text="FLIGHT SPEED" class="eyebrow" />
+                    <ui:VisualElement class="speed-line">
+                        <ui:Label name="speed-value" text="0.0" class="speed-value" />
+                        <ui:Label text="U/S" class="speed-unit" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="vertical-rule" />
+                <ui:VisualElement class="dodge-column">
+                    <ui:Label text="EVADE SYSTEM" class="eyebrow" />
+                    <ui:Label name="dodge-value" text="--" class="dodge-value" />
+                    <ui:VisualElement class="bar-track dodge-track">
+                        <ui:VisualElement name="dodge-fill" class="bar-fill dodge-fill" />
+                    </ui:VisualElement>
+                    <ui:Label text="SPACE + A / D" class="control-hint" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="controls-footer">
+            <ui:Label text="W / S   PITCH" />
+            <ui:Label text="A / D   BANK" />
+            <ui:Label text="LMB   FIRE" />
+            <ui:Label text="E   COLLECT" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

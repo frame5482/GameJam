@@ -45,7 +45,7 @@ Material:
     - _QueueOffset: 0
     - _Twirl_Amount: 2
     m_Colors:
-    - _Color: {r: 0, g: 11.858285, b: 12.268822, a: 1}
+    - _Color: {r: 117.150246, g: 179.01299, b: 181.01935, a: 1}
     - _Noisespeed: {r: 0, g: 0, b: 0, a: 0}
     - _TwirSpeed: {r: 1, g: 0, b: 0, a: 0}
     - _Twirl_Center: {r: 0, g: 0, b: 0, a: 0}

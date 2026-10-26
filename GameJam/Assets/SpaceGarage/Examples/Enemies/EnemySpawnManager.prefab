@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 101}
+  - component: {fileID: 102}
+  m_Layer: 0
+  m_Name: EnemySpawnManager
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b47760cd9fdb4d30ba9203dbff25dc92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 176, guid: 78c23e33658b4356b176bb24f510a6d4, type: 3}
+  gunPool:
+  - {fileID: 11400000, guid: 208feaead0e9093aba00072e9e72cb4c, type: 2}
+  armorPlatePool:
+  - {fileID: 11400000, guid: 016dca6a71e250b3ff9979815af6a59b, type: 2}
+  wingPool:
+  - {fileID: 11400000, guid: 74c1351ad30fceab8b372943594bff6c, type: 2}
+  jetPool:
+  - {fileID: 11400000, guid: d649b625e07028e2a39b2089f4c7401b, type: 2}
+  minimumSpawnDistance: 40
+  maximumSpawnDistance: 60
+  spawnInterval: 5
+  maxAlive: 5
+  spawnImmediately: 1
+  spawnClearance: 3
+  spawnBlockingLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  spawnAttempts: 12

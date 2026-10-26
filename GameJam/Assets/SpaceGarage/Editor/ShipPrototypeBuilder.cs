@@ -47,7 +47,7 @@ namespace SpaceGarage.Editor
                 muzzle.SetParent(gunObject.transform, false);
                 muzzle.localPosition = new Vector3(0, 0, 1.3f);
                 var gunSerialized = new SerializedObject(gun);
-                gunSerialized.FindProperty("projectilePrefab").objectReferenceValue = bulletPrefab.GetComponent<ShipProjectile>();
+                gunSerialized.FindProperty("projectilePrefabObject").objectReferenceValue = bulletPrefab;
                 gunSerialized.FindProperty("muzzle").objectReferenceValue = muzzle;
                 gunSerialized.ApplyModifiedPropertiesWithoutUndo();
                 gunStats.partPrefab = PrefabUtility.SaveAsPrefabAsset(gunObject, folder + "/GunPart.prefab");
