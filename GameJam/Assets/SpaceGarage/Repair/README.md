@@ -6,6 +6,20 @@
 
 ## เริ่มตั้งค่า
 
+### อุโมงค์ท่าจอดยานในซีน Repair (2026-10-27)
+
+ปรับธีมตามผู้ใช้ขอเป็นขาว–เทาอ่อน: แก้ Hull.mat ให้ผนัง/เพดานสีขาว, Deck.mat ให้พื้น/แผงผนังเทาอ่อน และ Structure.mat ให้โครงค้ำขาวอมเทา พร้อมปรับสีเงา Toon ทั้งสองระดับให้เข้าชุด เก็บไฟฟ้า/ส้มเดิมเป็นจุดนำทาง ใช้ Material asset เดิม ไม่เพิ่มไฟล์หรือช่อง Inspector และไม่ต้องตั้งค่าเพิ่ม ตรวจค่าสีและ diff แล้ว ยังไม่ได้ดูภาพสีจริงใน Unity
+
+แก้ `Scenes/Repair.unity` ที่ root `map`: เปิด map และเพิ่ม instance `SpaceDockTunnel` จาก `Hangar/SpaceDockTunnel.prefab` เก็บ Plane/Plane (1) เดิมไว้แต่ปิด GameObject ทั้งคู่ ไม่ลบ object หรือ reference เดิม อุโมงค์ปิดครบ 4 ด้านด้วย Floor/Ceiling/LeftWall/RightWall มี BoxCollider เฉพาะผนังหลัก 4 ชิ้น เปิดปลายตามแนวบินทั้งสองด้าน ไม่มีประตูหรือผนังปิดขวางยาน
+
+อุโมงค์ยาว 120 หน่วย ช่องภายในกว้าง 30 สูง 21 หน่วย แนวยาวแกน X ยึดตำแหน่ง Stay เดิมเป็น pivot ของ prefab instance (-16.15112, 8.97849, 12.94973) ปากเข้า local X=-25 อยู่หลังจุด IN(-30) 5 หน่วย; ปากออก local X=95 อยู่ก่อน Out(105.1) 10.1 หน่วย จึงเห็นยานบินจากภายนอกเข้ามาจอดแล้วออกอุโมงค์ก่อนถูกทำลาย พื้นอยู่ต่ำกว่า Stay 5 หน่วย เพดานสูงกว่า Stay 16 หน่วย ไม่ย้าย Position/IN/Stay/Out/CustomizationPreview หรือกล้องเดิม ไม่แก้เส้นทางบินหรือ UI
+
+เพิ่มโครงค้ำซ้ำทุก 10 หน่วย ผนังแยกช่อง รางไฟสีฟ้า ไฟเตือนสีส้ม เส้นนำทางและกรอบจุดจอดใต้ Stay เป็น geometry ใน prefab รวม MeshRenderer 199 ชิ้น ใช้ Material ร่วม 6 ไฟล์ใน `Hangar` (Hull/Deck/Structure ใช้ Toon/Toon, Cyan/Amber/Markings ใช้ URP Unlit) ทำเครื่องหมาย Batching Static เฉพาะ geometry ไม่มีสคริปต์สร้างแมพระหว่างเล่น ไม่เพิ่มแสงจริง/ไม่เปลี่ยนคุณภาพภาพ ไฟตกแต่งเป็นแถบ Material สีสว่าง ไม่มีช่อง component ใหม่ให้ลากหรือกรอก ปรับรายละเอียดจากลูกใน prefab และ Material ทั้งหกได้ หรือเปิด/ปิดทั้งอุโมงค์ที่ map > SpaceDockTunnel ด้วย SetActive ตามปกติ
+
+ผลตรวจ: ตรวจ fileID ใน scene/prefab ไม่ซ้ำและ reference ภายในครบ, Material ครบ 6 ไฟล์, collider ครบ 4 ด้าน ตรวจช่องทางบินจาก IN ถึง Out จำนวน 53,929 กรณีเทียบ geometry ทั้งหมด โดยเผื่อกรอบยานครึ่งขนาด (X=2,Y=3,Z=4) ไม่ชนอุโมงค์ และตรวจว่า anchor/กล้องเดิมไม่เปลี่ยน ตรวจ diff ผ่าน ลบเครื่องมือสร้าง/ตรวจชั่วคราวแล้ว ยังไม่ได้ตรวจ Unity import/ภาพจริงหรือทดสอบ Play Mode ไม่ได้วัด draw calls/FPS จริง ซีนเดิมไม่มี occlusion data ที่ bake ไว้
+
+ผู้ใช้ไม่ต้องผูกค่าเพิ่ม หาก Unity ยังแสดงซีนเก่าให้ Reload ซีน Repair จากไฟล์ที่แก้ กล้อง orbit ยังใช้ช่วงซูม/มุมเดิม จึงอาจซูมไกลจนออกนอกอุโมงค์ได้ ยังไม่ได้เพิ่มระบบกันกล้องทะลุผนังหรือเปลี่ยนขอบเขตกล้องแทนผู้ใช้
+
 1. เปิด `Scenes/Repair.unity` เลือก `RepairSystems` มี CustomerRepairManager, RepairInteraction, RepairUI และ RepairOrbitCamera แล้ว จุด IN / Stay / Out เดิมไม่ได้ย้าย และผูกกับ Manager แล้ว
 2. เติมวัสดุใน `MaterialPools/GunMaterials.asset`, `ArmorPlateMaterials.asset`, `WingMaterials.asset`, `JetMaterials.asset` แต่ละรายการรับ ShipMaterialData, Units At Full Damage และ Payment Per Unit เลือกจำนวนชนิดที่จะสุ่มด้วย Minimum/Maximum Material Types หากพูลว่างจะไม่เริ่มงานและแจ้งเตือน Console
 3. ตั้ง Material Catalog และ Starting Materials บน `ResourceManager.prefab` สำหรับวัสดุเริ่มต้น (จำนวนยังว่างไว้ให้กำหนดเอง) Money คือเงินเริ่มต้น ใช้รหัส Item ID ไม่ซ้ำกันใน ShipMaterialData
