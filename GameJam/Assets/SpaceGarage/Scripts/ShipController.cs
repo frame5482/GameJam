@@ -91,6 +91,14 @@ namespace SpaceGarage
             pitch = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(forward.y, -1, 1)) * Mathf.Rad2Deg,
                 -maxPitchAngle, maxPitchAngle);
             if (inventory == null) inventory = GetComponent<ShipInventory>();
+            var savedResources = ResourceManager.Instance;
+            if (savedResources != null && savedResources.CustomizationCatalog != null)
+            {
+                gunPart = savedResources.Equipped(ShipPartSlot.Gun) ?? gunPart;
+                armorPlatePart = savedResources.Equipped(ShipPartSlot.ArmorPlate) ?? armorPlatePart;
+                wingPart = savedResources.Equipped(ShipPartSlot.Wing) ?? wingPart;
+                jetPart = savedResources.Equipped(ShipPartSlot.Jet) ?? jetPart;
+            }
             AssembleParts();
             RebuildStats(true);
         }

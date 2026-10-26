@@ -12,6 +12,8 @@ namespace SpaceGarage
         [Header("Cinemachine cameras for each page")]
         [SerializeField] private CinemachineCamera mainMenuCamera = null;
         [SerializeField] private CinemachineCamera repairCamera = null;
+        [SerializeField] private ShipCustomization customization = null;
+        [SerializeField] private CinemachineCamera customizationCamera = null;
         [SerializeField] private float mouseSensitivity = 0.15f;
         [SerializeField] private float zoomSensitivity = 0.015f;
         [SerializeField] private float minimumDistance = 3;
@@ -21,14 +23,34 @@ namespace SpaceGarage
         private float yaw, pitch, distance;
         private bool initialized;
 
+        private void Awake()
+        {
+            if (workshop == null) workshop = FindFirstObjectByType<CustomerRepairManager>();
+            if (customization == null) customization = FindFirstObjectByType<ShipCustomization>();
+            foreach (var camera in FindObjectsByType<CinemachineCamera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (mainMenuCamera == null && camera.name == "MainMenuCamera") mainMenuCamera = camera;
+                if (repairCamera == null && camera.name == "CinemachineCamera") repairCamera = camera;
+                if (customizationCamera == null && camera.name == "CustomizationCamera") customizationCamera = camera;
+            }
+        }
+
+        private static void SetCamera(CinemachineCamera camera, bool selected)
+        {
+            if (camera == null) return;
+            if (selected && !camera.gameObject.activeSelf) camera.gameObject.SetActive(true);
+            if (camera.enabled != selected) camera.enabled = selected;
+        }
+
         private void LateUpdate()
         {
             bool repairing = workshop != null && workshop.IsOpen;
-            if (mainMenuCamera != null && repairCamera != null && mainMenuCamera != repairCamera)
-            {
-                mainMenuCamera.enabled = !repairing;
-                repairCamera.enabled = repairing;
-            }
+            bool customizing = customization != null && customization.IsOpen;
+            var selectedCamera = repairing ? repairCamera : customizing ? customizationCamera : mainMenuCamera;
+            if (selectedCamera == null) selectedCamera = mainMenuCamera;
+            SetCamera(mainMenuCamera, mainMenuCamera == selectedCamera);
+            SetCamera(repairCamera, repairCamera == selectedCamera);
+            SetCamera(customizationCamera, customizationCamera == selectedCamera);
             if (workshop == null || !workshop.IsOpen || workshop.StayPoint == null) { initialized = false; return; }
             if (repairCamera != null) orbitRig = repairCamera.transform;
             if (orbitRig == null) return;

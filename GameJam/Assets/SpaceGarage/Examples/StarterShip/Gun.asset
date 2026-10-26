@@ -25,3 +25,4 @@ MonoBehaviour:
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
+  partId: 208feaead0e9093aba00072e9e72cb4c

@@ -16,6 +16,12 @@ namespace SpaceGarage
         [SerializeField] private List<ItemStack> items = new List<ItemStack>();
         public UnityEvent changed = new UnityEvent();
         public IReadOnlyList<ItemStack> Items => items;
+        public void Restore(IReadOnlyList<ItemStack> saved)
+        {
+            items.Clear();
+            foreach (var item in saved) items.Add(new ItemStack { itemId = item.itemId, amount = item.amount });
+            changed.Invoke();
+        }
         public int Count(string itemId)
         {
             int count = 0;
@@ -27,7 +33,7 @@ namespace SpaceGarage
             if (string.IsNullOrWhiteSpace(itemId) || amount <= 0) return false;
             foreach (var item in items)
                 if (item != null && item.itemId == itemId)
-                { item.amount += amount; changed.Invoke(); return true; }
+                { if (item.amount > int.MaxValue - amount) return false; item.amount += amount; changed.Invoke(); return true; }
             items.Add(new ItemStack { itemId = itemId, amount = amount });
             changed.Invoke(); return true;
         }

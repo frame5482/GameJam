@@ -37,18 +37,31 @@ namespace SpaceGarage
         public CustomerRepairState State { get; private set; }
         public CustomerRepairShip Customer { get; private set; }
         public Transform StayPoint => stayPoint;
+        public Transform InPoint => inPoint;
+        public Transform OutPoint => outPoint;
         public bool IsOpen => State != CustomerRepairState.Closed;
         public bool CanSubmit => State == CustomerRepairState.Docked && Customer != null && Customer.IsFullyRepaired && !paid;
         public long QuotedPayment => Customer != null ? basePayment + Customer.RepairPayment : 0;
         private bool paid, configurationWarned;
         private float nextCustomerAt;
+        private CustomerRepairState suspendedState;
+        private bool suspended;
+        private float suspendedWait;
 
         [ContextMenu("Open Repair (configured pools required)")]
         public void OpenRepair() => TryOpenRepair();
+        public void CloseRepair() => TryCloseRepair();
         public void SubmitRepair() => TrySubmitRepair();
         public bool TryOpenRepair()
         {
             if (IsOpen) return false;
+            if (suspended)
+            {
+                suspended = false; State = suspendedState;
+                nextCustomerAt = Time.time + suspendedWait;
+                if (Customer != null) Customer.gameObject.SetActive(true);
+                Changed?.Invoke(); return true;
+            }
             return SpawnCustomer();
         }
         private bool SpawnCustomer()
@@ -144,13 +157,16 @@ namespace SpaceGarage
         }
         public bool TryCloseRepair()
         {
-            if (Customer != null) return false;
+            if (!IsOpen) return false;
+            suspended = true; suspendedState = State;
+            suspendedWait = Mathf.Max(0, nextCustomerAt - Time.time);
+            if (Customer != null) Customer.gameObject.SetActive(false);
             State = CustomerRepairState.Closed; Changed?.Invoke(); return true;
         }
         private void OnDisable()
         {
             if (Customer != null) { Customer.Docked -= OnDocked; Customer.Departed -= OnDeparted; Destroy(Customer.gameObject); }
-            Customer = null; State = CustomerRepairState.Closed;
+            Customer = null; State = CustomerRepairState.Closed; suspended = false;
         }
     }
 }

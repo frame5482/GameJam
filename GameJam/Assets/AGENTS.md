@@ -1,11 +1,16 @@
 # ข้อตกลงการทำงานในโปรเจกต์นี้
 
+## ปรับแต่งยานและเซฟ JSON (2026-10-26)
+- อ่าน `SpaceGarage/Customization/README.md` ก่อนแก้ระบบ มี CustomizationCatalog แยก 4 หมวด แต่ละหมวดมี Initially Unlocked และ Locked พร้อมราคา ปลดล็อกใช้เงินแล้วกด Equip แยก
+- UI ใช้ของผู้ใช้: CustomizationUI/CustomizationPartRow สร้างแถวจาก prefab ใน Part Container เดียว ของปลดแล้วอยู่ก่อน ของล็อกท้ายพร้อม Lock Icon/Price ส่วนยานในหมวดที่เลือกสว่างและลอยเล็กน้อย
+- ResourceManager เซฟ JSON ที่ persistentDataPath เก็บเงิน วัสดุ รหัสชิ้นส่วนที่ปลดและชุดยาน 4 ส่วน มี .bak และไม่เขียนทับเมื่อทั้งไฟล์หลัก/สำรองอ่านไม่ได้ ShipController อ่านชุดก่อนประกอบ ห้ามเปลี่ยน Part ID ของข้อมูลที่ใช้เซฟแล้ว
+
 ## ระบบซ่อมยานลูกค้า (2026-10-26)
 - ข้อความที่แสดงในเกมใช้ภาษาอังกฤษทั้งหมดตามผู้ใช้สั่ง (2026-10-26) เอกสารและการคุยกับผู้ใช้ยังใช้ภาษาไทยได้
 - อ่าน `SpaceGarage/Repair/README.md` ก่อนแก้ระบบซ่อม มี RepairSystems ใน Scenes/Repair.unity ผูก IN/Stay/Out เดิมแล้ว ห้ามย้ายจุดแทนผู้ใช้
 - สุ่มประกอบ 4 ส่วนและสุ่มบางชนิดจากพูลวัสดุของแต่ละส่วน ลากหนึ่งครั้งเติมเท่าที่ขาดและมี ซ่อมครบกดส่งรับเงินครั้งเดียว บิน Out ทำลายแล้วรับลูกค้าคันถัดไปอัตโนมัติ
 - ผู้ใช้ทำ Canvas เอง ใช้ RepairUI/RepairMaterialDragItem/RepairRequirementRow ผูก reference และสร้างเฉพาะแถวจาก prefab ของผู้ใช้ ไม่สร้าง UI Toolkit/กราฟิกสำรอง พูลวัสดุยังว่างให้ผู้ใช้กำหนด
-- ResourceManager เก็บเงิน/คลังร่วมข้ามซีน เชื่อม ShipController และ ShipPickup แล้ว ยังไม่มีบันทึกลงดิสก์ รายละเอียดช่อง Inspector และผลตรวจอยู่ใน README ของระบบซ่อม
+- ResourceManager เก็บเงิน/คลังร่วมข้ามซีน เชื่อม ShipController และ ShipPickup แล้ว มี JSON save ตาม README ปรับแต่ง รายละเอียดหน้าซ่อมอยู่ใน README ของระบบซ่อม
 
 ## Space Garage — ระบบยานต้นแบบ (2026-10-26)
 - CombatFeedback ใน SampleScene ผูก VFX/HIT (ผู้เล่นยิงศัตรู), VFX/HIT Monster (ศัตรูยิงผู้เล่น), VFX/DMG (เฉพาะผู้เล่นยิงศัตรู) ใช้ IShipHitReceiver.TakeHit พร้อมฝ่ายผู้ยิง/จุดชน แสดงหลังเลือดลดจริง ไม่แสดงตอน Dodge อมตะหรือโดน Def กันหมด สคริปต์ DamagePopup ใช้ GUID เดิมของ DMG Prefab ที่สคริปต์หายไว้แล้ว

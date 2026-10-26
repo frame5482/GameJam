@@ -30,6 +30,8 @@ Main Menu Panel ใส่ MainUi ได้ ส่วน Repair Panel ยัง�
 
 ## ต่อ Canvas ของคุณ
 
+Repair Back Button บน RepairUI รับ Button กลับเมนูหลัก กดแล้วเรียก CloseRepair เพื่อพักงาน/ซ่อนยานลูกค้า สลับกล้องกลับเมนู และให้ยานผู้เล่นบินจาก In มาจอด เปิด Repair อีกครั้งทำงานเดิมต่อ รายละเอียดการบินผู้เล่นและ Docking Flight Speed อยู่ `../Customization/README.md` อย่าสลับเฉพาะ Panel โดยไม่เรียก CloseRepair
+
 ปุ่มเข้าโหมดต่อสู้: บน RepairSystems > RepairUI เพิ่มช่อง Combat Button ให้ลาก Button ของคุณมาใส่ และ Combat Scene Name เริ่มต้น SampleScene (ฉากต่อสู้เดิม อยู่ใน Build Settings แล้ว) ระบบผูก onClick ให้ หรือเรียก RepairUI.EnterCombat จาก On Click เองโดยไม่ต้องผูกซ้ำ ใช้ข้อความปุ่ม ENG เช่น Combat ไม่มีการสร้าง/เปลี่ยน layout Canvas ให้ กดจากเมนูหลักจะโหลดฉากแบบ Single และ ResourceManager ที่คงข้ามซีนรักษาเงิน/คลังเดิม กันกดซ้ำระหว่างโหลดและไม่ให้เข้าเมื่อยังอยู่ในงานซ่อมเพื่อไม่ทิ้งวัสดุที่เติมไป หากเปลี่ยนฉากให้เพิ่มฉากใน Build Profile Scene List ด้วย ยังไม่ได้กดปุ่มทดสอบใน Play Mode
 
 เก็บ RepairUI บน RepairSystems ที่เปิดอยู่เสมอ ไม่ย้ายไปไว้ใต้ Panel ที่จะปิด ระบบเปิด/ปิดแผงด้วย SetActive
@@ -60,7 +62,7 @@ Tooltip หลบกรอบโมเดลยานทั้งลำที่
 
 ResourceManager เป็น singleton คงอยู่ข้ามซีน มี ShipInventory เก็บวัสดุและเงิน ใน Repair และ SampleScene วาง prefab ไว้แล้ว ตัวซ้ำจะถูกลบโดยรักษาของเดิม ShipController.Inventory และการเก็บ ShipPickup ใช้คลังกลางนี้ หากระบบอื่นเพิ่มวัสดุ ให้ RegisterMaterial(data) แล้ว Inventory.Add(data.itemId, amount) ใช้ changed สำหรับอัปเดต UI และ TrySpendMoney สำหรับใช้เงิน
 
-ยังไม่มีบันทึกลงดิสก์ ปิดเกมแล้วข้อมูล runtime หาย และยังไม่ทำหน้าปรับแต่งยานหรือเมนูออกสู้ ระบบหยุด/ออกซีนระหว่างซ่อมยังไม่มีบันทึกงานค้างหรือคืนวัสดุ
+เพิ่ม JSON save ของเงิน/วัสดุ/ปลดล็อก/ชุดยานและระบบปรับแต่งแล้ว อ่าน `../Customization/README.md` เมนูออกสู้ใช้ Combat Button บน RepairUI ระบบหยุด/ออกซีนระหว่างซ่อมยังไม่มีบันทึกงานค้างหรือคืนวัสดุ
 
 ## การตรวจ
 

@@ -1,6 +1,8 @@
 # ระบบควบคุมยานต้นแบบ
 
-เพิ่มระบบซ่อมลูกค้าและ ResourceManager แล้ว ดูขั้นตอนตั้งค่าที่ [Repair/README.md](Repair/README.md) ฉาก `Scenes/Repair.unity` ผูกจุดเดิมและ prefab แล้ว ต้องใส่พูลวัสดุและ Canvas ของผู้ใช้ก่อนเล่นครบวงจร ShipController.Inventory/ShipPickup ใช้คลังกลางเมื่อมี ResourceManager; ไม่มีบันทึกลงดิสก์
+เพิ่มระบบซ่อมลูกค้าและ ResourceManager แล้ว ดูขั้นตอนตั้งค่าที่ [Repair/README.md](Repair/README.md) ฉาก `Scenes/Repair.unity` ผูกจุดเดิมและ prefab แล้ว ต้องใส่พูลวัสดุและ Canvas ของผู้ใช้ก่อนเล่นครบวงจร ShipController.Inventory/ShipPickup ใช้คลังกลางเมื่อมี ResourceManager
+
+ระบบปรับแต่งยาน/ปลดล็อกด้วยเงิน/เซฟ JSON อยู่ที่ [Customization/README.md](Customization/README.md) มี catalog 4 หมวดและ preview ใน Repair.unity แล้ว ต้องใส่ Canvas กับ prefab แถวของผู้ใช้และรายการ Locked ที่ต้องการขาย
 
 อัปเดต 2026-10-26 — Unity 6000.3.8f1, Input System 1.18.0, บินแบบเครื่องบิน 3D เปลี่ยนระดับความสูงแกน Y ได้จริง ไม่ล็อกระนาบ
 

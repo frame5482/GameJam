@@ -10,10 +10,12 @@ namespace SpaceGarage
     {
         [SerializeField] private CustomerRepairManager workshop = null;
         [SerializeField] private RepairInteraction interaction = null;
+        [SerializeField] private ShipCustomization customization = null;
         [Header("Your Canvas panels and buttons")]
         [SerializeField] private GameObject mainMenuPanel = null;
         [SerializeField] private GameObject repairPanel = null;
         [SerializeField] private Button repairCustomerButton = null;
+        [SerializeField] private Button repairBackButton = null;
         [SerializeField] private Button combatButton = null;
         [SerializeField] private string combatSceneName = "SampleScene";
         [SerializeField] private Button submitButton = null;
@@ -39,9 +41,12 @@ namespace SpaceGarage
         {
             if (workshop == null) workshop = FindFirstObjectByType<CustomerRepairManager>();
             if (interaction == null) interaction = FindFirstObjectByType<RepairInteraction>();
+            if (customization == null) customization = FindFirstObjectByType<ShipCustomization>();
             if (workshop != null) workshop.Changed += Refresh;
             if (interaction != null) interaction.HoverChanged += Refresh;
+            if (customization != null) customization.Changed += Refresh;
             if (repairCustomerButton != null) repairCustomerButton.onClick.AddListener(OpenRepair);
+            if (repairBackButton != null) repairBackButton.onClick.AddListener(CloseRepair);
             if (combatButton != null) combatButton.onClick.AddListener(EnterCombat);
             if (submitButton != null) submitButton.onClick.AddListener(Submit);
             if (tooltipPanel != null)
@@ -60,18 +65,20 @@ namespace SpaceGarage
             if (resources != null) resources.changed.AddListener(Refresh);
             Refresh();
         }
-        private void OpenRepair() { if (workshop != null) workshop.OpenRepair(); }
+        private void OpenRepair() { if (workshop != null && (customization == null || !customization.IsOpen)) workshop.OpenRepair(); }
+        public void CloseRepair() { if (workshop != null) workshop.CloseRepair(); }
         private void Submit() { if (workshop != null) workshop.SubmitRepair(); }
 
         public void EnterCombat()
         {
-            if (loadingCombat || (workshop != null && workshop.IsOpen)) return;
+            if (loadingCombat || (workshop != null && workshop.IsOpen) || (customization != null && customization.IsOpen)) return;
             if (string.IsNullOrWhiteSpace(combatSceneName) || !Application.CanStreamedLevelBeLoaded(combatSceneName))
             {
                 Debug.LogWarning("Cannot enter combat: add the combat scene to the active Build Profile Scene List and check Combat Scene Name: " + combatSceneName, this);
                 return;
             }
             loadingCombat = true;
+            if (ResourceManager.Instance != null) ResourceManager.Instance.SaveProgress();
             Refresh();
             try { SceneManager.LoadSceneAsync(combatSceneName, LoadSceneMode.Single); }
             catch (System.Exception error)
@@ -84,10 +91,11 @@ namespace SpaceGarage
         public void Refresh()
         {
             bool open = workshop != null && workshop.IsOpen;
-            if (mainMenuPanel != null && mainMenuPanel != gameObject) mainMenuPanel.SetActive(!open);
+            bool customizing = customization != null && customization.IsOpen;
+            if (mainMenuPanel != null && mainMenuPanel != gameObject) mainMenuPanel.SetActive(!open && !customizing);
             if (repairPanel != null && repairPanel != gameObject) repairPanel.SetActive(open);
-            if (repairCustomerButton != null) repairCustomerButton.interactable = !open;
-            if (combatButton != null) combatButton.interactable = !open && !loadingCombat;
+            if (repairCustomerButton != null) repairCustomerButton.interactable = !open && !customizing;
+            if (combatButton != null) combatButton.interactable = !open && !customizing && !loadingCombat;
             if (submitButton != null) submitButton.interactable = workshop != null && workshop.CanSubmit;
             if (moneyText != null) moneyText.text = resources != null ? resources.Money.ToString("N0") : "0";
             if (paymentText != null) paymentText.text = workshop != null ? workshop.QuotedPayment.ToString("N0") : "0";
@@ -208,7 +216,9 @@ namespace SpaceGarage
             resources = null;
             if (workshop != null) workshop.Changed -= Refresh;
             if (interaction != null) interaction.HoverChanged -= Refresh;
+            if (customization != null) customization.Changed -= Refresh;
             if (repairCustomerButton != null) repairCustomerButton.onClick.RemoveListener(OpenRepair);
+            if (repairBackButton != null) repairBackButton.onClick.RemoveListener(CloseRepair);
             if (combatButton != null) combatButton.onClick.RemoveListener(EnterCombat);
             if (submitButton != null) submitButton.onClick.RemoveListener(Submit);
             if (tooltipPanel != null) tooltipPanel.gameObject.SetActive(false);

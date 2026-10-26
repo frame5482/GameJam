@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.Events;
+using System.IO;
 
 namespace SpaceGarage
 {
@@ -22,6 +23,16 @@ namespace SpaceGarage
         [SerializeField] private bool persistAcrossScenes = true;
         [SerializeField] private List<ShipMaterialData> materialCatalog = new List<ShipMaterialData>();
         [SerializeField] private List<StartingMaterial> startingMaterials = new List<StartingMaterial>();
+        [SerializeField] private ShipCustomizationCatalog customizationCatalog = null;
+        [SerializeField] private bool enableJsonSave = true;
+        [SerializeField] private string saveFileName = "space-garage.json";
+        private readonly HashSet<string> unlockedParts = new HashSet<string>();
+        private string[] equippedParts = new string[4];
+        private bool ready, dirty, protectUnreadableSave;
+        private float saveAt;
+        public ShipCustomizationCatalog CustomizationCatalog => customizationCatalog;
+        public string SavePath => Path.Combine(Application.persistentDataPath,
+            string.IsNullOrWhiteSpace(saveFileName) ? "space-garage.json" : Path.GetFileName(saveFileName));
         public UnityEvent changed = new UnityEvent();
         public ShipInventory Inventory { get; private set; }
         public long Money => money;
@@ -33,32 +44,113 @@ namespace SpaceGarage
             Instance = this;
             Inventory = GetComponent<ShipInventory>();
             Inventory.changed.AddListener(NotifyChanged);
-            foreach (var stack in startingMaterials)
+            bool loaded = enableJsonSave && LoadProgress();
+            if (!loaded) foreach (var stack in startingMaterials)
                 if (stack != null && stack.material != null && stack.amount > 0)
                 { RegisterMaterial(stack.material); Inventory.Add(stack.material.itemId, stack.amount); }
+            EnsureDefaultLoadout();
+            ready = true;
+            dirty = !protectUnreadableSave;
+            saveAt = Time.unscaledTime + 0.5f;
             if (persistAcrossScenes) DontDestroyOnLoad(gameObject);
         }
 
         public bool AddMoney(long amount)
         {
             if (amount <= 0 || money > long.MaxValue - amount) return false;
-            money += amount; changed.Invoke(); return true;
+            money += amount; NotifyChanged(); return true;
         }
         public bool TrySpendMoney(long amount)
         {
             if (amount < 0 || amount > money) return false;
-            money -= amount; changed.Invoke(); return true;
+            money -= amount; NotifyChanged(); return true;
         }
         public bool RegisterMaterial(ShipMaterialData material)
         {
             if (material == null || string.IsNullOrWhiteSpace(material.itemId)) return false;
             foreach (var existing in materialCatalog)
                 if (existing != null && existing.itemId == material.itemId) return existing == material;
-            materialCatalog.Add(material); changed.Invoke(); return true;
+            materialCatalog.Add(material); NotifyChanged(); return true;
         }
-        private void NotifyChanged() => changed.Invoke();
+        public bool IsUnlocked(ShipPartStats part) => part != null && customizationCatalog != null &&
+            customizationCatalog.Find(part.partId) == part &&
+            (customizationCatalog.IsInitiallyUnlocked(part.partId) || unlockedParts.Contains(part.partId));
+
+        public ShipPartStats Equipped(ShipPartSlot slot) => customizationCatalog != null && (int)slot >= 0 && (int)slot < 4
+            ? customizationCatalog.Find(equippedParts[(int)slot]) : null;
+
+        public bool TryUnlock(ShipPartStats part)
+        {
+            if (part == null || customizationCatalog == null || customizationCatalog.Find(part.partId) != part || IsUnlocked(part) ||
+                !customizationCatalog.TryGetPrice(part.partId, out int price) || money < price) return false;
+            money -= price; unlockedParts.Add(part.partId); NotifyChanged(); return true;
+        }
+        public bool TryEquip(ShipPartStats part)
+        {
+            if (!IsUnlocked(part) || (int)part.slot < 0 || (int)part.slot >= 4) return false;
+            equippedParts[(int)part.slot] = part.partId; NotifyChanged(); return true;
+        }
+        private void EnsureDefaultLoadout()
+        {
+            if (customizationCatalog == null) return;
+            for (int i = 0; i < 4; i++)
+            {
+                var current = Equipped((ShipPartSlot)i);
+                if (current != null && current.slot == (ShipPartSlot)i && IsUnlocked(current)) continue;
+                equippedParts[i] = null;
+                foreach (var part in customizationCatalog.Parts)
+                    if (part.slot == (ShipPartSlot)i && IsUnlocked(part)) { equippedParts[i] = part.partId; break; }
+            }
+        }
+        private void NotifyChanged()
+        {
+            if (ready) { dirty = true; saveAt = Time.unscaledTime + 0.5f; }
+            changed.Invoke();
+        }
+        private void Update()
+        {
+            if (dirty && enableJsonSave && !protectUnreadableSave && Time.unscaledTime >= saveAt) SaveProgress();
+        }
+        private GarageSaveData Snapshot()
+        {
+            var data = new GarageSaveData { version = 1, money = money, equippedParts = (string[])equippedParts.Clone(),
+                materials = new List<ShipInventory.ItemStack>(), unlockedParts = new List<string>() };
+            foreach (var stack in Inventory.Items)
+                if (stack != null && stack.amount > 0) data.materials.Add(new ShipInventory.ItemStack { itemId = stack.itemId, amount = stack.amount });
+            data.unlockedParts.AddRange(unlockedParts); data.unlockedParts.Sort(StringComparer.Ordinal);
+            return data;
+        }
+        [ContextMenu("Save Progress")]
+        public bool SaveProgress()
+        {
+            if (!ready || !enableJsonSave || protectUnreadableSave || Inventory == null) return false;
+            try
+            {
+                string path = SavePath;
+                var data = Snapshot();
+                if (!data.IsValid()) throw new InvalidDataException("Cannot save invalid resource data");
+                GarageJsonStorage.Write(path, JsonUtility.ToJson(data, true));
+                dirty = false; return true;
+            }
+            catch (Exception error)
+            {
+                dirty = false;
+                Debug.LogWarning("Unable to save progress: " + error.Message, this); return false;
+            }
+        }
+        private bool LoadProgress()
+        {
+            if (!GarageJsonStorage.TryRead(SavePath, JsonUtility.FromJson<GarageSaveData>,
+                message => Debug.LogWarning(message, this), out var data, out protectUnreadableSave)) return false;
+            money = data.money; equippedParts = data.equippedParts;
+            unlockedParts.Clear(); foreach (var id in data.unlockedParts) unlockedParts.Add(id);
+            Inventory.Restore(data.materials); return true;
+        }
+        private void OnApplicationPause(bool paused) { if (paused && dirty) SaveProgress(); }
+        private void OnApplicationQuit() { if (dirty) SaveProgress(); }
         private void OnDestroy()
         {
+            if (Instance == this && dirty) SaveProgress();
             if (Inventory != null) Inventory.changed.RemoveListener(NotifyChanged);
             if (Instance == this) Instance = null;
         }
