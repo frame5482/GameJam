@@ -21,6 +21,7 @@ namespace SpaceGarage
         private Transform destination;
         private float flightSpeed;
         private bool departing;
+        private Quaternion flightRotation;
 
         public void Assemble(ShipPartStats[] data, RepairMaterialPool[] recipes, int minDamage, int maxDamage,
             float lift, float noise, float highlight)
@@ -43,14 +44,17 @@ namespace SpaceGarage
             engines = GetComponentsInChildren<ShipBoostEffect>(true);
         }
 
-        public void FlyIn(Transform start, Transform stay, float speed)
+        public void FlyIn(Transform start, Transform stay, float speed, Transform exit = null)
         {
-            transform.SetPositionAndRotation(start.position, start.rotation);
+            Vector3 heading = exit != null ? exit.position - stay.position : stay.position - start.position;
+            flightRotation = FacingDirection(heading, start.rotation);
+            transform.SetPositionAndRotation(start.position, flightRotation);
             destination = stay; flightSpeed = Mathf.Max(0.01f, speed); departing = false; IsDocked = false;
             SetEngines(true);
         }
         public void FlyOut(Transform exit)
         {
+            flightRotation = FacingDirection(exit.position - transform.position, transform.rotation);
             destination = exit; departing = true; IsDocked = false;
             foreach (var part in parts) part.SetHovered(false);
             SetEngines(true);
@@ -59,9 +63,9 @@ namespace SpaceGarage
         {
             if (destination == null) return;
             transform.position = Vector3.MoveTowards(transform.position, destination.position, flightSpeed * Time.deltaTime);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, destination.rotation, 90 * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, flightRotation, 90 * Time.deltaTime);
             if ((transform.position - destination.position).sqrMagnitude > 0.0004f) return;
-            transform.SetPositionAndRotation(destination.position, destination.rotation);
+            transform.SetPositionAndRotation(destination.position, flightRotation);
             destination = null;
             Physics.SyncTransforms();
             if (departing) { Departed?.Invoke(this); Destroy(gameObject); }
@@ -69,5 +73,13 @@ namespace SpaceGarage
         }
         private void SetEngines(bool running)
         { foreach (var engine in engines) if (engine != null) engine.SetFlightState(running, false); }
+
+        private static Quaternion FacingDirection(Vector3 heading, Quaternion fallback)
+        {
+            if (heading.sqrMagnitude < 0.000001f) return fallback;
+            Vector3 forward = heading.normalized;
+            Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.999f ? Vector3.forward : Vector3.up;
+            return Quaternion.LookRotation(forward, up);
+        }
     }
 }

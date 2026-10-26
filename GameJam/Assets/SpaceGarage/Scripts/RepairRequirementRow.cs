@@ -14,7 +14,7 @@ namespace SpaceGarage
             if (icon != null) { icon.sprite = requirement.material.icon; icon.enabled = icon.sprite != null; }
             if (materialName != null) materialName.text = requirement.material.displayName;
             if (amountText != null)
-                amountText.text = requirement.Remaining == 0 ? "ครบแล้ว" : $"ต้องใช้ {requirement.Remaining} · มี {(inventory != null ? inventory.Count(requirement.material.itemId) : 0)}";
+                amountText.text = requirement.Remaining.ToString();
         }
     }
 }

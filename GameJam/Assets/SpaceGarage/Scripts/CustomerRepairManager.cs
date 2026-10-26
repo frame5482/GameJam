@@ -94,7 +94,7 @@ namespace SpaceGarage
             customer.Docked += OnDocked; customer.Departed += OnDeparted;
             State = CustomerRepairState.Arriving;
             customer.gameObject.SetActive(true);
-            customer.FlyIn(inPoint, stayPoint, flightSpeed);
+            customer.FlyIn(inPoint, stayPoint, flightSpeed, outPoint);
             Changed?.Invoke();
             return true;
         }

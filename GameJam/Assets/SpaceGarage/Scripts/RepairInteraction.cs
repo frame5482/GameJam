@@ -15,6 +15,7 @@ namespace SpaceGarage
         public event Action HoverChanged;
         public RepairableShipPart HoveredPart { get; private set; }
         public bool IsDragging => dragSource != null;
+        public Camera ViewCamera => viewCamera != null ? viewCamera : Camera.main;
         private RepairMaterialDragItem dragSource;
         private readonly List<RaycastResult> uiHits = new List<RaycastResult>();
 

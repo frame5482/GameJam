@@ -63,6 +63,7 @@ namespace SpaceGarage
                 Payment += (long)units * Math.Max(0, option.paymentPerUnit);
                 if (ResourceManager.Instance != null) ResourceManager.Instance.RegisterMaterial(option.material);
             }
+            Color partColor = UnityEngine.Random.ColorHSV(0f, 1f, 0.45f, 0.85f, 0.7f, 1f);
             foreach (var renderer in model.GetComponentsInChildren<Renderer>(true))
             {
                 if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) continue;
@@ -74,6 +75,7 @@ namespace SpaceGarage
                     renderer.GetPropertyBlock(original, i); renderer.GetPropertyBlock(working, i);
                     Color color = material.HasProperty("_BaseColor") ? material.GetColor("_BaseColor") :
                         material.HasProperty("_Color") ? material.GetColor("_Color") : Color.white;
+                    color = new Color(partColor.r, partColor.g, partColor.b, color.a);
                     tints.Add(new Tint { renderer = renderer, slot = i, original = original, working = working,
                         color = color, emission = material.HasProperty("_EmissionColor") ? material.GetColor("_EmissionColor") : Color.black });
                 }

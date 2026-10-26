@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 namespace SpaceGarage
 {
@@ -8,6 +9,9 @@ namespace SpaceGarage
     {
         [SerializeField] private CustomerRepairManager workshop = null;
         [SerializeField] private Transform orbitRig = null;
+        [Header("Cinemachine cameras for each page")]
+        [SerializeField] private CinemachineCamera mainMenuCamera = null;
+        [SerializeField] private CinemachineCamera repairCamera = null;
         [SerializeField] private float mouseSensitivity = 0.15f;
         [SerializeField] private float zoomSensitivity = 0.015f;
         [SerializeField] private float minimumDistance = 3;
@@ -19,8 +23,15 @@ namespace SpaceGarage
 
         private void LateUpdate()
         {
+            bool repairing = workshop != null && workshop.IsOpen;
+            if (mainMenuCamera != null && repairCamera != null && mainMenuCamera != repairCamera)
+            {
+                mainMenuCamera.enabled = !repairing;
+                repairCamera.enabled = repairing;
+            }
             if (workshop == null || !workshop.IsOpen || workshop.StayPoint == null) { initialized = false; return; }
-            if (orbitRig == null) orbitRig = transform;
+            if (repairCamera != null) orbitRig = repairCamera.transform;
+            if (orbitRig == null) return;
             Vector3 center = workshop.StayPoint.position;
             if (!initialized)
             {

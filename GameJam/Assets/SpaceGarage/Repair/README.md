@@ -2,6 +2,8 @@
 
 อัปเดต 2026-10-26 — ใช้ Canvas/UGUI ของผู้ใช้ ไม่สร้างหน้าตา UI หรือ UI Toolkit เพิ่ม
 
+ข้อความ UI ที่ระบบสร้างใช้ภาษาอังกฤษทั้งหมดตามผู้ใช้สั่ง ชื่อวัสดุอ่านจาก Display Name ของ ShipMaterialData ให้กำหนดเป็นภาษาอังกฤษด้วย จำนวนวัสดุใน tooltip แสดงเฉพาะเลขที่ยังขาด เมื่อครบแสดง 0 ไม่แสดง Required/Owned/Complete ไม่มีช่อง Inspector ใหม่
+
 ## เริ่มตั้งค่า
 
 1. เปิด `Scenes/Repair.unity` เลือก `RepairSystems` มี CustomerRepairManager, RepairInteraction, RepairUI และ RepairOrbitCamera แล้ว จุด IN / Stay / Out เดิมไม่ได้ย้าย และผูกกับ Manager แล้ว
@@ -10,6 +12,10 @@
 4. สร้าง Canvas ของคุณ แล้วลากช่อง UI ลง RepairUI บน RepairSystems ตามรายละเอียดด้านล่าง จากนั้นกด Play และกดปุ่มซ่อมยานลูกค้า
 
 ## ช่องบน Inspector
+
+หน้า Main UI และ Repair ใช้กล้อง Cinemachine แยกกัน: RepairSystems > RepairOrbitCamera มี Main Menu Camera และ Repair Camera รับ CinemachineCamera คนละตัว สลับ enabled ตามสถานะหน้าซ่อม ผ่าน Main Camera/CinemachineBrain เดิม ระบบหมุนรอบยานขยับเฉพาะ Repair Camera และคงตำแหน่งกล้องเมนูไว้ UI ยังใช้ Main Menu Panel / Repair Panel คนละแผงตามเดิม ไม่ต้องเปลี่ยน Canvas Render Camera จาก Main Camera ไปเป็น CinemachineCamera
+
+ผูกใน Repair.unity แล้ว: MainMenuCamera เป็นกล้องเมนูที่สำเนามุมเดิมไว้ ส่วน CinemachineCamera เดิมเป็นกล้องซ่อม ปรับตำแหน่ง/มุม MainMenuCamera เพื่อเลือกภาพหน้าเมนูตามต้องการ คอมไพล์ผ่าน ยังไม่ได้ตรวจการสลับภาพจริงใน Play Mode
 
 ### กด Repair แล้วไม่มียาน
 
@@ -24,6 +30,8 @@ Main Menu Panel ใส่ MainUi ได้ ส่วน Repair Panel ยัง�
 
 ## ต่อ Canvas ของคุณ
 
+ปุ่มเข้าโหมดต่อสู้: บน RepairSystems > RepairUI เพิ่มช่อง Combat Button ให้ลาก Button ของคุณมาใส่ และ Combat Scene Name เริ่มต้น SampleScene (ฉากต่อสู้เดิม อยู่ใน Build Settings แล้ว) ระบบผูก onClick ให้ หรือเรียก RepairUI.EnterCombat จาก On Click เองโดยไม่ต้องผูกซ้ำ ใช้ข้อความปุ่ม ENG เช่น Combat ไม่มีการสร้าง/เปลี่ยน layout Canvas ให้ กดจากเมนูหลักจะโหลดฉากแบบ Single และ ResourceManager ที่คงข้ามซีนรักษาเงิน/คลังเดิม กันกดซ้ำระหว่างโหลดและไม่ให้เข้าเมื่อยังอยู่ในงานซ่อมเพื่อไม่ทิ้งวัสดุที่เติมไป หากเปลี่ยนฉากให้เพิ่มฉากใน Build Profile Scene List ด้วย ยังไม่ได้กดปุ่มทดสอบใน Play Mode
+
 เก็บ RepairUI บน RepairSystems ที่เปิดอยู่เสมอ ไม่ย้ายไปไว้ใต้ Panel ที่จะปิด ระบบเปิด/ปิดแผงด้วย SetActive
 
 - Main Menu Panel / Repair Panel: แผงเมนูและแผงซ่อมของคุณ
@@ -31,12 +39,18 @@ Main Menu Panel ใส่ MainUi ได้ ส่วน Repair Panel ยัง�
 - Money Text / Payment Text / Job Status Text: TMP_Text เงินที่มี ค่าจ้าง และสถานะงาน
 - Inventory Container: RectTransform แถบล่าง จัด Horizontal/Grid Layout เอง; Inventory Item Prefab: prefab UI ที่ติด RepairMaterialDragItem ใส่ Image รูป, TMP ชื่อและจำนวนที่มี ตัว Graphic ต้องรับ raycast เพื่อเริ่มลากได้
 - Drag Ghost Prefab บน RepairMaterialDragItem: RectTransform รูปตอนลากที่คุณทำเอง ไม่ใส่ก็ยังส่งวัสดุได้ ระบบไม่สร้างกราฟิกสำรอง
-- Tooltip Panel / Part Name Text / Damage Text: แผงเล็กและ TMP ของคุณ แสดงใกล้เมาส์เมื่อชี้ชิ้นส่วน จัดให้เป็นลูก Canvas และตั้งขนาดเอง ระบบใส่ CanvasGroup กัน tooltip บัง raycast
+- Tooltip Panel / Part Name Text / Damage Text: แผงเล็กและ TMP ของคุณ แสดงใกล้ชิ้นส่วนที่ชี้ ไม่ตามเมาส์ อิงตำแหน่งชิ้นส่วนผ่านกล้องจริง ปรับระยะด้วย Tooltip Offset เดิม จัดให้เป็นลูก Canvas และตั้งขนาดเอง ระบบใส่ CanvasGroup กัน tooltip บัง raycast
 - Requirement Container / Requirement Row Prefab: RectTransform และ prefab ที่ติด RepairRequirementRow ใส่ Image กับ TMP ชื่อ/จำนวน แสดงวัสดุที่ยังขาดและจำนวนที่มี
 
 Canvas ต้องมี GraphicRaycaster ในฉากมี EventSystem พร้อม Input System UI module แล้ว ระบบสร้างแถวจาก prefab ที่คุณให้เท่านั้น ไม่ปรับ layout และไม่ลบลูกอื่นใน Container ช่อง UI ทั้งหมดยังว่างรอของจริง
 
 ## กติกาและการเชื่อมระบบ
+
+ยานลูกค้าสุ่มสีแยก Gun / ArmorPlate / Wing / Jet ครั้งเดียวตอนประกอบ แต่ละส่วนใช้สีเดียวกันกับทุก material slot ของโมเดลส่วนนั้น คง alpha และ texture เดิม ใช้ MaterialPropertyBlock ไม่แก้ Material asset หรือสียานผู้เล่น สีสุ่มทำงานร่วมกับความหม่นตอนพังและไฮไลต์เดิม ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม ยังไม่ได้ตรวจภาพสีใน Play Mode
+
+Tooltip หลบกรอบโมเดลยานทั้งลำที่คำนวณจาก MeshRenderer/SkinnedMeshRenderer บนจอ เลือกด้านขวา ซ้าย บน หรือล่างที่มีพื้นที่แสดงมากที่สุด เว้นระยะอย่างน้อย 12 หน่วย Canvas (หรือค่า X ของ Tooltip Offset หากมากกว่า) ไม่ตามเมาส์ ไม่มีช่องใหม่ หากยานกินจอจนไม่มีพื้นที่พอ แผงอาจล้นขอบจอเพื่อไม่ให้ทับยาน ยังต้องตรวจภาพกับขนาด UI จริง
+
+หัวของยานลูกค้า (local +Z) หันตามแนว Stay ไป Out ตั้งแต่เกิดและคงทิศตอนเข้าจอด เมื่อส่งงานหันไปยังตำแหน่ง Out ไม่ใช้ rotation ของจุด IN/Stay/Out จึงไม่ต้องหมุนจุดเหล่านั้น ไม่มีช่อง Inspector ใหม่
 
 รับงานแล้วสุ่ม ShipPartStats สี่ช่องและเปอร์เซ็นต์พังของแต่ละชิ้น สุ่มวัสดุไม่ซ้ำรหัสจากพูลของช่องนั้น สูตรซ่อมถูกเก็บตลอดงาน ไม่สุ่มใหม่ตอนชี้เมาส์ จำนวนที่ต้องใช้ = ปัดขึ้น(Units At Full Damage × เปอร์เซ็นต์พัง / 100) เช่น 10 หน่วยที่พัง 35% ใช้ 4 หน่วย
 
