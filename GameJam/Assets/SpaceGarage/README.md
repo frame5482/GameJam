@@ -5,9 +5,10 @@
 ## พฤติกรรมที่ยืนยัน
 
 - ยานบินไปข้างหน้าตลอดเวลาตามหัว (local +Z) ด้วย Speed แม้ไม่ได้กดปุ่ม ปล่อยปุ่มแล้วบินต่อในทิศปัจจุบัน
-- S เชิดหัวไต่ระดับ (+Y), W กดหัวลดระดับ (-Y) เทียบกับท่าบินปกติ เป็นการหมุนก้ม/เงยต่อเนื่อง ไม่ใช่สั่งหันไป +Z/-Z กดค้างสามารถตีลังกาได้
+- S เชิดหัวไต่ระดับ (+Y), W กดหัวลดระดับ (-Y) เทียบกับท่าบินปกติ จำกัดมุม ±30 องศา กดค้างไม่ตีลังกา ความเร็วก้มเงยไม่เกิน 30 องศา/วินาที และค่อย ๆ รับ/คลายคำสั่ง
 - A/D เอียงลำซ้าย/ขวาแล้วเปลี่ยนเส้นทางบินตามมุมเอียงจริง; ปล่อยค่อยคืนปีกตรง และยังบินต่อในทิศใหม่ ไม่หันไปแกนโลก -X/+X โดยตรง
-- Handling กำหนดอัตราก้ม/เงยและอัตราเลี้ยวขณะเอียงเต็ม หน่วยองศาต่อวินาที ยิงตามหัว ไม่เล็งเมาส์
+- Handling กำหนดอัตราก้ม/เงยและอัตราเลี้ยว โดยจำกัดเพดานด้วย Pitch Degrees Per Second (30) และ Turn Degrees Per Second (45) ตามลำดับ หน่วยองศาต่อวินาที ยิงตามหัว ไม่เล็งเมาส์
+- การเปลี่ยนความเร็วรวมถึงบูสต์ใช้เวลาตอบสนอง 0.6 วินาที และอัตราเลี้ยวใช้เวลาตอบสนอง 0.4 วินาที ไม่เปลี่ยนทันที ปล่อยปุ่มก้มเงยแล้วค่อยหยุดหมุนและคงมุมนั้นเพื่อไต่/ลดระดับต่อ
 - มุมเอียงเริ่มต้น 25 องศา หมุนลำยานทั้งชุดรวม collider ด้วย Rigidbody ไม่ใช่แค่เอียงกราฟิก
 - กด Space ค้างเพื่อบูสต์ขณะเคลื่อนที่ เกจเริ่มต้น 100 ใช้ต่อวินาทีตาม Jet ปล่อยปุ่มแล้วฟื้นหลังเวลาหน่วง ถ้าเกจหมดต้องปล่อยก่อนใช้ครั้งใหม่
 - คลิกซ้ายค้างยิงตาม local +Z ของ Muzzle
@@ -41,7 +42,20 @@
 | Jet Part / Jet Mount | Jet.asset / ลูก JetSpawnPoint |
 | Inventory | ShipInventory บน root ยาน |
 
-ข้อมูลแต่ละ asset มี Part Prefab ของตัวเอง; ใน GunPart มี ShipGun ผูก Muzzle และ StarterBullet.prefab ไว้แล้ว ไม่ต้องลากช่องเพิ่มเพื่อประกอบตัวอย่าง ตรวจโครงสร้างไฟล์และ reference ของ instance แล้ว แต่ยังไม่ได้เปิดซีนตรวจภาพ/ทดสอบ Play Mode จริง กล้องเดิมของ SampleScene เป็นกล้องนิ่ง ไม่ติดตามยาน เมื่อบินออกนอกกรอบจะมองไม่เห็น ต้องจัดกล้องให้เหมาะกับการบิน 3D ก่อนทดลองใน Game View
+ข้อมูลแต่ละ asset มี Part Prefab ของตัวเอง; ใน GunPart มี ShipGun ผูก Muzzle และ StarterBullet.prefab ไว้แล้ว ไม่ต้องลากช่องเพิ่มเพื่อประกอบตัวอย่าง ตรวจโครงสร้างไฟล์และ reference ของ instance แล้ว แต่ยังไม่ได้เปิดซีนตรวจภาพ/ทดสอบ Play Mode จริง SampleScene มี CinemachineCamera ตามยานตามรายละเอียดด้านล่าง
+
+### กล้องตามยาน Cinemachine 3.1.7
+
+ตั้งค่าใน `Scenes/SampleScene.unity` โดยใช้ CinemachineCamera และ CinemachineBrain ที่ผู้ใช้เพิ่มไว้แล้ว ไม่สร้างกล้องซ้ำและไม่เพิ่มสคริปต์กล้องเอง
+
+- **Main Camera > Cinemachine Brain**: ใช้ Brain เดิม Smart Update และ Late Update สำหรับส่งผลกล้องจริง
+- **CinemachineCamera > Tracking Target**: PlayerShip (ShipController) / Transform root ของยาน ผูกไว้แล้ว Look At ใช้เป้าหมายเดียวกันผ่าน Custom Look At Target = false
+- **Position Control = Cinemachine Follow**: เพิ่ม component และตั้ง Follow Offset `(0, 3, -10)` คือหลังยาน 10 หน่วย สูง 3 หน่วย; Binding Mode = Lock To Target No Roll ตามก้มเงย/เลี้ยวของยานแต่ไม่เอียงภาพตามปีก
+- **Follow > Position Damping**: `(0.15, 0.15, 0.15)` และ Rotation Damping `(0.1, 0.1, 0)` ใช้เป็นค่าต้นแบบ
+- **Rotation Control = Cinemachine Rotation Composer**: เพิ่ม component เล็งกลางยาน วางยานกลางภาพ Damping `(0.1, 0.1)` ปิด Lookahead/Dead Zone/Hard Limits
+- คง FOV เดิม 50 องศา และตั้งตำแหน่งเริ่มต้นของกล้องทั้งสองที่ `(0, 3, -10)` มองกลับไปหายาน กด Play ได้โดยไม่ต้องต่อช่องเพิ่ม
+- ปรับระยะ/ความสูงที่ Follow Offset และความนุ่มที่ Damping บน CinemachineCamera ไม่แก้ Transform ของ Main Camera ระหว่างเล่น เพราะ Brain เป็นผู้ควบคุม
+- ตรวจ serialized field กับซอร์ส Cinemachine ใน package จริง ตรวจ Script GUID, target, component references และ fileID ของซีนแล้ว ยังไม่ได้ตรวจภาพ/ทดสอบ Play Mode จริง
 
 ### Prefab ประกอบสำเร็จ StarterShip (เพิ่มตามคำขอ 2026-10-26)
 
@@ -52,7 +66,7 @@
 - ผูกข้อมูล Gun.asset / ArmorPlate.asset / Wing.asset / Jet.asset และ Prefab ของแต่ละส่วนไว้ครบ พร้อม StarterBullet.prefab ทรงกลม ปืนยิงไป local +Z
 - จุดเสกอยู่บนลูกยานชื่อ GunSpawnPoint `(0, 0.14, 0.85)`, ArmorPlateSpawnPoint `(0, 0, 0)`, WingSpawnPoint `(0, 0, -0.1)`, JetSpawnPoint `(0, 0, -1.05)` ทั้ง 4 จุดผูกกับช่อง Mount บน ShipController แล้ว ขยับได้ตามต้องการ
 - เห็นชิ้นส่วนประกอบใน Edit Mode ได้เลย โดย ShipController เก็บ reference ชิ้นตัวอย่างในฟิลด์ซ่อน assembledParts เมื่อ Awake จะปิดและถอดชุดตัวอย่างก่อนประกอบจริงจากข้อมูล เพื่อไม่ให้เกิดส่วน/ปืนซ้ำ ไม่มีช่อง Inspector ใหม่ที่ผู้ใช้ต้องกรอก
-- ลาก Prefab ลงซีนที่มีกล้องมองเห็นยาน แล้วกด Play เพื่อทดลองบิน 3D กล้องยังไม่ติดตามยาน ไม่ได้ปรับกล้องในงานแก้การควบคุม
+- ลาก Prefab ลงซีนที่มีกล้องมองเห็นยาน แล้วกด Play เพื่อทดลองบิน 3D หากใช้ SampleScene มีกล้อง Cinemachine ตามยาน instance เดิมให้แล้ว ถ้าสร้างยานใหม่แทนตัวเดิมต้องเปลี่ยน Tracking Target ให้ตรงยานใหม่
 - ค่าเพิ่มสเตตัสแต่ละส่วนเริ่มที่ 0 ใช้ค่าพื้นฐานยาน Attack 10 / Def 0 / Speed 8 / Handling 360 / HP 100 / Boost 100 ก่อน ผู้ใช้เปลี่ยน Prefab/Stats ใน asset ได้เอง
 - ตรวจ reference ภายใน/ข้าม asset ของไฟล์ตัวอย่าง 14 ไฟล์และตรวจคอมไพล์ผ่าน ไม่มี error/warning ยังไม่ได้ดูภาพหรือทดสอบ Play Mode ใน Unity จริง
 
@@ -89,7 +103,8 @@
 - **Guns**: ระบบค้นปืนในลูกยานใหม่หลังประกอบ ไม่ต้องลากเอง
 - **Inventory**: ลาก ShipInventory หรือปล่อยว่างให้ค้นบน GameObject เดียวกัน
 - ลบช่อง **Bank Visual Root** และวิธีสร้าง ShipVisualBank ออกแล้ว การเอียงทำที่ Rigidbody root จริง ส่วน mount ทั้ง 4 อยู่ตาม hierarchy ที่จัดไว้ ไม่ต้องลากช่องทดแทน
-- **Bank Angle / Bank Degrees Per Second**: มุมเอียงสูงสุดและความเร็วเอียง/คืนตรง ค่าเริ่มต้น 25 องศาและ 120 องศาต่อวินาที ปรับได้บน ShipController
+- **Bank Angle / Bank Degrees Per Second**: มุมเอียงสูงสุดและความเร็วเอียง/คืนตรง ค่าเริ่มต้น 25 องศาและ 60 องศาต่อวินาที ปรับได้บน ShipController
+- ช่องใหม่กลุ่ม **Weighted Flight Response** บน ShipController: **Max Pitch Angle** มุมก้มเงยสูงสุด 30 องศา; **Pitch Degrees Per Second** เพดานความเร็วก้มเงย 30; **Turn Degrees Per Second** เพดานเลี้ยว 45; **Steering Response Time** ความหน่วงอัตราก้มเงย/เลี้ยว 0.4 วินาที; **Speed Response Time** ความหน่วงเพิ่ม/ลดความเร็วและบูสต์ 0.6 วินาที ค่าหน่วงมากยิ่งตอบสนองช้า ผูกค่าบน StarterShip.prefab แล้ว ไม่ต้องลาก reference เพิ่ม
 - **Pickup Radius / Pickup Layers**: ระยะเก็บและเลเยอร์ของ collider ของดรอป
 - **Health Changed / Boost Changed**: อีเวนต์ส่งค่าปัจจุบันกับค่าสูงสุดให้ UI ที่ผู้ใช้ทำในอนาคต; **Died**: อีเวนต์ตอนเลือดหมด
 
@@ -118,6 +133,9 @@
 `RebuildStats()` รวมค่าสเตตัสใหม่อย่างเดียว ไม่เปลี่ยน Prefab; `RebuildStats(true)` เติมเลือด/เกจเต็มสำหรับการเริ่มรอบใหม่ที่ระบบเกมอนุญาต
 
 ## ข้อจำกัดและผลตรวจ
+
+- แก้รายงานบินวนกลับหัว: เดิมสะสม quaternion ก้มเงยได้ครบวง ทำให้ยานผ่านแนวดิ่งและกล้อง LockToTargetNoRoll เปลี่ยนกรอบอ้างอิงใหม่ เปลี่ยนเป็น yaw/pitch ที่จำกัดมุมก้มเงย ±30 องศาและ bank ±25 องศา จึงไม่ผ่านแนวดิ่ง ลดความเร็วเลี้ยวและเพิ่มความหน่วงตามผู้ใช้ขอ คง Cinemachine เดิมไว้
+- การเปิดดู Unity ผ่าน computer-use ทำไม่ได้ในรอบนี้: native pipe เชื่อมต่อไม่สำเร็จ แม้ลองใหม่และ reset แล้ว จึงยังไม่อ้างว่าตรวจภาพหรือทดสอบ Play Mode จริง
 
 - แก้การควบคุมตามผู้ใช้ยืนยันล่าสุดเป็นเครื่องบิน 3D: S เชิด / W กดหัว / A,D เอียงแล้วเลี้ยว บินต่อเนื่อง ปลด Constraints ของ Rigidbody และลบ Bank Visual Root ตัวอย่างเดิมไม่ต้องตั้งค่าเพิ่ม ค่ามุมเอียง 0 ทำให้ไม่เลี้ยวด้วย A/D เพราะไม่มีการเอียง
 

@@ -21,7 +21,13 @@ namespace SpaceGarage
         [SerializeField] private Transform jetMount = null;
         [Header("3D aircraft banking")]
         [SerializeField, Range(0, 70)] private float bankAngle = 25f;
-        [SerializeField, Min(0)] private float bankDegreesPerSecond = 120f;
+        [SerializeField, Min(0)] private float bankDegreesPerSecond = 60f;
+        [Header("Weighted flight response")]
+        [SerializeField, Range(1, 80)] private float maxPitchAngle = 30f;
+        [SerializeField, Min(0)] private float pitchDegreesPerSecond = 30f;
+        [SerializeField, Min(0)] private float turnDegreesPerSecond = 45f;
+        [SerializeField, Min(0.01f)] private float steeringResponseTime = 0.4f;
+        [SerializeField, Min(0.01f)] private float speedResponseTime = 0.6f;
         [Header("References")]
         [SerializeField] private ShipGun[] guns;
         [SerializeField] private ShipInventory inventory;
@@ -42,7 +48,14 @@ namespace SpaceGarage
 
         private Rigidbody body;
         private Vector2 flightInput;
-        private Quaternion flightHeading;
+        private float yaw;
+        private float pitch;
+        private float pitchRate;
+        private float turnRate;
+        private float pitchRateVelocity;
+        private float turnRateVelocity;
+        private float flightSpeed;
+        private float speedVelocity;
         private bool boostHeld;
         private bool fireHeld;
         private bool boostExhausted;
@@ -56,7 +69,10 @@ namespace SpaceGarage
             body = GetComponent<Rigidbody>();
             body.useGravity = false;
             body.constraints = RigidbodyConstraints.None;
-            flightHeading = body.rotation;
+            Vector3 forward = body.rotation * Vector3.forward;
+            yaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+            pitch = Mathf.Clamp(-Mathf.Asin(Mathf.Clamp(forward.y, -1, 1)) * Mathf.Rad2Deg,
+                -maxPitchAngle, maxPitchAngle);
             if (inventory == null) inventory = GetComponent<ShipInventory>();
             AssembleParts();
             RebuildStats(true);
@@ -98,19 +114,27 @@ namespace SpaceGarage
             else if (IsAlive && !boostHeld && Time.time >= recoveryAt)
                 Boost = Mathf.Min(Stats.boosterCapacity, Boost + recovery * Time.fixedDeltaTime);
 
-            float distance = Stats.speed * (Time.fixedDeltaTime + boostedSeconds * (Mathf.Max(1, multiplier) - 1));
             if (IsAlive)
             {
                 float step = Time.fixedDeltaTime;
                 currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle, bankDegreesPerSecond * step);
-                // A bank turns the flight path; pitch rotates the nose around the aircraft's right axis.
                 float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
-                flightHeading = Quaternion.AngleAxis(turn * Stats.handling * step, Vector3.up)
-                    * flightHeading * Quaternion.AngleAxis(-flightInput.y * Stats.handling * step, Vector3.right);
-                Quaternion heading = flightHeading * Quaternion.AngleAxis(currentBank, Vector3.forward);
+                pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond),
+                    ref pitchRateVelocity, steeringResponseTime, Mathf.Infinity, step);
+                turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond),
+                    ref turnRateVelocity, steeringResponseTime, Mathf.Infinity, step);
+                pitch = Mathf.Clamp(pitch + pitchRate * step, -maxPitchAngle, maxPitchAngle);
+                // Discard outward angular momentum at the pitch stop so reversing responds smoothly.
+                if ((pitch <= -maxPitchAngle && pitchRate < 0) || (pitch >= maxPitchAngle && pitchRate > 0))
+                { pitchRate = 0; pitchRateVelocity = 0; }
+                yaw = Mathf.Repeat(yaw + turnRate * step, 360f);
+                Quaternion heading = Quaternion.Euler(pitch, yaw, currentBank);
+                float speedTarget = Stats.speed * (1 + boostedSeconds / step * (Mathf.Max(1, multiplier) - 1));
+                flightSpeed = Mathf.SmoothDamp(flightSpeed, speedTarget, ref speedVelocity,
+                    speedResponseTime, Mathf.Infinity, step);
                 body.angularVelocity = Vector3.zero;
                 body.MoveRotation(heading);
-                body.MovePosition(body.position + (heading * Vector3.forward) * distance);
+                body.MovePosition(body.position + (heading * Vector3.forward) * (flightSpeed * step));
             }
             boostChanged.Invoke(Boost, Stats.boosterCapacity);
         }
@@ -197,6 +221,9 @@ namespace SpaceGarage
             IsBoosting = false;
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
+            flightSpeed = 0;
+            speedVelocity = 0;
+            pitchRate = turnRate = pitchRateVelocity = turnRateVelocity = 0;
             foreach (var gun in guns) if (gun != null) gun.SetTrigger(false, Stats.attack, transform);
             died.Invoke();
         }

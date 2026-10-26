@@ -116,6 +116,13 @@ MonoBehaviour:
   armorPlateMount: {fileID: 121}
   wingMount: {fileID: 137}
   jetMount: {fileID: 157}
+  bankAngle: 25
+  bankDegreesPerSecond: 60
+  maxPitchAngle: 30
+  pitchDegreesPerSecond: 30
+  turnDegreesPerSecond: 45
+  steeringResponseTime: 0.4
+  speedResponseTime: 0.6
   guns: []
   inventory: {fileID: 104}
   pickupRadius: 3
