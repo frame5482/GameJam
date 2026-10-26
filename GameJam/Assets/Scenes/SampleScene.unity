@@ -879,7 +879,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 0.1, y: 0.1, z: 0}
     QuaternionDamping: 0.1
-  FollowOffset: {x: 0, y: 3, z: -10}
+  FollowOffset: {x: 0, y: 3, z: -12}
 --- !u!114 &756097417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -929,6 +929,9 @@ MonoBehaviour:
   boostExtraDistance: 3
   boostPullbackTime: 0.35
   boostReturnTime: 0.6
+  orbitSensitivity: 0.15
+  orbitPitchLimit: 60
+  orbitReturnTime: 0.35
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

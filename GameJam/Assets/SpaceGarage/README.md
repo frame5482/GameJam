@@ -68,16 +68,24 @@
 
 ### กล้องตามยาน Cinemachine 3.1.7
 
+อัปเดตระยะกล้องต่อสู้ 2026-10-26: เพิ่มระยะตามหลังยานอีก 2 หน่วยใน SampleScene ที่ CinemachineCamera > Cinemachine Follow > Follow Offset Z จาก -10 เป็น -12 (X=0, Y=3 เดิม) ระยะบูสต์จึงเพิ่มจาก -12 ไป -15 อัตโนมัติ และปล่อยคลิกขวาจะกลับมุมตามระยะฐานใหม่นี้ ไม่มีช่องใหม่ ไม่ต้องตั้งค่าเพิ่ม ตรวจค่า serialized และ diff แล้ว ยังไม่ได้ดูภาพใน Play Mode
+
+อัปเดต 2026-10-26: หน้าต่อสู้กดคลิกขวาค้างแล้วลากเมาส์เพื่อหมุนกล้องรอบยาน ปล่อยแล้วค่อยคืนมุมตามหลังยานเดิม ใช้ ShipDodgeCameraLag ตัวเดิมหมุน Follow Offset ก่อน Cinemachine อัปเดต ยังเล็งยานผ่าน Rotation Composer และใช้ No Roll เดิม ระยะบูสต์/ความหน่วงตอนหลบทำร่วมกันได้ คืน offset เดิมเมื่อปิด component ไม่แก้ทิศบิน/การยิง/UI และไม่ล็อกหรือซ่อนเคอร์เซอร์
+
+ช่องใหม่บน CinemachineCamera > ShipDodgeCameraLag กลุ่ม Right Mouse Camera Orbit: Orbit Sensitivity = 0.15 องศาต่อหน่วย delta เมาส์, Orbit Pitch Limit = 60 องศาสำหรับจำกัดก้มเงยจากมุมเดิม, Orbit Return Time = 0.35 วินาทีสำหรับความนุ่มตอนคืนมุม ใส่ค่าใน SampleScene แล้ว ไม่ต้องลาก reference หรือตั้งค่าเพิ่ม ไม่มีเมาส์/เกมเสียโฟกัส/ยานตายจะคืนมุมด้วย ใช้เฉพาะ component กล้องต่อสู้ ไม่แก้ RepairOrbitCamera
+
+ผลตรวจ: คอมไพล์ Runtime ทั้งชุดด้วย Roslyn และ response file/references ของ Unity โปรเจกต์จริงผ่าน (exit 0) ตรวจ git diff --check ผ่าน ลบไฟล์คอมไพล์ชั่วคราวแล้ว ยังไม่ได้ลากกล้อง/ตรวจภาพหรือทดสอบร่วมกับบูสต์และหลบใน Play Mode จริง
+
 ตั้งค่าใน `Scenes/SampleScene.unity` โดยใช้ CinemachineCamera และ CinemachineBrain ที่ผู้ใช้เพิ่มไว้แล้ว ไม่สร้างกล้องซ้ำและไม่เพิ่มสคริปต์กล้องเอง
 
 - **Main Camera > Cinemachine Brain**: ใช้ Brain เดิม Smart Update และ Late Update สำหรับส่งผลกล้องจริง
 - **CinemachineCamera > Tracking Target**: PlayerShip (ShipController) / Transform root ของยาน ผูกไว้แล้ว Look At ใช้เป้าหมายเดียวกันผ่าน Custom Look At Target = false
-- **Position Control = Cinemachine Follow**: เพิ่ม component และตั้ง Follow Offset `(0, 3, -10)` คือหลังยาน 10 หน่วย สูง 3 หน่วย; Binding Mode = Lock To Target No Roll ตามก้มเงย/เลี้ยวของยานแต่ไม่เอียงภาพตามปีก
+- **Position Control = Cinemachine Follow**: เพิ่ม component และตั้ง Follow Offset `(0, 3, -12)` คือหลังยาน 12 หน่วย สูง 3 หน่วย; Binding Mode = Lock To Target No Roll ตามก้มเงย/เลี้ยวของยานแต่ไม่เอียงภาพตามปีก
 - **Follow > Position Damping**: `(0.15, 0.15, 0.15)` และ Rotation Damping `(0.1, 0.1, 0)` ใช้เป็นค่าต้นแบบ
 - **Rotation Control = Cinemachine Rotation Composer**: เพิ่ม component เล็งกลางยาน วางยานกลางภาพ Damping `(0.1, 0.1)` ปิด Lookahead/Dead Zone/Hard Limits
 - คง FOV เดิม 50 องศา และตั้งตำแหน่งเริ่มต้นของกล้องทั้งสองที่ `(0, 3, -10)` มองกลับไปหายาน กด Play ได้โดยไม่ต้องต่อช่องเพิ่ม
 - ปรับระยะ/ความสูงที่ Follow Offset และความนุ่มที่ Damping บน CinemachineCamera ไม่แก้ Transform ของ Main Camera ระหว่างเล่น เพราะ Brain เป็นผู้ควบคุม
-- ขณะ Shift บูสต์จริง **ShipDodgeCameraLag** จะค่อยเพิ่มระยะหลังยานอีก 3 หน่วย (Follow Offset Z จาก -10 ไป -13 ในค่าตัวอย่าง) และค่อยกลับระยะเดิมเมื่อปล่อย/เกจหมด ไม่เปลี่ยน FOV หรือความสูงกล้อง ทำร่วมกับ Dodge lag ได้
+- ขณะ Shift บูสต์จริง **ShipDodgeCameraLag** จะค่อยเพิ่มระยะหลังยานอีก 3 หน่วย (Follow Offset Z จาก -12 ไป -15 ในค่าตัวอย่าง) และค่อยกลับระยะเดิมเมื่อปล่อย/เกจหมด ไม่เปลี่ยน FOV หรือความสูงกล้อง ทำร่วมกับ Dodge lag ได้
 - ช่องใหม่กลุ่ม **Boost Camera Pullback** บน ShipDodgeCameraLag: **Boost Extra Distance** ระยะถอยเพิ่ม 3 หน่วย, **Boost Pullback Time** ความหน่วงตอนถอย 0.35 วินาที, **Boost Return Time** ความหน่วงตอนกลับ 0.6 วินาที ตั้งใน SampleScene แล้ว ไม่ต้องต่อ reference เพิ่ม สคริปต์จำ Follow Offset ตอนเริ่มเล่นและคืนเมื่อปิด component
 - ตรวจ serialized field กับซอร์ส Cinemachine ใน package จริง ตรวจ Script GUID, target, component references และ fileID ของซีนแล้ว ยังไม่ได้ตรวจภาพ/ทดสอบ Play Mode จริง
 

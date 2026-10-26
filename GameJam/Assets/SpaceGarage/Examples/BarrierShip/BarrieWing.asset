@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
-  m_Name: HeavyJet
+  m_Name: BarrieWing
   m_EditorClassIdentifier: 
-  partId: 13a701962ca666848b3fdff3bdf206fa
-  displayName: Heavy jet
+  partId: 305d5292c3f0bbb43be756380582aae1
+  displayName: Heavy Wing
   icon: {fileID: 0}
-  slot: 3
-  partPrefab: {fileID: 100, guid: 403e7ac71f43f7d4aab8bf1381fd0675, type: 3}
+  slot: 2
+  partPrefab: {fileID: 100, guid: 852e7410109d3d3458921f318d6dfeff, type: 3}
   stats:
     attack: 0
     defense: 0

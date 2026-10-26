@@ -1,5 +1,6 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SpaceGarage
 {
@@ -17,6 +18,12 @@ namespace SpaceGarage
         [SerializeField, Min(0)] private float boostExtraDistance = 3f;
         [SerializeField, Min(0.01f)] private float boostPullbackTime = 0.35f;
         [SerializeField, Min(0.01f)] private float boostReturnTime = 0.6f;
+        [Header("Right mouse camera orbit")]
+        [SerializeField, Min(0)] private float orbitSensitivity = 0.15f;
+        [SerializeField, Range(0, 60)] private float orbitPitchLimit = 60f;
+        [SerializeField, Min(0.01f)] private float orbitReturnTime = 0.35f;
+        private Vector2 orbitAngles;
+        private Vector2 orbitVelocity;
         private CinemachineFollow follow;
         private CinemachineRotationComposer composer;
         private Vector3 normalPositionDamping;
@@ -37,6 +44,7 @@ namespace SpaceGarage
             normalFollowOffset = follow.FollowOffset;
             boostDistance = boostDistanceVelocity = 0;
             weight = 0;
+            orbitAngles = orbitVelocity = Vector2.zero;
             captured = true;
         }
 
@@ -54,7 +62,32 @@ namespace SpaceGarage
             boostDistance = Mathf.SmoothDamp(boostDistance, boosting ? boostExtraDistance : 0,
                 ref boostDistanceVelocity, boosting ? boostPullbackTime : boostReturnTime,
                 Mathf.Infinity, Time.deltaTime);
-            follow.FollowOffset = normalFollowOffset + Vector3.back * boostDistance;
+            UpdateOrbit();
+            follow.FollowOffset = Quaternion.Euler(orbitAngles.y, orbitAngles.x, 0)
+                * (normalFollowOffset + Vector3.back * boostDistance);
+        }
+
+        private void UpdateOrbit()
+        {
+            var mouse = Mouse.current;
+            bool orbiting = Application.isFocused && ship != null && ship.IsAlive &&
+                mouse != null && mouse.rightButton.isPressed;
+            if (orbiting)
+            {
+                Vector2 delta = mouse.delta.ReadValue() * orbitSensitivity;
+                orbitAngles.x = Mathf.DeltaAngle(0, orbitAngles.x + delta.x);
+                orbitAngles.y = Mathf.Clamp(orbitAngles.y - delta.y, -orbitPitchLimit, orbitPitchLimit);
+                orbitVelocity = Vector2.zero;
+            }
+            else
+            {
+                orbitAngles.x = Mathf.SmoothDampAngle(orbitAngles.x, 0, ref orbitVelocity.x,
+                    orbitReturnTime, Mathf.Infinity, Time.deltaTime);
+                orbitAngles.y = Mathf.SmoothDampAngle(orbitAngles.y, 0, ref orbitVelocity.y,
+                    orbitReturnTime, Mathf.Infinity, Time.deltaTime);
+                if (orbitAngles.sqrMagnitude < 0.0001f && orbitVelocity.sqrMagnitude < 0.0001f)
+                    orbitAngles = orbitVelocity = Vector2.zero;
+            }
         }
 
         private void OnDisable()
@@ -69,6 +102,7 @@ namespace SpaceGarage
             captured = false;
             weight = 0;
             boostDistance = boostDistanceVelocity = 0;
+            orbitAngles = orbitVelocity = Vector2.zero;
         }
     }
 }

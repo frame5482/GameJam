@@ -2,6 +2,13 @@
 
 อัปเดต 2026-10-26 ใช้ Canvas ของผู้ใช้ ข้อความบน UI เป็น ENG ไม่สร้างหน้าตา Panel หรือจัด layout แทน
 
+## แก้รายการไม่ขึ้นและ Initially Unlocked ยังล็อก (2026-10-26)
+
+พบ Gun pool ใส่ HeavyArmorPlate แทน HeavyGun ทำให้ถูกกรองเพราะ Slot ไม่ตรง และชุด Barrier ที่คัดลอกมาทั้งสี่ชิ้นมี Part ID ซ้ำกับ Heavy ทำให้ Catalog.Find คืน null เพื่อป้องกันเซฟอ้างผิดชิ้น ส่งผลให้ IsUnlocked เป็น false และรายการถูกตัดซ้ำตาม ID
+
+แก้ CustomizationCatalog.asset ให้ช่องปืนอ้าง HeavyGun และแก้เฉพาะ Part ID ของ asset Barrier ชุดใหม่ BarrieGun/BarrieArmorPlate/BarrieWing/BarrieJet ให้ใช้ ID เฉพาะของแต่ละ asset (ตรงกับ GUID ของ asset นั้น) เก็บ Part ID ของ Starter/Heavy เดิมทั้งหมด ไม่ล้างหรือเขียนย้ายเซฟเก่า ไม่แก้สคริปต์/ซีน/UI/prefab และไม่มีช่อง Inspector ใหม่ Initially Unlocked ตรวจจาก catalog ปัจจุบันแม้มีเซฟแล้ว จึงไม่ต้องลบเซฟเพื่อให้ปลดล็อก
+
+ตรวจข้อมูลอ้างอิงใน catalog ครบ 12 ชิ้น (หมวดละ 3) พบ asset ครบ Slot ตรงหมวดและ Part ID ไม่ซ้ำ ตรวจ git diff --check ผ่าน ยังไม่ได้กด UI หรือทดสอบ Equip/ภาพยานใน Unity Play Mode ผู้ใช้ไม่ต้องผูก reference เพิ่ม; หากกำลัง Play ให้ออกแล้วเข้า Play ใหม่เพื่อโหลดข้อมูลที่แก้
 ## ตั้งค่าพูลทั้งสี่หมวด
 
 แก้ Jet ต่อไม่ถึงตัวถัง: JetSpawnPoint ของ CustomizationPreview ใน Repair.unity และ prefab CustomerRepairShip/EnemyShip/StarterShip ทั้งสองชุดใช้ local (0,0,0) แทน z=-1.05 เพราะ mesh Jet และ ArmorPlate จาก Ship1.fbx ใช้ตำแหน่งประกอบในข้อมูลโมเดลอยู่แล้ว SampleScene มี Jet z=0 override เดิมอยู่แล้ว ไม่ขยับโมเดล/ไอพ่นหรือเปลี่ยน Material ไม่มีช่องใหม่ ตรวจค่าจุดติดตั้งแล้ว ยังไม่ได้ตรวจภาพ Play Mode หลังแก้
@@ -37,6 +44,20 @@ ResourceManager.prefab ผูก Customization Catalog แล้ว ถ้าเ
 RepairUI ผูก ShipCustomization เพื่อปิด Main Menu Panel เมื่อเปิดหน้าปรับแต่ง และกันเริ่มซ่อม/เข้าต่อสู้ซ้อนกัน RepairOrbitCamera เพิ่ม Customization / Customization Camera ผูก CustomizationCamera แยกไว้แล้ว ปรับมุมกล้องนี้เองได้โดยไม่กระทบกล้องเมนู/ซ่อม Canvas ยังใช้ Main Camera จริงตามเดิม
 
 ## JSON save
+
+### New Game (2026-10-26)
+
+เพิ่ม `SpaceGarage/Scripts/newGame.cs` (component `SpaceGarage.newGame`) ให้ใส่บน GameObject ของผู้ใช้ แล้วผูก Button > On Click โดยลาก object นั้นและเลือก `newGame.NewGame()` ไม่ได้สร้างปุ่ม/UI หรือผูกปุ่มแทนผู้ใช้
+
+เพิ่มช่อง Inspector `On Start` บน newGame (ค่าเริ่มต้นปิด): ติ๊กเพื่อเรียก NewGame อัตโนมัติใน Start หนึ่งครั้งต่อซีนต่อรอบการเล่น ป้องกันรีเซ็ต/โหลดซีนวน และไม่รีเซ็ตซ้ำเมื่อกลับเข้าซีนเดิมในรอบนั้น ปุ่ม NewGame ยังเรียกซ้ำได้ตามเดิม เริ่ม Play หรือเปิดเกมรอบใหม่จะเริ่มนับใหม่ รวมกรณี Editor ปิด Domain Reload ไม่เปลี่ยนการเปิด/ปิด UI ไม่มี reference ใหม่ให้ลาก
+
+เมื่อเรียกจะใช้ `ResourceManager.ResetForNewGame()` ตั้งเงิน 3000 แทนเงินเดิม ล้างคลังแล้วคืนตาม Starting Materials ของ ResourceManager ที่ใช้งานอยู่ (รวมจำนวนรายการ ID เดียวกัน; ช่องว่าง/จำนวนศูนย์ข้าม) ล้างชิ้นส่วนที่ซื้อทั้งหมด เหลือสิทธิ์ Initially Unlocked ตาม catalog และใส่ชิ้นแรกที่ปลดฟรีของแต่ละหมวดเป็นชุดเริ่มต้น ไม่เปลี่ยน Part ID ของ asset
+
+บันทึก JSON ใหม่ก่อนเปลี่ยนข้อมูลในหน่วยความจำ และอัปเดต .bak ให้เป็น New Game ด้วยเพื่อไม่กู้ความคืบหน้าเก่ากลับมา ถ้าเขียนไฟล์หลักล้มเหลวจะไม่รีเซ็ต/ไม่โหลดซีน ถ้าอัปเดต backup ล้มเหลวจะแจ้ง warning (ไฟล์หลักใหม่ยังใช้ได้) หากไฟล์หลักและ backup อ่านไม่ได้อยู่ก่อนแล้ว ยังคงป้องกันการเขียนทับตามระบบเดิมและแจ้ง warning ไม่ล้างไฟล์จริงในงานพัฒนา
+
+หลังรีเซ็ต โหลดซีนเดิมใหม่แบบ Single และคืน Time.timeScale = 1 เพื่อเคลียร์ลูกค้า/งานซ่อมที่พัก ยานต่อสู้ ศัตรู HP และสถานะชั่วคราว ไม่เปลี่ยนไปซีนอื่น ซีนต้องอยู่ใน Build Profile Scene List (SampleScene และ Repair มีแล้ว) ResourceManager ใช้ Persist Across Scenes/Enable Json Save เดิม: ควรเปิดอย่างน้อยหนึ่งอย่างเพื่อรักษาข้อมูลรีเซ็ตเมื่อโหลดซีน ไม่ได้ปรับค่า prefab หรือ Starting Materials ที่ผู้ใช้ตั้งไว้ กรณี Starting Materials ว่างจะเริ่มด้วยคลังว่าง
+
+ผลตรวจ: คอมไพล์ runtime ทั้งชุดรวม newGame.cs ด้วย Roslyn และ references ของ Unity โปรเจกต์จริงผ่าน exit 0 ตรวจ diff ผ่าน ไม่ได้เรียก NewGame กับเซฟของผู้ใช้ และยังไม่ได้ทดสอบกดปุ่ม/โหลดกลับ/กู้ backup ใน Play Mode ต้องเพิ่ม component และผูก On Click ของปุ่มเองตามด้านบน
 
 ResourceManager เพิ่ม Enable Json Save (เริ่มต้นเปิด) และ Save File Name (space-garage.json) ไฟล์อยู่ `Application.persistentDataPath` มี version, money, materials (Item ID/amount), unlockedParts (Part ID), equippedParts (Gun/ArmorPlate/Wing/Jet) ใช้ ID ไม่เก็บ reference ของ Unity ใน JSON
 

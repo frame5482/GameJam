@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
-  m_Name: HeavyGun
+  m_Name: BarrieArmorPlate
   m_EditorClassIdentifier: 
-  partId: 3f97dd7dda621ce499d8bf1a9855da06
-  displayName: Heavy Gun
+  partId: 84b59816c48206f40a8621e366aa6235
+  displayName: Heavy Plate
   icon: {fileID: 0}
-  slot: 0
-  partPrefab: {fileID: 100, guid: 7a13d5f1637713246b8a2b98b051deb9, type: 3}
+  slot: 1
+  partPrefab: {fileID: 100, guid: c155c2fcde918a24fb5b678c5d029aeb, type: 3}
   stats:
     attack: 0
     defense: 0
     speed: 0
     handling: 0
-    health: 0
+    health: 100
     boosterCapacity: 0
   boostSpeedMultiplier: 2
   boostDrainPerSecond: 25

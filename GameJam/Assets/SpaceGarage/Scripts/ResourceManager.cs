@@ -120,6 +120,63 @@ namespace SpaceGarage
             data.unlockedParts.AddRange(unlockedParts); data.unlockedParts.Sort(StringComparer.Ordinal);
             return data;
         }
+        public bool ResetForNewGame()
+        {
+            if (!ready || Inventory == null || protectUnreadableSave)
+            {
+                Debug.LogWarning("Cannot start a new game: resources are not ready or the save is protected because it could not be read.", this);
+                return false;
+            }
+            var data = new GarageSaveData
+            {
+                version = 1, money = 3000,
+                materials = new List<ShipInventory.ItemStack>(),
+                unlockedParts = new List<string>(), equippedParts = new string[4]
+            };
+            foreach (var stack in startingMaterials)
+            {
+                if (stack == null || stack.material == null || stack.amount <= 0 ||
+                    string.IsNullOrWhiteSpace(stack.material.itemId)) continue;
+                var existing = data.materials.Find(item => item.itemId == stack.material.itemId);
+                if (existing == null)
+                    data.materials.Add(new ShipInventory.ItemStack { itemId = stack.material.itemId, amount = stack.amount });
+                else if (existing.amount <= int.MaxValue - stack.amount) existing.amount += stack.amount;
+                else
+                {
+                    Debug.LogWarning("Cannot start a new game: Starting Materials exceed the inventory limit.", this);
+                    return false;
+                }
+            }
+            if (customizationCatalog != null)
+                foreach (var part in customizationCatalog.Parts)
+                    if (data.equippedParts[(int)part.slot] == null &&
+                        customizationCatalog.Find(part.partId) == part && customizationCatalog.IsInitiallyUnlocked(part.partId))
+                        data.equippedParts[(int)part.slot] = part.partId;
+            if (!data.IsValid()) return false;
+            if (enableJsonSave)
+            {
+                try
+                {
+                    GarageJsonStorage.Write(SavePath, JsonUtility.ToJson(data, true));
+                }
+                catch (Exception error)
+                {
+                    Debug.LogWarning("Cannot save new game: " + error.Message, this);
+                    return false;
+                }
+                // Recovery must restore the new game, rather than progress from before the reset.
+                try { File.Copy(SavePath, SavePath + ".bak", true); }
+                catch (Exception error) { Debug.LogWarning("Unable to update new game backup: " + error.Message, this); }
+            }
+            money = data.money;
+            unlockedParts.Clear();
+            equippedParts = data.equippedParts;
+            foreach (var stack in startingMaterials)
+                if (stack != null && stack.material != null && stack.amount > 0) RegisterMaterial(stack.material);
+            Inventory.Restore(data.materials);
+            dirty = false;
+            return true;
+        }
         [ContextMenu("Save Progress")]
         public bool SaveProgress()
         {
