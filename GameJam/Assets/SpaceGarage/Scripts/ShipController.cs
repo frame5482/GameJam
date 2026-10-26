@@ -49,7 +49,7 @@ namespace SpaceGarage
         public float Boost { get; private set; }
         public bool IsAlive => Health > 0;
         public bool IsBoosting { get; private set; }
-        public ShipInventory Inventory => inventory;
+        public ShipInventory Inventory => ResourceManager.Instance != null ? ResourceManager.Instance.Inventory : inventory;
         public float CurrentSpeed => flightSpeed;
         public bool IsRolling => dodge.IsInvulnerable(Time.timeAsDouble);
         public bool IsInvulnerable => IsAlive && IsRolling;
@@ -289,11 +289,12 @@ namespace SpaceGarage
 
         public void CollectNearby()
         {
-            if (!IsAlive || inventory == null) return;
+            var storage = Inventory;
+            if (!IsAlive || storage == null) return;
             foreach (var hit in Physics.OverlapSphere(transform.position, pickupRadius, pickupLayers, QueryTriggerInteraction.Collide))
             {
                 var pickup = hit.GetComponentInParent<ShipPickup>();
-                if (pickup != null) pickup.TryCollect(inventory);
+                if (pickup != null) pickup.TryCollect(storage);
             }
         }
 

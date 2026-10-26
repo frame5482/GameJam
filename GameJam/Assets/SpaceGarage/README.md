@@ -1,5 +1,7 @@
 # ระบบควบคุมยานต้นแบบ
 
+เพิ่มระบบซ่อมลูกค้าและ ResourceManager แล้ว ดูขั้นตอนตั้งค่าที่ [Repair/README.md](Repair/README.md) ฉาก `Scenes/Repair.unity` ผูกจุดเดิมและ prefab แล้ว ต้องใส่พูลวัสดุและ Canvas ของผู้ใช้ก่อนเล่นครบวงจร ShipController.Inventory/ShipPickup ใช้คลังกลางเมื่อมี ResourceManager; ไม่มีบันทึกลงดิสก์
+
 อัปเดต 2026-10-26 — Unity 6000.3.8f1, Input System 1.18.0, บินแบบเครื่องบิน 3D เปลี่ยนระดับความสูงแกน Y ได้จริง ไม่ล็อกระนาบ
 
 ## พฤติกรรมที่ยืนยัน
@@ -102,6 +104,10 @@
 
 ### HUD ต่อสู้ตัวอย่างด้วย UI Toolkit (2026-10-26)
 
+ผู้ใช้ยืนยันล่าสุดว่า **UI จริงใช้ Canvas** จึงใช้ **ShipHUD** บน **MainUI** ใน SampleScene ผูก ShipController ให้แล้ว เพิ่ม Auto Find Player ค้น Tag Player อัตโนมัติเมื่อไม่ใส่ Ship ผู้ใช้ยังต้องลาก TMP Text/Slider/Image ที่ออกแบบเองลงช่อง ไม่ได้สร้างหรือย้ายหน้าตา Canvas เดิม Toolkit ยังคงเป็นตัวอย่างปิดได้เท่านั้น
+
+แก้ Toolkit ไม่ขึ้นโดยใช้ UIDocument.visualTreeAsset แทนการแทรก CloneTree เอง กำหนด root เต็มจอและ rebind เมื่อ root ถูกสร้างใหม่ ตรวจ Play Mode จริงพร้อมดูภาพ ScreenCapture แล้ว HUD ขึ้นครบและ root 1920×1080 รายละเอียดผลตรวจใน SpaceGarage/UI/README.md
+
 ตามคำขอให้ทำหน้าตาตัวอย่าง เพิ่ม `CombatHUD_Example` ใน SampleScene แยกจาก UI เดิม แสดงเลือด บูสต์ ความเร็ว Dodge วัสดุมาร์กพร้อมรูป และเป้าเมาส์ ปิดที่ GameObject/component หรือช่อง Visible ได้ และแทน UXML จริงผ่าน Layout โดยไม่แตะระบบเกม รายละเอียดไฟล์ ช่อง Inspector สัญญาชื่อ element และข้อจำกัดอยู่ใน **SpaceGarage/UI/README.md**
 
 ไม่ต้องต่อ reference เพิ่มในซีนตัวอย่าง กด Play เพื่อดู HUD ส่วนระบบมาร์กต้องส่งรายการให้ ShipCombatHUDToolkit.SetTrackedMaterials เมื่อมีข้อมูลจริง แยก ShipMaterialRequirement เป็นไฟล์กลางโดยไม่เปลี่ยน API ของ ShipHUD เดิม
@@ -186,7 +192,8 @@
 1. ติด **ShipHUD** บน GameObject UI ของผู้ใช้ ลาก PlayerShip ลง **Ship**
 2. **Health Text / Boost Text / Speed Text** รับ TMP_Text แสดงเลือดปัจจุบัน/สูงสุด เกจปัจจุบัน/สูงสุด และความเร็วที่ผ่านการหน่วงแล้ว หน่วย Unity ต่อวินาที ช่องที่ไม่ใช้ปล่อยว่างได้
 3. **Health Slider / Boost Slider** รับ Slider ของผู้ใช้ หรือใช้ **Health Fill / Boost Fill** รับ Image ที่ตั้ง Type = Filled ไว้เอง รองรับใส่ทั้งสองหรือเลือกอย่างใดอย่างหนึ่ง ไม่เปลี่ยนรูปแบบ/ช่วง min-max ของ Slider ไม่ยิง OnValueChanged ระหว่างอัปเดต
-4. สร้างแถววัสดุด้วยตัวเองแล้วติด **ShipTrackedMaterialRow** ในแต่ละแถว ลาก **Icon** (Image), **Material Name** (TMP_Text), **Amount Text** (TMP_Text) จาก UI ของแถวนั้น และใส่ component แถวทั้งหมดลง **Material Rows** บน ShipHUD ตามลำดับแสดง
+4. สร้างหน้าตาแถววัสดุหนึ่งแถวแล้วติด **ShipTrackedMaterialRow** ลาก **Icon** (Image), **Material Name** (TMP_Text), **Amount Text** (TMP_Text) ของแถวนั้นให้ครบ จากนั้นทำเป็น Prefab แล้วลากลง **Material Row Prefab** บน ShipHUD และลาก RectTransform พื้นที่รายการบน Canvas ลง **Material Container** ระบบจะเสกแถวจากรายการที่มาร์กเข้า Container ตามผู้ใช้ขอ
+5. ผู้ใช้จัด LayoutGroup เช่น VerticalLayoutGroup/GridLayoutGroup และขนาดแถวเอง ระบบไม่เพิ่มหรือเปลี่ยน layout ให้อัตโนมัติ ถ้าไม่ใส่ Material Container ยังใช้ **Material Rows** แบบลากแถวสำเร็จทีละอันได้เหมือนเดิม
 
 สร้างข้อมูลวัสดุด้วย **Create > Space Garage > Material Data**:
 
@@ -207,7 +214,11 @@ hud.SetTrackedMaterials(new[]
 
 แต่ละแถวแสดงรูป ชื่อ และ `จำนวนใน ShipInventory/requiredAmount` อัปเดตเมื่อเก็บของ ระบบเก็บข้อมูลมาร์กเป็นสำเนาของรายการที่รับ ไม่สร้างระบบมาร์ก/เซฟมาร์กในงานนี้ เรียก `SetTrackedMaterials(null)` เพื่อล้างรายการ; `SetShip(newShip)` เพื่อเปลี่ยนยานที่ HUD ติดตาม
 
-แถวที่ไม่ใช้จะล้างข้อความและปิดเฉพาะ Image ของรูปที่ไม่มีข้อมูล ไม่ปิด GameObject แถว ไม่เปลี่ยน alpha ไม่สร้างหรือย้ายแถวอัตโนมัติ หากจำนวนรายการเกินช่อง Material Rows จะแจ้งเตือนและแสดงได้ตามจำนวนแถวที่ผู้ใช้ผูกไว้ ต้องเตรียมแถวให้เพียงพอ
+เมื่อใส่ **Material Container** ระบบใช้โหมดสร้างแถวตามรายการมาร์ก ไม่ใช้ array Material Rows โดยต้องมี **Material Row Prefab** ที่เป็นแถวแยก ไม่ใช่ Container หรือ Canvas ทั้งอัน สร้างแถวเท่าที่ต้องใช้แล้วเก็บใช้ซ้ำ หากมาร์กลดลงจะ SetActive(false) เฉพาะแถวที่ระบบเสก เมื่อเพิ่มมาร์กจะนำกลับมาใช้ หากล้างรายการจะปิดทุกแถวที่ระบบเสก ไม่แตะลูกอื่นของ Container เช่นหัวข้อ/ของตกแต่ง เมื่อปิด ShipHUD หรือเปลี่ยน Container/Prefab จะลบเฉพาะ instance ที่ระบบเป็นเจ้าของและสร้างใหม่เมื่อใช้งาน
+
+ในโหมด **Material Rows** เดิม (ไม่ใส่ Container) แถวที่ไม่ใช้ยังล้างข้อความและปิดเฉพาะ Image ของรูปที่ไม่มีข้อมูล ไม่ปิด GameObject แถวหรือเปลี่ยน alpha หากจำนวนรายการเกินช่องที่เตรียมจะเตือนเหมือนเดิม
+
+ตรวจคอมไพล์ Runtime/Editor หลังเพิ่ม Container ผ่าน ไม่มี error/warning ยังไม่ได้ทดลองกับ Row Prefab/Container ของจริงใน Play Mode ผู้ใช้ต้องลากสองช่องใหม่และเตรียม layout ของตัวเอง ไม่มีการสร้างกราฟิกแถวสำรอง
 
 ### เอฟเฟกต์บูสต์ในแต่ละชิ้นส่วน (2026-10-26)
 

@@ -14,6 +14,7 @@ namespace SpaceGarage
             if (collected || inventory == null) return false;
             // Lock before invoking inventory events to prevent reentrant or multi-collider collection.
             collected = true;
+            if (material != null && ResourceManager.Instance != null) ResourceManager.Instance.RegisterMaterial(material);
             if (!inventory.Add(material != null ? material.itemId : itemId, amount)) { collected = false; return false; }
             gameObject.SetActive(false);
             Destroy(gameObject);

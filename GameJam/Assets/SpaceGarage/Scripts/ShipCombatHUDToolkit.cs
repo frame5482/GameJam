@@ -16,7 +16,7 @@ namespace SpaceGarage
         [SerializeField] private PanelSettings panelSettings = null;
         private UIDocument document;
         private PanelSettings ownedPanel;
-        private TemplateContainer view;
+        private VisualElement view;
         private VisualElement hud, healthFill, boostFill, dodgeFill, reticle, materialList;
         private Label healthValue, boostValue, speedValue, dodgeValue, modeStatus, emptyMaterials;
         private readonly List<ShipMaterialRequirement> tracked = new List<ShipMaterialRequirement>();
@@ -36,7 +36,7 @@ namespace SpaceGarage
 
         private void Build()
         {
-            if (view != null) return;
+            if (view != null && document != null && ReferenceEquals(document.rootVisualElement, view) && view.panel != null) return;
             var tree = layout != null ? layout : Resources.Load<VisualTreeAsset>("SpaceGarageHUD/CombatHUD");
             if (tree == null)
             {
@@ -62,15 +62,17 @@ namespace SpaceGarage
                 }
                 document.panelSettings = ownedPanel;
             }
+            if (document.visualTreeAsset != tree) document.visualTreeAsset = tree;
             document.enabled = true;
             if (document.rootVisualElement == null) return;
-            document.rootVisualElement.pickingMode = PickingMode.Ignore;
-            view = tree.CloneTree();
+            view = document.rootVisualElement;
             view.style.position = Position.Absolute;
             view.style.left = view.style.top = view.style.right = view.style.bottom = 0;
+            view.style.width = Length.Percent(100);
+            view.style.height = Length.Percent(100);
+            view.style.flexGrow = 1;
             // This is a display-only HUD: it must not consume mouse aim/shooting or keyboard input.
             IgnorePicking(view);
-            document.rootVisualElement.Add(view);
             hud = view.Q<VisualElement>("combat-hud") ?? view;
             healthValue = view.Q<Label>("health-value");
             boostValue = view.Q<Label>("boost-value");
@@ -120,7 +122,8 @@ namespace SpaceGarage
 
         private void Update()
         {
-            if (view == null) { Build(); if (view == null) return; }
+            if (view == null || document == null || !ReferenceEquals(document.rootVisualElement, view) || view.panel == null)
+            { Build(); if (view == null) return; }
             SetVisible(visible);
             if (ship == null && Time.unscaledTime >= nextShipSearch)
             {
@@ -210,7 +213,7 @@ namespace SpaceGarage
         private void OnDisable()
         {
             Unsubscribe();
-            if (view != null) view.RemoveFromHierarchy();
+            if (document != null) document.enabled = false;
             view = null;
             rows.Clear();
         }

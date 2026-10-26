@@ -148,6 +148,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 176, guid: f7341bb2a076ab56efc2aa85f830d860, type: 3}
+      propertyPath: guns.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 176, guid: f7341bb2a076ab56efc2aa85f830d860, type: 3}
       propertyPath: 'assembledParts.Array.data[0]'
       value: 
       objectReference: {fileID: 0}
@@ -257,6 +261,23 @@ MonoBehaviour:
   hitMonsterPrefab: {fileID: 1737521523590580331, guid: d7ee81b85be2107459ebe02372acab5c, type: 3}
   damageNumberPrefab: {fileID: 465469603795642029, guid: d9771b1e6cd106f418919533d1f916db, type: 3}
   hitLifetime: 2
+--- !u!1001 &9004000
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 102, guid: 60bd91cf33064f609cfa3f55798bd24c, type: 3}
+      propertyPath: ship
+      value: 
+      objectReference: {fileID: 9001002}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 60bd91cf33064f609cfa3f55798bd24c, type: 3}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -645,6 +666,7 @@ GameObject:
   - component: {fileID: 733452094}
   - component: {fileID: 733452093}
   - component: {fileID: 733452092}
+  - component: {fileID: 733452096}
   m_Layer: 5
   m_Name: MainUI
   m_TagString: Untagged
@@ -734,6 +756,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &733452096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 733452091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7b72f95817f7dc40a60f4ff8d220e55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ship: {fileID: 9001002}
+  autoFindPlayer: 1
+  healthText: {fileID: 0}
+  healthSlider: {fileID: 0}
+  healthFill: {fileID: 0}
+  boostText: {fileID: 0}
+  boostSlider: {fileID: 0}
+  boostFill: {fileID: 0}
+  dodgeCooldownText: {fileID: 0}
+  dodgeReadySlider: {fileID: 0}
+  dodgeReadyFill: {fileID: 0}
+  speedText: {fileID: 0}
+  materialContainer: {fileID: 0}
+  materialRowPrefab: {fileID: 0}
+  materialRows: []
 --- !u!1 &756097413
 GameObject:
   m_ObjectHideFlags: 0
@@ -1042,32 +1091,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &9004000
+--- !u!1001 &9007100
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 102, guid: 60bd91cf33064f609cfa3f55798bd24c, type: 3}
-      propertyPath: ship
-      value: 
-      objectReference: {fileID: 9001002}
+    m_Modifications: []
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 60bd91cf33064f609cfa3f55798bd24c, type: 3}
---- !u!4 &9004001 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 101, guid: 60bd91cf33064f609cfa3f55798bd24c, type: 3}
-  m_PrefabInstance: {fileID: 9004000}
-  m_PrefabAsset: {fileID: 0}
+  m_SourcePrefab: {fileID: 100100000, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 9007100}
   - {fileID: 9004000}
   - {fileID: 9003001}
   - {fileID: 9002000}

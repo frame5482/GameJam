@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 namespace SpaceGarage
 {
+    [AddComponentMenu("Space Garage/UI/Canvas Combat HUD")]
+    [DisallowMultipleComponent]
     public sealed class ShipHUD : MonoBehaviour
     {
+        [Tooltip("Canvas/UGUI HUD. Drag the player's ShipController here, or enable Auto Find Player.")]
         [SerializeField] private ShipController ship = null;
+        [SerializeField] private bool autoFindPlayer = true;
         [Header("Existing health UI (all optional)")]
         [SerializeField] private TMP_Text healthText = null;
         [SerializeField] private Slider healthSlider = null;
@@ -22,12 +26,20 @@ namespace SpaceGarage
         [SerializeField] private Image dodgeReadyFill = null;
         [Header("Existing speed UI")]
         [SerializeField] private TMP_Text speedText = null;
+        [Header("Spawn marked material rows into your Canvas container")]
+        [SerializeField] private RectTransform materialContainer = null;
+        [SerializeField] private ShipTrackedMaterialRow materialRowPrefab = null;
         [Header("Rows made by the user, in display order")]
         [SerializeField] private ShipTrackedMaterialRow[] materialRows = new ShipTrackedMaterialRow[0];
         private readonly List<ShipMaterialRequirement> tracked = new List<ShipMaterialRequirement>();
         private ShipInventory subscribedInventory;
         private int lastHealth = -1, lastMaxHealth = -1, lastBoost = -1, lastMaxBoost = -1, lastSpeed = -1;
         private int lastDodge = -1;
+        private float nextPlayerSearch;
+        private readonly List<ShipTrackedMaterialRow> spawnedMaterialRows = new List<ShipTrackedMaterialRow>();
+        private RectTransform spawnedContainer;
+        private ShipTrackedMaterialRow spawnedRowPrefab;
+        private bool materialSetupWarning;
 
         public void SetShip(ShipController target)
         {
@@ -47,17 +59,24 @@ namespace SpaceGarage
                     if (entry != null && entry.material != null && !string.IsNullOrWhiteSpace(entry.material.itemId))
                         tracked.Add(new ShipMaterialRequirement
                         { material = entry.material, requiredAmount = Mathf.Max(1, entry.requiredAmount) });
-            if (tracked.Count > materialRows.Length)
+            if (materialContainer == null && tracked.Count > materialRows.Length)
                 Debug.LogWarning($"HUD has {materialRows.Length} material rows for {tracked.Count} marked materials. Add and assign more rows to display the remaining entries.", this);
             RefreshMaterials();
         }
 
         private void OnEnable() { ResetCache(); BindInventory(); RefreshMaterials(); }
-        private void OnDisable() => Unsubscribe();
+        private void OnDisable() { Unsubscribe(); ClearSpawnedMaterialRows(); }
         private void ResetCache() => lastHealth = lastMaxHealth = lastBoost = lastMaxBoost = lastSpeed = lastDodge = -1;
 
         private void LateUpdate()
         {
+            if (ship == null && autoFindPlayer && Time.unscaledTime >= nextPlayerSearch)
+            {
+                var player = GameObject.FindGameObjectWithTag("Player");
+                ship = player != null ? player.GetComponent<ShipController>() : null;
+                nextPlayerSearch = Time.unscaledTime + 0.5f;
+                ResetCache();
+            }
             BindInventory();
             float health = ship != null ? ship.Health : 0;
             float maxHealth = ship != null ? ship.Stats.health : 0;
@@ -109,14 +128,76 @@ namespace SpaceGarage
         public void RefreshMaterials()
         {
             var inventory = ship != null ? ship.Inventory : null;
+            if (materialContainer != null)
+            {
+                PrepareSpawnedMaterialRows();
+                for (int i = 0; i < spawnedMaterialRows.Count; i++)
+                {
+                    var row = spawnedMaterialRows[i];
+                    if (row == null) continue;
+                    bool active = i < tracked.Count;
+                    row.gameObject.SetActive(active);
+                    if (active) DisplayMaterial(row, tracked[i], inventory);
+                }
+                return;
+            }
+            if (spawnedMaterialRows.Count > 0) ClearSpawnedMaterialRows();
             for (int i = 0; i < materialRows.Length; i++)
             {
-                if (materialRows[i] == null) continue;
                 var entry = i < tracked.Count ? tracked[i] : null;
-                var material = entry != null ? entry.material : null;
-                int amount = inventory != null && material != null ? inventory.Count(material.itemId) : 0;
-                materialRows[i].Display(material, amount, entry != null ? entry.requiredAmount : 0);
+                if (materialRows[i] != null) DisplayMaterial(materialRows[i], entry, inventory);
             }
+        }
+
+        private static void DisplayMaterial(ShipTrackedMaterialRow row, ShipMaterialRequirement entry, ShipInventory inventory)
+        {
+            var material = entry != null ? entry.material : null;
+            int amount = inventory != null && material != null ? inventory.Count(material.itemId) : 0;
+            row.Display(material, amount, entry != null ? entry.requiredAmount : 0);
+        }
+
+        private void PrepareSpawnedMaterialRows()
+        {
+            if (spawnedContainer != materialContainer || spawnedRowPrefab != materialRowPrefab)
+            {
+                ClearSpawnedMaterialRows();
+                spawnedContainer = materialContainer;
+                spawnedRowPrefab = materialRowPrefab;
+                materialSetupWarning = false;
+            }
+            if (materialRowPrefab == null || materialRowPrefab.transform == materialContainer ||
+                materialContainer.IsChildOf(materialRowPrefab.transform) || materialRowPrefab.GetComponentInChildren<ShipHUD>(true) != null)
+            {
+                if (!materialSetupWarning && tracked.Count > 0)
+                {
+                    Debug.LogWarning("Material Container needs a separate Material Row Prefab with ShipTrackedMaterialRow. Do not use the container or the entire HUD as the row prefab.", this);
+                    materialSetupWarning = true;
+                }
+                return;
+            }
+            if (!isActiveAndEnabled) return;
+            for (int i = 0; i < tracked.Count; i++)
+            {
+                if (i < spawnedMaterialRows.Count && spawnedMaterialRows[i] != null) continue;
+                var row = Instantiate(materialRowPrefab, materialContainer, false);
+                row.name = "MarkedMaterial_" + i;
+                if (i < spawnedMaterialRows.Count) spawnedMaterialRows[i] = row;
+                else spawnedMaterialRows.Add(row);
+            }
+        }
+
+        private void ClearSpawnedMaterialRows()
+        {
+            foreach (var row in spawnedMaterialRows)
+                if (row != null)
+                {
+                    row.gameObject.SetActive(false);
+                    if (Application.isPlaying) Destroy(row.gameObject);
+                    else DestroyImmediate(row.gameObject);
+                }
+            spawnedMaterialRows.Clear();
+            spawnedContainer = null;
+            spawnedRowPrefab = null;
         }
     }
 }

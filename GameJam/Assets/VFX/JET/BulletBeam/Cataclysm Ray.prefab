@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5958569447855283775}
-  - component: {fileID: 2359302172539465432}
   m_Layer: 0
   m_Name: Cataclysm Ray
   m_TagString: Untagged
@@ -33,46 +32,6 @@ Transform:
   - {fileID: 8598364327304856976}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2359302172539465432
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1796526010670638762}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9d0f89868e481643b63eedef68ce0f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CataclysmRay
-  bulletBeam: {fileID: 2349324277283516349}
-  sizeProperty: Size
-  fullSize: 50
-  openDuration: 1
-  closeDuration: 1
-  originHeight: 1.2
-  forwardOffset: 0.6
-  beamLength: 41.5
-  visualCenterOffset: 1.5
-  beamRadius: 0.75
-  enemyLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  repeatHitInterval: 1
-  damagePerHit: 1
-  damagePopupPrefab: {fileID: 6842585499203216316, guid: 1b89868cbd9c4974fbb5f80d93078150,
-    type: 3}
-  hitVfxPrefab: {fileID: 0}
-  criticalHitVfxPrefab: {fileID: 0}
-  vfxLifetime: 2
-  spawnSfx: {fileID: 0}
-  loopSfx: {fileID: 0}
-  hitSfx: {fileID: 0}
-  closeSfx: {fileID: 0}
-  sfxVolume: 1
-  vfxData: {fileID: 11400000, guid: e33c583d383fa104bb9b8362c012f7ae, type: 2}
-  forceLevel: -1
-  logHit: 0
 --- !u!1 &3662560231923592803
 GameObject:
   m_ObjectHideFlags: 0

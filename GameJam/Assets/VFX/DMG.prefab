@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -1935541474126015953, guid: dc7aceb71315533489d274dd986d697d, type: 2}
+  - {fileID: -1935541474126015953, guid: d658f3dd8f497bc44a1c12b3d7425dab, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -109,9 +109,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 123456789
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dc7aceb71315533489d274dd986d697d, type: 2}
-  m_sharedMaterial: {fileID: -1935541474126015953, guid: dc7aceb71315533489d274dd986d697d,
-    type: 2}
+  m_fontAsset: {fileID: 11400000, guid: d658f3dd8f497bc44a1c12b3d7425dab, type: 2}
+  m_sharedMaterial: {fileID: -1935541474126015953, guid: d658f3dd8f497bc44a1c12b3d7425dab, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -195,6 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22c09ef2ba100a3499915918f3177915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamagePopup
+  damageText: {fileID: 0}
   launchSpeed: 4
   gravity: 10
   sideSpeed: {x: 0.3, y: 0.9}
@@ -203,11 +203,5 @@ MonoBehaviour:
   fadeDelay: 0.7
   fontSize: 0
   sizeScale: 1
-  critScale: 1.15
   popScale: 1.25
   popDuration: 0.15
-  physicalColor: {r: 1, g: 1, b: 1, a: 1}
-  magicColor: {r: 0.2, g: 0.75, b: 1, a: 1}
-  minionColor: {r: 0.75, g: 0.35, b: 1, a: 1}
-  critColor: {r: 1, g: 0.85, b: 0.1, a: 1}
-  additionalColor: {r: 1, g: 0, b: 0, a: 1}

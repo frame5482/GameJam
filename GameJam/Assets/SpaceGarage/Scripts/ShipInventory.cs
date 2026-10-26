@@ -15,6 +15,7 @@ namespace SpaceGarage
         }
         [SerializeField] private List<ItemStack> items = new List<ItemStack>();
         public UnityEvent changed = new UnityEvent();
+        public IReadOnlyList<ItemStack> Items => items;
         public int Count(string itemId)
         {
             int count = 0;
@@ -29,6 +30,23 @@ namespace SpaceGarage
                 { item.amount += amount; changed.Invoke(); return true; }
             items.Add(new ItemStack { itemId = itemId, amount = amount });
             changed.Invoke(); return true;
+        }
+
+        public bool TryRemove(string itemId, int amount)
+        {
+            if (string.IsNullOrWhiteSpace(itemId) || amount <= 0 || Count(itemId) < amount) return false;
+            int remaining = amount;
+            for (int i = items.Count - 1; i >= 0 && remaining > 0; i--)
+            {
+                var item = items[i];
+                if (item == null || item.itemId != itemId) continue;
+                int take = Math.Min(remaining, item.amount);
+                item.amount -= take;
+                remaining -= take;
+                if (item.amount <= 0) items.RemoveAt(i);
+            }
+            changed.Invoke();
+            return true;
         }
     }
 }
