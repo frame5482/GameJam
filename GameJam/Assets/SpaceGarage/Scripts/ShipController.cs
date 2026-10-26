@@ -181,7 +181,8 @@ namespace SpaceGarage
 
         private void UpdateBoostEffects(bool active)
         {
-            foreach (var effect in boostEffects) if (effect != null) effect.SetBoosting(active);
+            foreach (var effect in boostEffects)
+                if (effect != null) effect.SetFlightState(IsAlive && isActiveAndEnabled, active);
         }
 
         private void AssemblePart(ShipPartStats part, ShipPartSlot slot, Transform mount)

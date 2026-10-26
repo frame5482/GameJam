@@ -12,6 +12,7 @@
 - SampleScene ใช้ CinemachineCamera/Brain เดิมของผู้ใช้ตามยานแล้ว: CinemachineFollow offset (0,3,-10), LockToTargetNoRoll และ CinemachineRotationComposer เล็งยาน ผูก Tracking Target กับ root PlayerShip; รายละเอียดปรับกล้องและข้อจำกัดอยู่ใน SpaceGarage/README.md
 - HUD ใช้ ShipHUD ผูก UI ของผู้ใช้เท่านั้น แสดง HP/Boost/ความเร็ว และวัสดุที่ระบบอื่นมาร์ก ส่งผ่าน SetTrackedMaterials; ใช้ ShipMaterialData (รหัส/ชื่อ/Sprite) และแถว ShipTrackedMaterialRow แสดงรูป ชื่อ จำนวนที่มี/เป้าหมาย ไม่แสดงทั้งคลังเอง
 - เอฟเฟกต์บูสต์ใช้ ShipBoostEffect ในแต่ละ Part Prefab รองรับ VFX Graph ที่ผู้ใช้ใส่เอง เปิด/ปิดตาม IsBoosting ไม่ปิด root ชิ้นส่วน ติดตัวอย่างไว้ใน JetPart.prefab พร้อม BoostEffectPoint แต่ยังต้องใส่ VFX จริง
+- ShipBoostEffect มี Normal Effect Root เพิ่มสำหรับไอพ่นปกติ สลับกับเอฟเฟกต์บูสต์ (ไม่เปิดพร้อมกัน); ยานตายหรือปิด controller/ชิ้นส่วนปิดทั้งคู่ ห้ามเปลี่ยน reference VFX เดิมที่ผู้ใช้จัดไว้
 
 ## UI — ใช้ของที่ผู้ใช้จัดไว้ (ยืนยัน 2026-10-24)
 - งาน UI ให้ทำเฉพาะโค้ดและผูกข้อมูลกับ panel/ปุ่ม/ข้อความที่ผู้ใช้ทำไว้ ไม่สร้างหน้าตา panel, layout, กล่องสำรอง หรือ runtime UI เอง เว้นแต่ผู้ใช้สั่งให้สร้างโดยตรง ถ้ายังไม่ผูก reference ให้แจ้งช่องที่ต้องใส่ ไม่สร้างของสำรองแทน และไม่ย้าย/ปรับขนาด/ลำดับ UI ที่ผู้ใช้จัดไว้เอง

@@ -118,6 +118,16 @@ hud.SetTrackedMaterials(new[]
 
 ### เอฟเฟกต์บูสต์ในแต่ละชิ้นส่วน (2026-10-26)
 
+เพิ่มช่อง **Normal Effect Root** บน ShipBoostEffect สำหรับไอพ่นปกติ ให้ลาก GameObject ลูกที่มี VFX Graph ปกติลงช่องนี้ ส่วนช่อง Effect Root / Effect Prefab เดิมใช้สำหรับไอพ่นบูสต์ ไม่เปลี่ยน reference VFX ที่ผู้ใช้ใส่ไว้แล้ว
+
+| สถานะ | Normal Effect Root | เอฟเฟกต์บูสต์ |
+| --- | --- | --- |
+| บินปกติ / ปล่อย Space / เกจหมด | เปิด | ปิด |
+| กำลังบูสต์จริง | ปิด | เปิด |
+| ยานตาย / ปิด ShipController / ปิดชิ้นส่วน | ปิด | ปิด |
+
+สลับด้วย VisualEffect.Play/Stop และ SetActive จริง ปิดชุดเดิมก่อนเปิดชุดใหม่ ไม่สร้างเฟด ทั้งสอง Root ต้องเป็น GameObject ลูกคนละอัน ห้ามใช้ตัวเดียวกันหรือซ้อนเป็นพ่อ–ลูกกัน ส่วนไอพ่นปกติยังไม่ถูกสร้างให้ ผู้ใช้ต้องใส่ VFX และลากช่อง Normal Effect Root เพิ่ม 1 ช่อง; ช่องเดิมไม่ต้องต่อใหม่ รองรับกรณีใส่เฉพาะไอพ่นปกติหรือเฉพาะบูสต์ด้วย สคริปต์กลางส่ง SetFlightState เพื่อแยกบินปกติจากยานตาย
+
 ใส่ **ShipBoostEffect** บน root ของ Part Prefab ที่ต้องการให้มีเอฟเฟกต์ จะเป็น Jet หรือส่วนอื่นก็ได้ แต่ละ Prefab ใช้ VFX คนละแบบได้ ไม่เก็บ VFX ไว้ใน ShipPartStats และไม่ต้องลากเอฟเฟกต์แต่ละอันบนสคริปต์กลาง
 
 - วิธีฝัง VFX Graph: เพิ่ม GameObject ลูกที่มี VisualEffect ตั้ง Graph Asset ที่ผู้ใช้เตรียม แล้วลาก GameObject ลูกนั้นลง **Effect Root** ของ ShipBoostEffect
