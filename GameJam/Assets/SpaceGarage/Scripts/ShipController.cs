@@ -19,6 +19,9 @@ namespace SpaceGarage
         [SerializeField] private Transform armorPlateMount = null;
         [SerializeField] private Transform wingMount = null;
         [SerializeField] private Transform jetMount = null;
+        [Header("3D aircraft banking")]
+        [SerializeField, Range(0, 70)] private float bankAngle = 25f;
+        [SerializeField, Min(0)] private float bankDegreesPerSecond = 120f;
         [Header("References")]
         [SerializeField] private ShipGun[] guns;
         [SerializeField] private ShipInventory inventory;
@@ -38,11 +41,13 @@ namespace SpaceGarage
         public ShipInventory Inventory => inventory;
 
         private Rigidbody body;
-        private Vector3 movement;
+        private Vector2 flightInput;
+        private Quaternion flightHeading;
         private bool boostHeld;
         private bool fireHeld;
         private bool boostExhausted;
         private float recoveryAt;
+        private float currentBank;
         // Saved preview instances are replaced on Awake so edit-mode assembly never duplicates parts in play.
         [SerializeField, HideInInspector] private GameObject[] assembledParts = new GameObject[4];
 
@@ -50,7 +55,8 @@ namespace SpaceGarage
         {
             body = GetComponent<Rigidbody>();
             body.useGravity = false;
-            body.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+            body.constraints = RigidbodyConstraints.None;
+            flightHeading = body.rotation;
             if (inventory == null) inventory = GetComponent<ShipInventory>();
             AssembleParts();
             RebuildStats(true);
@@ -58,14 +64,14 @@ namespace SpaceGarage
 
         private void Update()
         {
-            movement = Vector3.zero;
+            flightInput = Vector2.zero;
             boostHeld = false;
             fireHeld = false;
             var keyboard = Keyboard.current;
             if (IsAlive && keyboard != null && Application.isFocused)
             {
-                movement = new Vector3((keyboard.dKey.isPressed ? 1 : 0) - (keyboard.aKey.isPressed ? 1 : 0),
-                    0, (keyboard.sKey.isPressed ? 1 : 0) - (keyboard.wKey.isPressed ? 1 : 0)).normalized;
+                flightInput = new Vector2((keyboard.dKey.isPressed ? 1 : 0) - (keyboard.aKey.isPressed ? 1 : 0),
+                    (keyboard.sKey.isPressed ? 1 : 0) - (keyboard.wKey.isPressed ? 1 : 0));
                 boostHeld = keyboard.spaceKey.isPressed;
                 if (keyboard.eKey.wasPressedThisFrame) CollectNearby();
             }
@@ -77,7 +83,7 @@ namespace SpaceGarage
         private void FixedUpdate()
         {
             if (!boostHeld) boostExhausted = false;
-            IsBoosting = IsAlive && boostHeld && !boostExhausted && movement.sqrMagnitude > 0 && Boost > 0;
+            IsBoosting = IsAlive && boostHeld && !boostExhausted && Boost > 0;
             float multiplier = jetPart != null ? jetPart.boostSpeedMultiplier : 2f;
             float drain = jetPart != null ? jetPart.boostDrainPerSecond : 25f;
             float recovery = jetPart != null ? jetPart.boostRecoveryPerSecond : 15f;
@@ -95,10 +101,16 @@ namespace SpaceGarage
             float distance = Stats.speed * (Time.fixedDeltaTime + boostedSeconds * (Mathf.Max(1, multiplier) - 1));
             if (IsAlive)
             {
-                body.MovePosition(body.position + movement * distance);
-                if (movement.sqrMagnitude > 0)
-                    body.MoveRotation(Quaternion.RotateTowards(body.rotation, Quaternion.LookRotation(movement, Vector3.up),
-                        Stats.handling * Time.fixedDeltaTime));
+                float step = Time.fixedDeltaTime;
+                currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle, bankDegreesPerSecond * step);
+                // A bank turns the flight path; pitch rotates the nose around the aircraft's right axis.
+                float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
+                flightHeading = Quaternion.AngleAxis(turn * Stats.handling * step, Vector3.up)
+                    * flightHeading * Quaternion.AngleAxis(-flightInput.y * Stats.handling * step, Vector3.right);
+                Quaternion heading = flightHeading * Quaternion.AngleAxis(currentBank, Vector3.forward);
+                body.angularVelocity = Vector3.zero;
+                body.MoveRotation(heading);
+                body.MovePosition(body.position + (heading * Vector3.forward) * distance);
             }
             boostChanged.Invoke(Boost, Stats.boosterCapacity);
         }
@@ -180,7 +192,7 @@ namespace SpaceGarage
             Health = Mathf.Max(0, Health - Mathf.Max(0, amount - Stats.defense));
             healthChanged.Invoke(Health, Stats.health);
             if (IsAlive) return;
-            movement = Vector3.zero;
+            flightInput = Vector2.zero;
             boostHeld = false;
             IsBoosting = false;
             body.linearVelocity = Vector3.zero;
@@ -201,7 +213,7 @@ namespace SpaceGarage
 
         private void OnDisable()
         {
-            movement = Vector3.zero; boostHeld = false; fireHeld = false; IsBoosting = false;
+            flightInput = Vector2.zero; boostHeld = false; fireHeld = false; IsBoosting = false;
             if (guns != null) foreach (var gun in guns) if (gun != null) gun.SetTrigger(false, 0, transform);
         }
 
