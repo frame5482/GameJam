@@ -10,10 +10,13 @@ namespace SpaceGarage
         [SerializeField] private Transform armorPlateMount = null;
         [SerializeField] private Transform wingMount = null;
         [SerializeField] private Transform jetMount = null;
+        [Header("Customer ship outline")]
+        [SerializeField, Min(0)] private float outlineWorldWidth = 0.03f;
         public event Action<CustomerRepairShip> Docked;
         public event Action<CustomerRepairShip> Departed;
         public IReadOnlyList<RepairableShipPart> Parts => parts;
         public bool IsDocked { get; private set; }
+        public ShipRandomColors.Palette Colors { get; private set; }
         public bool IsFullyRepaired { get { foreach (var p in parts) if (!p.IsRepaired) return false; return parts.Count == 4; } }
         public long RepairPayment { get { long total = 0; foreach (var p in parts) total += p.Payment; return total; } }
         private readonly List<RepairableShipPart> parts = new List<RepairableShipPart>();
@@ -27,6 +30,7 @@ namespace SpaceGarage
             float lift, float noise, float highlight)
         {
             if (parts.Count != 0 || data.Length != 4 || recipes.Length != 4) throw new ArgumentException("Customer assembly requires four fresh part/recipe pairs.");
+            Colors = ShipRandomColors.CreatePalette();
             Transform[] mounts = { gunMount, armorPlateMount, wingMount, jetMount };
             for (int i = 0; i < 4; i++)
             {
@@ -36,6 +40,9 @@ namespace SpaceGarage
                 wrapper.transform.SetParent(parent, false);
                 var model = Instantiate(data[i].partPrefab, wrapper.transform, false);
                 model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
+                var outline = model.GetComponent<ShipToonOutline>();
+                if (outline == null) outline = model.AddComponent<ShipToonOutline>();
+                outline.SetOutlineWidth(outlineWorldWidth);
                 foreach (var gun in model.GetComponentsInChildren<ShipGun>(true)) gun.enabled = false;
                 var part = wrapper.AddComponent<RepairableShipPart>();
                 part.Initialize(this, data[i], model.transform, UnityEngine.Random.Range(minDamage, maxDamage + 1), recipes[i], lift, noise, highlight);

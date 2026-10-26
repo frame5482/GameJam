@@ -13,6 +13,7 @@ namespace SpaceGarage
         private float expiresAt;
         private bool initialized;
         private ShipHitSource hitSource;
+        public void SetHitRadius(float radius) => hitRadius = Mathf.Max(0.001f, radius);
 
         public void Initialize(Transform source, float attack, float velocity, float lifetime)
         {

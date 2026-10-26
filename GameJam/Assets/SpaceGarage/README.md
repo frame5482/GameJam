@@ -1,6 +1,24 @@
 # ระบบควบคุมยานต้นแบบ
 
-ยานศัตรูในฉากต่อสู้สุ่มสีทุก material slot ในทุก Part ตอนประกอบผ่าน ShipRandomColors ใช้ MaterialPropertyBlock แยกตาม renderer/material index ไม่แก้ Material asset/texture/alpha หรือสีผู้เล่น Hit Reaction แฟลชแยกทุก slot แล้วคืนสีที่สุ่มไว้ ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม ยังไม่ได้ตรวจภาพใน Play Mode
+## Material ยาน Toon พร้อมเส้น (2026-10-26)
+
+อัปเดต 2026-10-27: ยานลูกค้าที่สุ่มบินเข้าโรงซ่อมใช้ Outline World Width 0.03 บน CustomerRepairShip แยกจากเส้นยานทั่วไป 0.012 และกำหนดค่าให้ชิ้นส่วนโดยตรงตอนประกอบก่อนเริ่มบิน พร้อมรักษาค่าเส้นเมื่ออัปเดตสีพัง/ไฮไลต์ รายละเอียดและช่องปรับอยู่ `Repair/README.md` ไม่ต้องตั้งค่าเพิ่ม
+
+ตามคำขอผู้ใช้ล่าสุด เปลี่ยนเฉพาะ Material ของชิ้นส่วนยานที่ใช้งานจริงเป็น `Toon/Toon` จาก Unity Toon Shader ที่ติดตั้งในโปรเจกต์: `Model/Ship1`, `Model/Ship2`, `Model/Ship3` หมวดละ Material.001/Material.002 รวม 6 ไฟล์ และ `Examples/StarterShip/Armor.mat`, `Metal.mat` ของปืน รวม 8 ไฟล์ แก้ไฟล์เดิม/เก็บ GUID สีหลัก texture และ UV เดิม ไม่สร้าง Material สำเนา ไม่แตะ Energy/Hull/ชุดประกอบตัวอย่างเก่าที่ผู้ใช้ยืนยันว่าไม่ได้ใช้ และไม่เปลี่ยน shader ของกระสุน/ไอพ่น/VFX Graph
+
+StarterShip เดิมอ้าง Material ฝังใน Ship1.fbx: ตรวจ object ID และชื่อ/สีจากข้อมูลนำเข้าของ Unity แล้วผูก ArmorPlatePart/WingPart/JetPart และ renderer ที่อ้างข้อมูลเดียวกันใน `Scenes/Repair.unity` ไปยัง Material.001/Material.002 ที่มีอยู่ใน Model/Ship1 ไม่เปลี่ยน mesh ตำแหน่งหรือสเกลชิ้นส่วน ชุดผู้เล่น ศัตรู ยานลูกค้าซ่อม และหน้าคัสตอมใช้ prefab ชิ้นส่วนชุดเดียวกันจึงได้รับ Material ใหม่ด้วย
+
+เปิดเส้นดำด้วย outline pass/keyword ของ Toon ตั้งสีเงาสองระดับจากสีหลัก (65% และ 40%) เพิ่ม `Scripts/ShipToonOutline.cs` บน root ของ Part prefab ทั้ง 12 ชิ้นใน StarterShip/HeavyShip 2/BarrierShip เพื่อชดเชยความหนาเส้นตาม lossyScale ผ่าน MaterialPropertyBlock ใน Edit/Play Mode ไม่สร้าง Material ระหว่างเล่นและไม่เขียนทับ property สีอื่น ช่องใหม่ **Outline World Width** บน **ShipToonOutline** คือความหนาเส้นเป้าหมายในหน่วยโลก ค่าเริ่มต้น **0.012**; 0 ซ่อนเส้นของชิ้นนั้นได้ ใส่ค่าและผูก component ให้แล้ว ไม่ต้องลาก reference เพิ่ม สเกลไม่เท่ากันแต่ละแกนใช้แกนใหญ่สุดเพื่อไม่ให้เส้นหนาเกิน โดยความหนาจริงยังขึ้นกับ normals/ระยะกล้อง/สูตร shader
+
+ปรับ `ShipRandomColors`, `Enemy` (hit flash), `CustomizationPreviewPart` และ `RepairableShipPart` ให้ปรับสีเงาของ Toon ควบคู่สีหลัก การสุ่มสี/แฟลชขาว/ไฮไลต์/แสดงความเสียหายยังใช้ MPB และคืน property block เดิม ไม่มีช่อง Inspector เพิ่มในสคริปต์เหล่านี้
+
+ผลตรวจ: คอมไพล์ Runtime ทั้งชุดรวม ShipToonOutline ด้วย Roslyn/references จริงของ Unity ผ่าน exit 0 ตรวจ Material ทั้ง 8 ไฟล์มี shader/keyword/ความหนาเส้นถูกต้อง ไม่มี property ซ้ำ ตรวจ component และ fileID ใน prefab 12 ไฟล์ไม่ซ้ำ ตรวจสูตรชดเชย 5 สเกล (0.005/0.16/0.45/1/100) ผ่าน และตรวจ diff ผ่าน ลบเครื่องมือชั่วคราวแล้ว ยังไม่ได้ให้ Unity คอมไพล์ shader/ตรวจภาพเส้นหรือทดสอบ Play Mode จริง ผู้ใช้ไม่ต้องตั้งค่าเพิ่ม หากกำลัง Play ให้ออกก่อนเพื่อให้ Unity โหลด asset และสคริปต์ใหม่
+
+อัปเดตสี NPC 2026-10-27 ตามโทนที่ผู้ใช้เลือก: ยานศัตรูและยานลูกค้าสุ่มหนึ่ง palette ต่อหนึ่งลำจาก 8 ชุดสีหลัก/สีรอง/โลหะเข้มใน `ShipRandomColors` เช่น น้ำเงิน–ทองอุ่น, เขียวอมฟ้า–ครีม, แดงไวน์–ทราย, เขียว–ทอง, ม่วง–มิ้นต์, ส้มอิฐ–ครีม, งาช้าง–น้ำเงิน และเทาอมฟ้า–เหลืองทอง ไม่สุ่ม HSV แยกทุก material slot อีก ตัวถัง/ปีกใช้สีหลัก ปืน/Jet ในช่องสีสว่างใช้สีรอง ช่อง Material เดิมที่มี RGB สูงสุดน้อยกว่า 0.5 ใช้สีโลหะเข้มเหมือนกันทั้งลำ สุ่มครั้งเดียวตอนประกอบและคงสีจนยานถูกทำลายหรือประกอบใหม่
+
+แก้ `ShipRandomColors.cs`, `Enemy.cs`, `CustomerRepairShip.cs`, `RepairableShipPart.cs` ใช้ palette เดียวผ่านชิ้นส่วนทั้งสี่และคำนวณสีเงาจากสีเดียวกัน คง alpha/texture/เส้นขอบ/แฟลชขาว/ความหม่นและไฮไลต์ด้วย MaterialPropertyBlock เดิม สุ่มเฉพาะผิว Toon/Toon ไม่เปลี่ยนสี VFX/ไอพ่น และไม่แก้ Material asset หรือสียานผู้เล่น ไม่มีช่อง Inspector ใหม่ ชุดสีปรับได้ใน array palettes ของ ShipRandomColors ไม่ต้องตั้งค่าเพิ่ม ยานที่ประกอบอยู่ก่อนแก้ต้องเกิดใหม่/เริ่ม Play ใหม่เพื่อใช้ระบบใหม่
+
+ผลตรวจสี NPC: คอมไพล์ Runtime ทั้งชุดกับ Roslyn/references จริงของ Unity ผ่าน exit 0 และตรวจ diff ผ่าน ยังไม่ได้ตรวจภาพสีบนโมเดลหรือทดสอบ Play Mode จริง ลบไฟล์คอมไพล์ชั่วคราวแล้ว
 
 เพิ่มระบบซ่อมลูกค้าและ ResourceManager แล้ว ดูขั้นตอนตั้งค่าที่ [Repair/README.md](Repair/README.md) ฉาก `Scenes/Repair.unity` ผูกจุดเดิมและ prefab แล้ว ต้องใส่พูลวัสดุและ Canvas ของผู้ใช้ก่อนเล่นครบวงจร ShipController.Inventory/ShipPickup ใช้คลังกลางเมื่อมี ResourceManager
 
@@ -308,6 +326,29 @@ ShipController อ่าน Shift ซ้ายหรือขวาแบบก�
 
 ### ShipGun: ติดใน Prefab ส่วน Gun
 
+#### ปืน 4 แบบ (2026-10-27)
+
+อัปเดตตามผู้ใช้ยืนยัน: Laser และ Rail Gun ยิงตรงตามแกน +Z (forward) ของ Muzzle แต่ละจุดทั้ง VFX และ ray ดาเมจ ไม่เล็งเมาส์/เป้า AI ไม่ต้องผ่านการตรวจกล้องหรือ viewport ถ้าไม่มี Muzzle ใช้ forward ของ ShipGun ยานยังเลี้ยวตามระบบบินเดิม Laser กดค้างได้ไม่จำกัดเวลา ไม่มีรอบพัลส์หรือคูลดาวน์ ปล่อยจึง Size=0; Rail คงพัลส์ 1 วินาที/พัก 1 วินาทีเดิม แก้ ShipGun/ShipBeamEmitter ไม่มีช่อง Inspector ใหม่และไม่ต้องตั้งค่าเพิ่ม ปืน Projectile/Plasma/Getsuka ยังใช้การเล็งเดิม ช่อง Muzzle ต้องหันแกน Z ไปทิศยิงตามปกติ
+
+ผลตรวจการยิงตรง: คอมไพล์ Runtime ทั้งชุดกับ Unity assemblies จริงผ่าน exit 0 ตรวจ diff ผ่าน ยังไม่ได้ทดสอบภาพทิศลำแสง/ดาเมจหรือกดค้างจริงใน Play Mode
+
+เพิ่ม **Weapon Type** บน ShipGun: Projectile คือโหมดเดิม (ค่าเริ่มต้นของ prefab เดิม ไม่เปลี่ยนปืนที่ผู้ใช้จัดไว้), Laser, Rail Gun, Plasma และ Getsuka เลือกชนิดบน component ของ Gun Part prefab ที่ต้องการแล้วบันทึก prefab ไม่เพิ่มปืนชนิดใหม่ลง catalog แทนผู้ใช้ เพราะยังไม่ได้ระบุว่าชิ้นส่วนใดเป็นปืนชนิดใด ใช้ Muzzle 1/2, Attack และ Damage Multiplier เดิม การเล็งเมาส์/AI ใช้เฉพาะ Projectile/Plasma/Getsuka ส่วน Laser/Rail ยิงตรง ปากสองจุดยิงพร้อมกัน ปากเดียวกันไม่ยิงซ้ำ ค่าคูลดาวน์ด้านล่างแทน Shots Per Second เฉพาะโหมดใหม่
+
+| Weapon Type | การทำงาน |
+| --- | --- |
+| Laser | กดค้างเปิด CataclysmBeam ด้วย Size=10 ปล่อยแล้ว Size=0 ไม่สร้างลำแสงใหม่ทุกเฟรม ทำดาเมจซ้ำทุก Laser Damage Interval (เริ่มต้น 0.1 วินาที) แต่ละครั้ง/ปากใช้ Attack × Damage Multiplier และผ่าน Def/Hit Feedback เดิม |
+| Rail Gun | เริ่มยิงทำดาเมจครั้งเดียวต่อปาก เปิด Size=20 เป็นเวลา 1 วินาทีแล้ว Size=0 พักอีก 1 วินาที รวมรอบละ 2 วินาทีตามผู้ใช้ยืนยัน ปล่อยปุ่มระหว่างพัลส์ยังแสดงจนจบ 1 วินาที ไม่มีดาเมจซ้ำระหว่างเปิดลำแสง ยานตาย/ปิดปืนยกเลิกทันที |
+| Plasma | ยิง Plasma Projectile Prefab ทุก 2 วินาทีขณะกดค้าง ยังเว้น prefab ให้ผู้ใช้ใส่กระสุนลูกกลมขนาดใหญ่ตามที่ขอ ระบบไม่สร้างกราฟิกทดแทน ขนาดภาพใช้ scale/โมเดลของ prefab ที่ผู้ใช้ใส่ |
+| Getsuka | ยิง Getsuka Projectile Prefab ทุก 3 วินาที ใช้ VFX/Getsuka/Getsuka.prefab เดิม จัดแนว +Z ไปจุดเล็งและใช้ world up เพื่อให้เสี้ยวจันทร์ไม่เอียงตาม roll ของปากกระบอก ไม่เปลี่ยนกราฟ/mesh ของเอฟเฟกต์ |
+
+ช่องใหม่กลุ่ม **Laser / Rail Gun**: **Cataclysm Beam** รับ VisualEffectAsset (.vfx) ที่มี exposed float ชื่อ Size; เลือก Laser/Rail ใน Inspector แล้ว OnValidate ผูก `VFX/JET/BulletBeam/CataclysmBeam.vfx` ให้อัตโนมัติถ้าช่องว่าง ไม่แทน reference ที่มีอยู่ **Laser Size**=10, **Rail Size**=20; **Laser Damage Interval**=0.1 วินาที; **Laser Range**=10 และ **Rail Range**=20 หน่วย คือระยะ ray ดาเมจจากแต่ละปาก ปรับได้แยกจาก Size ของภาพ VFX ต้องตรวจภาพในเกมเพื่อเทียบระยะจริงของกราฟ ลำแสงหยุดตรวจดาเมจที่ collider แรก ไม่ทะลุสิ่งกีดขวาง ข้ามเจ้าของ/กระสุนและรับ Trigger เฉพาะ ShipDamageHitbox ตามระบบเดิม
+
+ช่องใหม่กลุ่ม **Plasma / Getsuka Projectiles**: **Plasma Projectile Prefab** รับ GameObject prefab ของลูกกลม (ต้องใส่เอง), **Getsuka Projectile Prefab** รับ prefab คลื่นพลัง (OnValidate ผูกของเดิมให้อัตโนมัติเมื่อเลือกโหมดและช่องว่าง), **Heavy Projectile Hit Radius**=0.8 คือรัศมีชนแบบ sphere sweep สำหรับ prefab ที่ไม่มีสคริปต์ IShipProjectile ถ้ายังไม่มีสคริปต์นี้จะเพิ่ม ShipProjectile เฉพาะ instance ที่ยิง แล้วส่ง Attack/ความเร็ว/อายุเดิมให้ ถ้ามีสคริปต์ IShipProjectile อยู่แล้วจะใช้ของผู้ใช้โดยไม่เพิ่มซ้ำ ความเร็วและอายุใช้ Projectile Speed/Projectile Lifetime เดิม รวมถึงขนาด hitbox ของ Getsuka เป็น sphere ไม่ใช่รูป mesh เสี้ยวจันทร์ ต้องปรับรัศมีให้เหมาะกับ prefab จริง
+
+ไฟล์ที่เพิ่ม: `Scripts/ShipWeaponCycle.cs` (นาฬิกาพัลส์/คูลดาวน์และ enum ชนิดปืน), `Scripts/ShipBeamEmitter.cs` (VFX ต่อปาก สั่ง Size และทำลาย instance เมื่อปิดปืน) แก้ `ShipGun.cs` และเพิ่ม SetHitRadius ใน `ShipProjectile.cs` ไม่มีการแก้ prefab/scene/Gun Part ID หรือ reference ปาก/กระสุนเดิม ไม่มี UI ใหม่ การเปิด/ปิดลำแสงใช้ Size ตามผู้ใช้สั่ง ไม่ใช้การปิด root ยาน/ชิ้นส่วน
+
+ผลตรวจ: คอมไพล์ Runtime ทั้งชุดกับ Unity assemblies จริงผ่าน ทดสอบ ShipWeaponCycle ตัวจริงด้วย Mono ผ่าน 16 กรณี: ขอบเขตพัลส์ Rail 1 วินาที/รอบ 2 วินาที, ยกเลิกพัลส์ไม่ข้ามคูลดาวน์, Plasma 2 วินาที, Getsuka 3 วินาที ตรวจ diff ผ่าน ลบเครื่องมือทดสอบชั่วคราวแล้ว ยังไม่ได้ทดสอบภาพ VFX/แนวคลื่น/การโดนดาเมจ/เส้นเตือน AI ร่วมปืนใหม่ใน Play Mode ผู้ใช้ต้องเลือก Weapon Type บนปืนแต่ละ prefab บันทึก prefab และใส่ Plasma Projectile Prefab เมื่อพร้อม ไม่มีการเลือกชนิดแทนจากชื่อชิ้นส่วน
+
 - **Projectile Prefab**: เปลี่ยนเป็น GameObject Prefab ใส่กระสุนที่มีสคริปต์ชนิดใดก็ได้ ไม่บังคับ ShipProjectile โดยช่อง serialized ภายในใหม่ชื่อ projectilePrefabObject ส่วน reference เก่าเก็บเป็นช่องซ่อนเพื่อย้ายค่า/ใช้ย้อนหลัง ไม่ล้างกระสุนที่ผู้ใช้ใส่ไว้
 - **Muzzle 1 / Muzzle 2**: Transform ตำแหน่งยิง กระสุนหัน +Z ของตัวเองเข้าจุดใต้เมาส์ ยิงพร้อมกันทั้งสองจุดตามผู้ใช้ยืนยัน ใส่เพียงจุดเดียวก็ยิงจุดเดียว ถ้าไม่ใส่ทั้งสองใช้ Transform ของ ShipGun ถ้าลาก Transform เดียวกันสองช่องจะไม่ยิงซ้ำ ใส่ Muzzle เดิมเป็น Muzzle 1 ให้อยู่แล้ว ผู้ใช้ต้องสร้างและลากจุดที่สองลง Muzzle 2 เองตามตำแหน่งโมเดล
 - ช่องใหม่กลุ่ม **Mouse Aim** บน ShipGun: **Aim Camera** รับ Camera ที่เรนเดอร์จริง ไม่ใช่ CinemachineCamera ปล่อยว่างใช้ Camera.main (SampleScene มี MainCamera tag แล้ว ไม่ต้องลากเพิ่ม); **Aim Layers** เลเยอร์ Collider ที่รับเล็ง; **Aim Distance** ระยะ ray/ระยะเป้าหมายในอวกาศว่าง ค่าเริ่มต้น 1000 หน่วย
@@ -348,6 +389,6 @@ Prefab ใด ๆ ถูก Instantiate ตามจุดยิงได้เ�
 - ตรวจคอมไพล์สคริปต์ Runtime และ Editor กับ DLL จริงของ Unity 6000.3.8f1 และ Input System ด้วย Roslyn ผ่าน ไม่มี error/warning
 - ยังไม่ได้ทดสอบ Play Mode หรือดูภาพจริง จึงยังไม่ยืนยันความรู้สึกควบคุม/การชน/ภาพจากกล้อง
 - สูตร Def ต้นแบบ: ความเสียหายที่ได้รับ = max(0, ดาเมจเข้า - Defense); เลือดหมดหยุดคุมและยิง เรียก Died ไม่ลบยานหรือสร้างหน้าแพ้เอง
-- มีระบบศัตรูสุ่มส่วน/บินไล่ยิงแล้ว แต่ยังไม่มีสุ่มดรอปวัสดุ เซฟคลัง/โหลดชุดแต่ง หน้าแต่งยาน Barrier และพฤติกรรมเฉพาะปืน 5 แบบ
+- มีระบบศัตรูสุ่มส่วน/บินไล่ยิงแล้ว แต่ยังไม่มีสุ่มดรอปวัสดุ ส่วนปืนมี Projectile เดิมและโหมด Laser/Rail Gun/Plasma/Getsuka ตามหัวข้อ ShipGun แล้ว ยังต้องตรวจภาพและดาเมจจริงใน Play Mode
 - ค่าฟื้นเกจ ตัวคูณบูสต์ สูตร Def และระยะเก็บเป็นค่าต้นแบบที่ปรับต่อได้ ไม่ใช่ข้อสรุปบาลานซ์เกม
 - ไม่มีการแก้ SampleScene, UI, Input Actions เดิม หรือ Project Settings เมนูสร้างชุดทดลองต้องกดใน Unity เอง

@@ -52,6 +52,7 @@ MonoBehaviour:
   armorPlateMount: {fileID: 121}
   wingMount: {fileID: 137}
   jetMount: {fileID: 157}
+  outlineWorldWidth: 0.03
 --- !u!1 &105
 GameObject:
   m_ObjectHideFlags: 0

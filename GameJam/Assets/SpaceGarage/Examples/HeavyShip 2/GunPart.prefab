@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 101}
+  - component: {fileID: 1000000001}
   - component: {fileID: 112}
   m_Layer: 0
   m_Name: GunPart
@@ -35,6 +36,19 @@ Transform:
   - {fileID: 111}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18105d5231d74b37811edb5ae250fb81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineWorldWidth: 0.012
 --- !u!114 &112
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,6 +61,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4fc9d15fc6f484d9bfe15daa527c03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  weaponType: 1
   projectilePrefab: {fileID: 0}
   projectilePrefabObject: {fileID: 1796526010670638762, guid: c09612ccc4087fc4197aef983eb37ae1, type: 3}
   muzzle: {fileID: 111}
@@ -60,6 +75,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   aimDistance: 1000
+  cataclysmBeam: {fileID: 8926484042661614526, guid: ac9f0e3cca53ecb4e9dc0014c8b5eb8a, type: 3}
+  laserSize: 10
+  railSize: 20
+  laserDamageInterval: 0.1
+  laserRange: 10
+  railRange: 20
+  plasmaProjectilePrefab: {fileID: 0}
+  getsukaProjectilePrefab: {fileID: 0}
+  heavyProjectileHitRadius: 0.8
 --- !u!1 &102
 GameObject:
   m_ObjectHideFlags: 0

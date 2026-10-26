@@ -29,7 +29,7 @@ namespace SpaceGarage
                     var material = materials[i]; if (material == null) continue;
                     var original = new MaterialPropertyBlock(); var highlight = new MaterialPropertyBlock();
                     renderer.GetPropertyBlock(original, i); renderer.GetPropertyBlock(highlight, i);
-                    foreach (string property in new[] { "_BaseColor", "_Color" })
+                    foreach (string property in new[] { "_BaseColor", "_Color", "_1st_ShadeColor", "_2nd_ShadeColor" })
                         if (material.HasProperty(property))
                         {
                             Color color = material.GetColor(property); float alpha = color.a;

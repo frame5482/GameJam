@@ -21,10 +21,15 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Material.001
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Shader: {fileID: 4800000, guid: be891319084e9d147b09d89e80ce60e0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _EMISSIVE_SIMPLE
+  - _IS_CLIPPING_OFF
+  - _IS_ANGELRING_OFF
+  - _IS_OUTLINE_CLIPPING_NO
+  - _OUTLINE_NML
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -96,6 +101,24 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Outline_Width: 0.12
+    - _OUTLINE: 0
+    - _Farthest_Distance: 1000
+    - _Nearest_Distance: 0.5
+    - _Is_LightColor_Outline: 0
+    - _Is_BlendBaseColor: 0
+    - _SPRDefaultUnlitColorMask: 15
+    - _SRPDefaultUnlitColMode: 1
+    - _CullMode: 2
+    - _ZWriteMode: 1
+    - _Use_BaseAs1st: 1
+    - _Use_1stAs2nd: 1
+    - _BaseColor_Step: 0.5
+    - _ShadeColor_Step: 0.2
+    - _BaseShade_Feather: 0.03
+    - _1st2nd_Shades_Feather: 0.03
+    - _Unlit_Intensity: 1
+    - _GI_Intensity: 0.2
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -131,6 +154,9 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
+    - _1st_ShadeColor: {r: 0.5891284425, g: 0.435724705, b: 0.34817328, a: 1}
+    - _2nd_ShadeColor: {r: 0.36254058, g: 0.26813828, b: 0.21426048, a: 1}
+    - _Outline_Color: {r: 0, g: 0, b: 0, a: 1}
     - _BaseColor: {r: 0.90635145, g: 0.6703457, b: 0.5356512, a: 1}
     - _Color: {r: 0.90635145, g: 0.6703457, b: 0.5356512, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}

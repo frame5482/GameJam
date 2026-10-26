@@ -13,6 +13,10 @@
 
 ## ช่องบน Inspector
 
+อัปเดต 2026-10-27 — เส้นยานลูกค้าที่สุ่มบินเข้า: `CustomerRepairShip.Assemble` กำหนด ShipToonOutline ให้ทุกชิ้นหลังตั้ง parent/ตำแหน่ง และก่อน RepairableShipPart เก็บ property block สำหรับสีพัง/ไฮไลต์ หาก prefab ชิ้นใดยังไม่มี component จะเพิ่มให้เฉพาะ instance นั้น ไม่แก้ Material asset หรือ VFX ใช้ Toon/Toon ของยานจากงานก่อนหน้า เพิ่มช่อง **CustomerRepairShip > Customer Ship Outline > Outline World Width** บน `CustomerRepairShip.prefab` ตั้ง **0.03** หน่วยโลก (เส้นยานปกติเดิม 0.012) ให้หนาขึ้นสำหรับยานลูกค้า ปรับเป็น 0 เพื่อซ่อนเส้นได้ ชดเชยตามสเกล renderer ผ่าน ShipToonOutline.SetOutlineWidth และอ่าน property block ปัจจุบันก่อนอัปเดตสีใน RepairableShipPart.LateUpdate จึงเก็บค่าเส้นและ property อื่นไว้ ไม่ย้าย In/Stay/Out ไม่เปลี่ยนการบิน/UI/การสุ่มชิ้นส่วน ใส่ค่า prefab ให้แล้วไม่ต้องตั้งค่าเพิ่ม ยานที่ประกอบค้างอยู่ก่อนแก้ต้องเริ่ม Play ใหม่เพื่อรับค่าเริ่มต้นใหม่
+
+ผลตรวจรอบนี้: คอมไพล์ Runtime ทั้งชุดกับ Roslyn/references ของ Unity โปรเจกต์จริงผ่าน exit 0 ตรวจค่า prefab และ diff ผ่าน ยังไม่ได้ตรวจภาพเส้นของยานลูกค้าระหว่างบิน/จอด/ไฮไลต์ใน Play Mode จริง ไม่ได้เรียกรีเซ็ตเซฟหรือเริ่มงานซ่อมแทนผู้ใช้
+
 หน้า Main UI และ Repair ใช้กล้อง Cinemachine แยกกัน: RepairSystems > RepairOrbitCamera มี Main Menu Camera และ Repair Camera รับ CinemachineCamera คนละตัว สลับ enabled ตามสถานะหน้าซ่อม ผ่าน Main Camera/CinemachineBrain เดิม ระบบหมุนรอบยานขยับเฉพาะ Repair Camera และคงตำแหน่งกล้องเมนูไว้ UI ยังใช้ Main Menu Panel / Repair Panel คนละแผงตามเดิม ไม่ต้องเปลี่ยน Canvas Render Camera จาก Main Camera ไปเป็น CinemachineCamera
 
 ผูกใน Repair.unity แล้ว: MainMenuCamera เป็นกล้องเมนูที่สำเนามุมเดิมไว้ ส่วน CinemachineCamera เดิมเป็นกล้องซ่อม ปรับตำแหน่ง/มุม MainMenuCamera เพื่อเลือกภาพหน้าเมนูตามต้องการ คอมไพล์ผ่าน ยังไม่ได้ตรวจการสลับภาพจริงใน Play Mode
@@ -48,7 +52,9 @@ Canvas ต้องมี GraphicRaycaster ในฉากมี EventSystem พ
 
 ## กติกาและการเชื่อมระบบ
 
-ยานลูกค้าสุ่มสีทุก material slot ของทุก MeshRenderer/SkinnedMeshRenderer ใน Gun / ArmorPlate / Wing / Jet แยกกัน ครั้งเดียวตอนประกอบ คง alpha และ texture เดิม ใช้ MaterialPropertyBlock ไม่แก้ Material asset หรือสียานผู้เล่น สีสุ่มทำงานร่วมกับความหม่นตอนพังและไฮไลต์เดิม ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม ยังไม่ได้ตรวจภาพสีใน Play Mode
+อัปเดต 2026-10-27: ยานลูกค้าสุ่มชุดสีหลัก/สีรอง/โลหะเข้มหนึ่งชุดต่อหนึ่งลำจาก 8 palette ใน ShipRandomColors ตามผู้ใช้เลือก CustomerRepairShip.Assemble สุ่มครั้งเดียวและเก็บใน Colors แล้ว RepairableShipPart ใช้ชุดเดียวกันทุกส่วน ช่อง Material ที่เดิมมืด (RGB สูงสุดต่ำกว่า 0.5) ใช้โลหะเข้ม ช่องสว่างของตัวถัง/ปีกใช้สีหลัก ส่วนปืน/Jet ใช้สีรอง จึงไม่มีการสุ่มสีคนละโทนตาม renderer หรือช่อง material อีก อ่านรายละเอียดชุดสีใน ../README.md
+
+คง alpha/texture/เส้นขอบและทำงานร่วมกับความหม่นตอนพัง/ไฮไลต์เดิม ใช้ MaterialPropertyBlock ไม่แก้ Material asset หรือสียานผู้เล่น ข้าม Material ที่ไม่ใช่ Toon/Toon เพื่อเก็บสี VFX/ไอพ่น ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม คอมไพล์ Runtime จริงผ่าน exit 0 ตรวจ diff ผ่าน แต่ยังไม่ได้ตรวจภาพสีใน Play Mode ให้เกิดลูกค้าคันใหม่หรือเริ่ม Play ใหม่เพื่อใช้ชุดสีใหม่
 
 Tooltip หลบกรอบโมเดลยานทั้งลำที่คำนวณจาก MeshRenderer/SkinnedMeshRenderer บนจอ เลือกด้านขวา ซ้าย บน หรือล่างที่มีพื้นที่แสดงมากที่สุด เว้นระยะอย่างน้อย 12 หน่วย Canvas (หรือค่า X ของ Tooltip Offset หากมากกว่า) ไม่ตามเมาส์ ไม่มีช่องใหม่ หากยานกินจอจนไม่มีพื้นที่พอ แผงอาจล้นขอบจอเพื่อไม่ให้ทับยาน ยังต้องตรวจภาพกับขนาด UI จริง
 

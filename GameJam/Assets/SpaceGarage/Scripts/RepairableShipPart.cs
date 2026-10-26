@@ -69,12 +69,12 @@ namespace SpaceGarage
                 var materials = renderer.sharedMaterials;
                 for (int i = 0; i < materials.Length; i++)
                 {
-                    var material = materials[i]; if (material == null) continue;
+                    var material = materials[i]; if (!ShipRandomColors.IsShipSurface(material)) continue;
                     var original = new MaterialPropertyBlock(); var working = new MaterialPropertyBlock();
                     renderer.GetPropertyBlock(original, i); renderer.GetPropertyBlock(working, i);
                     Color color = material.HasProperty("_BaseColor") ? material.GetColor("_BaseColor") :
                         material.HasProperty("_Color") ? material.GetColor("_Color") : Color.white;
-                    color = ShipRandomColors.Sample(color.a);
+                    color = owner.Colors.ColorFor(color, data.slot);
                     tints.Add(new Tint { renderer = renderer, slot = i, original = original, working = working,
                         color = color, emission = material.HasProperty("_EmissionColor") ? material.GetColor("_EmissionColor") : Color.black });
                 }
@@ -130,9 +130,12 @@ namespace SpaceGarage
             foreach (var tint in tints)
             {
                 if (tint.renderer == null) continue;
+                tint.renderer.GetPropertyBlock(tint.working, tint.slot);
                 Color color = tint.color * (Mathf.Lerp(1, 0.45f, damaged) + (hovered ? hoverBrightness : 0));
                 color.a = tint.color.a;
                 tint.working.SetColor("_BaseColor", color); tint.working.SetColor("_Color", color);
+                tint.working.SetColor("_1st_ShadeColor", ShipRandomColors.Shade(color, 0.65f));
+                tint.working.SetColor("_2nd_ShadeColor", ShipRandomColors.Shade(color, 0.4f));
                 tint.working.SetColor("_EmissionColor", tint.emission + (hovered ? new Color(0.05f,0.3f,0.4f) * hoverBrightness : Color.black));
                 tint.renderer.SetPropertyBlock(tint.working, tint.slot);
             }

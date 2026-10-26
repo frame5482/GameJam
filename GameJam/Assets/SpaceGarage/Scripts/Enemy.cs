@@ -104,8 +104,9 @@ namespace SpaceGarage
             for (int i = 0; i < parts.Length; i++)
                 if (parts[i] != null) { parts[i].SetActive(false); Destroy(parts[i]); parts[i] = null; }
             gunPart = gun; armorPlatePart = armor; wingPart = wing; jetPart = jet;
-            CreatePart(gun, gunMount); CreatePart(armor, armorPlateMount);
-            CreatePart(wing, wingMount); CreatePart(jet, jetMount);
+            var palette = ShipRandomColors.CreatePalette();
+            CreatePart(gun, gunMount, palette); CreatePart(armor, armorPlateMount, palette);
+            CreatePart(wing, wingMount, palette); CreatePart(jet, jetMount, palette);
             Stats = baseStats + gun.stats + armor.stats + wing.stats + jet.stats;
             Health = Mathf.Max(1, Stats.health);
             configured = true;
@@ -126,6 +127,7 @@ namespace SpaceGarage
                     var original = new MaterialPropertyBlock(); var flash = new MaterialPropertyBlock();
                     renderer.GetPropertyBlock(original, i); renderer.GetPropertyBlock(flash, i);
                     flash.SetColor("_BaseColor", Color.white); flash.SetColor("_Color", Color.white);
+                    flash.SetColor("_1st_ShadeColor", Color.white); flash.SetColor("_2nd_ShadeColor", Color.white);
                     surfaces.Add(new Surface { renderer = renderer, index = i, original = original, flash = flash });
                 }
             }
@@ -139,14 +141,14 @@ namespace SpaceGarage
             part.partPrefab.GetComponentInChildren<ShipController>(true) == null &&
             part.partPrefab.GetComponentInChildren<Enemy>(true) == null;
 
-        private void CreatePart(ShipPartStats data, Transform mount)
+        private void CreatePart(ShipPartStats data, Transform mount, ShipRandomColors.Palette palette)
         {
             if (mount != null && mount != transform && !mount.IsChildOf(transform)) mount = null;
             var instance = Instantiate(data.partPrefab, mount != null ? mount : transform, false);
             instance.transform.localPosition = Vector3.zero;
             instance.transform.localRotation = Quaternion.identity;
             instance.name = data.slot + "_" + data.partPrefab.name;
-            ShipRandomColors.Apply(instance);
+            ShipRandomColors.Apply(instance, palette, data.slot);
             parts[(int)data.slot] = instance;
         }
 
