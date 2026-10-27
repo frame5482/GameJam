@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
+  m_Name: Overdrive
+  m_EditorClassIdentifier: 
+  partId: 377ca85dd60b26f42a172afc960cfedb
+  displayName: Overdrive
+  icon: {fileID: 0}
+  slot: 3
+  partPrefab: {fileID: 100, guid: e34a0e4221c0b9b41bb404cfa1f9e780, type: 3}
+  stats:
+    attack: 0
+    defense: 0
+    speed: 0
+    handling: 0
+    health: 0
+    boosterCapacity: 0
+  boostSpeedMultiplier: 5
+  boostDrainPerSecond: 40
+  boostRecoveryPerSecond: 15
+  boostRecoveryDelay: 1
+  speedMultiplier: 1
+  healthMultiplier: 1
+  handlingMultiplier: 1
+  steeringResponseMultiplier: 1
+  knockbackMultiplier: 1
+  switchableMode: 0
+  alternateSpeedMultiplier: 1
+  alternateHandlingMultiplier: 1
+  alternateSteeringResponseMultiplier: 1
+  alternateDefense: 0
+  barrierCapacity: 0
+  barrierRecoveryDelay: 4
+  barrierRecoveryPerSecond: 15
+  barrierPrefab: {fileID: 0}
+  barrierVisualScale: 1
+  dodgeCharges: 1
+  postBoostSpeedMultiplier: 0.6
+  postBoostSlowDuration: 2

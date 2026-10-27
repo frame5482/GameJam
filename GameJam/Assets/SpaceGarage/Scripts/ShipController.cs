@@ -31,7 +31,7 @@ namespace SpaceGarage
         [Header("Dodge roll (Space + A/D)")]
         [SerializeField, Min(0.01f)] private float dodgeDuration = 1.2f;
         [SerializeField, Min(0.01f)] private float dodgeDashDuration = 0.6f;
-        [SerializeField, Min(0)] private float dodgeCooldown = 4f;
+        [SerializeField, Min(0)] private float dodgeCooldown = 1f;
         [SerializeField, Min(0)] private float dodgeDistance = 5f;
         [Header("References")]
         [SerializeField] private ShipGun[] guns;
@@ -60,6 +60,14 @@ namespace SpaceGarage
             DodgeCooldown > 0 ? Mathf.Clamp01(1 - DodgeCooldownRemaining / DodgeCooldown) : 1;
 
         private Rigidbody body;
+        private readonly ShipBarrierState barrier = new ShipBarrierState();
+        public float Barrier => barrier.Current;
+        public float BarrierCapacity => barrier.Capacity;
+        public bool AlternateMode { get; private set; }
+        private int dodgeChargesUsed;
+        private double dodgeRechargeAt;
+        private bool wasBoosting;
+        private float boostSlowUntil;
         private Vector2 flightInput;
         private float yaw;
         private float pitch;
@@ -101,6 +109,7 @@ namespace SpaceGarage
             }
             AssembleParts();
             RebuildStats(true);
+            barrier.Configure(armorPlatePart, transform);
         }
 
         private void Update()
@@ -115,7 +124,7 @@ namespace SpaceGarage
                     (keyboard.sKey.isPressed ? 1 : 0) - (keyboard.wKey.isPressed ? 1 : 0));
                 boostHeld = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
                 if (keyboard.spaceKey.wasPressedThisFrame) TryDodge(Mathf.RoundToInt(flightInput.x));
-                if (keyboard.eKey.wasPressedThisFrame) CollectNearby();
+                if (keyboard.eKey.wasPressedThisFrame) TogglePartMode();
             }
             fireHeld = IsAlive && Application.isFocused && Mouse.current != null && Mouse.current.leftButton.isPressed;
             foreach (var gun in guns)
@@ -124,8 +133,13 @@ namespace SpaceGarage
 
         private void FixedUpdate()
         {
+            barrier.Tick(IsAlive, Time.fixedDeltaTime);
+            if (IsAlive) CollectNearby();
             if (!boostHeld) boostExhausted = false;
             IsBoosting = IsAlive && boostHeld && !boostExhausted && Boost > 0;
+            if (wasBoosting && !IsBoosting && jetPart != null)
+                boostSlowUntil = Time.time + jetPart.postBoostSlowDuration;
+            wasBoosting = IsBoosting;
             float multiplier = jetPart != null ? jetPart.boostSpeedMultiplier : 2f;
             float drain = jetPart != null ? jetPart.boostDrainPerSecond : 25f;
             float recovery = jetPart != null ? jetPart.boostRecoveryPerSecond : 15f;
@@ -156,12 +170,15 @@ namespace SpaceGarage
                 }
                 else
                 {
-                    currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle, bankDegreesPerSecond * step);
+                    float responseFactor = wingPart != null ? (AlternateMode && wingPart.switchableMode ? wingPart.alternateSteeringResponseMultiplier : wingPart.steeringResponseMultiplier) : 1f;
+                    currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle,
+                        bankDegreesPerSecond * step / Mathf.Max(0.01f, responseFactor));
                     float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
-                    pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond),
-                        ref pitchRateVelocity, steeringResponseTime, Mathf.Infinity, step);
-                    turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond),
-                        ref turnRateVelocity, steeringResponseTime, Mathf.Infinity, step);
+                    float handlingFactor = wingPart != null ? (AlternateMode && wingPart.switchableMode ? wingPart.alternateHandlingMultiplier : wingPart.handlingMultiplier) : 1f;
+                    pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond * Mathf.Min(1, handlingFactor)),
+                        ref pitchRateVelocity, steeringResponseTime * responseFactor, Mathf.Infinity, step);
+                    turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond * Mathf.Min(1, handlingFactor)),
+                        ref turnRateVelocity, steeringResponseTime * responseFactor, Mathf.Infinity, step);
                     pitch = Mathf.Clamp(pitch + pitchRate * step, -maxPitchAngle, maxPitchAngle);
                     // Discard outward angular momentum at the pitch stop so reversing responds smoothly.
                     if ((pitch <= -maxPitchAngle && pitchRate < 0) || (pitch >= maxPitchAngle && pitchRate > 0))
@@ -171,9 +188,12 @@ namespace SpaceGarage
                 // Roll is around the forward axis only: flight direction and No-Roll camera remain stable.
                 Quaternion heading = Quaternion.Euler(pitch, yaw, currentBank + rollAngle);
                 float speedTarget = Stats.speed * (1 + boostedSeconds / step * (Mathf.Max(1, multiplier) - 1));
+                if (Time.time < boostSlowUntil && jetPart != null) speedTarget *= jetPart.postBoostSpeedMultiplier;
                 flightSpeed = Mathf.SmoothDamp(flightSpeed, speedTarget, ref speedVelocity,
                     speedResponseTime, Mathf.Infinity, step);
                 body.angularVelocity = Vector3.zero;
+                if (wingPart != null && wingPart.knockbackMultiplier < 1f)
+                    body.linearVelocity *= wingPart.knockbackMultiplier;
                 body.MoveRotation(heading);
                 body.MovePosition(body.position + (heading * Vector3.forward) * (flightSpeed * step) + dodgeStep);
             }
@@ -183,8 +203,14 @@ namespace SpaceGarage
 
         public bool TryDodge(int direction)
         {
-            if (!isActiveAndEnabled || !IsAlive || !dodge.TryBegin(direction, Time.timeAsDouble, dodgeDuration, DodgeCooldown))
+            if (dodgeRechargeAt > 0 && Time.timeAsDouble >= dodgeRechargeAt)
+            { dodgeChargesUsed = 0; dodgeRechargeAt = 0; }
+            int charges = jetPart != null ? Mathf.Max(1, jetPart.dodgeCharges) : 1;
+            bool lastCharge = dodgeChargesUsed + 1 >= charges;
+            if (!isActiveAndEnabled || !IsAlive || !dodge.TryBegin(direction, Time.timeAsDouble, dodgeDuration, lastCharge ? DodgeCooldown : 0))
                 return false;
+            dodgeChargesUsed++;
+            if (lastCharge) dodgeRechargeAt = dodge.ReadyAt;
             pitchRate = turnRate = pitchRateVelocity = turnRateVelocity = 0;
             dodgeDirectionWorld = Quaternion.Euler(0, yaw, 0) * Vector3.right * dodge.Direction;
             dodgeDistanceMoved = 0;
@@ -201,9 +227,21 @@ namespace SpaceGarage
                 return false;
             }
             gunPart = gun; armorPlatePart = armor; wingPart = wing; jetPart = jet;
+            AlternateMode = false;
+            dodgeChargesUsed = 0; dodgeRechargeAt = 0; dodge.Cancel();
+            boostSlowUntil = 0; wasBoosting = false;
             if (Application.isPlaying && body != null) AssembleParts();
             RebuildStats(false);
+            if (Application.isPlaying && body != null) barrier.Configure(armorPlatePart, transform);
             return true;
+        }
+
+        public void TogglePartMode()
+        {
+            if (!IsAlive || !((armorPlatePart != null && armorPlatePart.switchableMode) ||
+                (wingPart != null && wingPart.switchableMode))) return;
+            AlternateMode = !AlternateMode;
+            RebuildStats(false);
         }
 
         private static bool Fits(ShipPartStats part, ShipPartSlot slot) => part == null || part.slot == slot;
@@ -253,6 +291,7 @@ namespace SpaceGarage
             AddPart(ref total, armorPlatePart, ShipPartSlot.ArmorPlate);
             AddPart(ref total, wingPart, ShipPartSlot.Wing);
             AddPart(ref total, jetPart, ShipPartSlot.Jet);
+            total = ShipPartTraits.Apply(total, armorPlatePart, wingPart, jetPart, AlternateMode);
             total.attack = Mathf.Max(0, total.attack); total.defense = Mathf.Max(0, total.defense);
             total.speed = Mathf.Max(0, total.speed); total.handling = Mathf.Max(0, total.handling);
             total.health = Mathf.Max(1, total.health); total.boosterCapacity = Mathf.Max(0, total.boosterCapacity);
@@ -277,7 +316,7 @@ namespace SpaceGarage
         {
             if (!IsAlive || IsInvulnerable || amount <= 0) return;
             float previousHealth = Health;
-            Health = Mathf.Max(0, Health - Mathf.Max(0, amount - Stats.defense));
+            Health = Mathf.Max(0, Health - barrier.Absorb(Mathf.Max(0, amount - Stats.defense)));
             ShipCombatFeedback.Report(source, true, previousHealth - Health, point, normal);
             healthChanged.Invoke(Health, Stats.health);
             if (IsAlive) return;
@@ -285,6 +324,7 @@ namespace SpaceGarage
             flightInput = Vector2.zero;
             boostHeld = false;
             IsBoosting = false;
+            barrier.SetVisible(false);
             UpdateBoostEffects(false);
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
@@ -302,12 +342,13 @@ namespace SpaceGarage
             foreach (var hit in Physics.OverlapSphere(transform.position, pickupRadius, pickupLayers, QueryTriggerInteraction.Collide))
             {
                 var pickup = hit.GetComponentInParent<ShipPickup>();
-                if (pickup != null) pickup.TryCollect(storage);
+                if (pickup != null) pickup.Attract(this, storage);
             }
         }
 
         private void OnDisable()
         {
+            barrier.SetVisible(false);
             bool wasRolling = dodge.IsRolling;
             dodge.Cancel();
             if (wasRolling && body != null) body.rotation = Quaternion.Euler(pitch, yaw, currentBank);
@@ -321,5 +362,7 @@ namespace SpaceGarage
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(transform.position, pickupRadius);
         }
+
+        private void OnDestroy() => barrier.Dispose();
     }
 }

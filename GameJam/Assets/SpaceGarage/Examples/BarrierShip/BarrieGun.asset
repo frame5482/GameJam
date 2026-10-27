@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BarrieGun
   m_EditorClassIdentifier: 
   partId: 656cb98c2b9cb1c4c98e49591640d79e
-  displayName: Heavy Gun
+  displayName: Barrier Gun
   icon: {fileID: 0}
   slot: 0
   partPrefab: {fileID: 100, guid: b44f7a5e1386d7647b1d936cb0d4c4e0, type: 3}

@@ -16,24 +16,48 @@ MonoBehaviour:
   - slot: 0
     initiallyUnlocked:
     - {fileID: 11400000, guid: 208feaead0e9093aba00072e9e72cb4c, type: 2}
-    - {fileID: 11400000, guid: 3f97dd7dda621ce499d8bf1a9855da06, type: 2}
-    - {fileID: 11400000, guid: 656cb98c2b9cb1c4c98e49591640d79e, type: 2}
-    locked: []
+    locked:
+    - part: {fileID: 11400000, guid: 3f97dd7dda621ce499d8bf1a9855da06, type: 2}
+      price: 900
+    - part: {fileID: 11400000, guid: 4bc1d69e5ab1e864db7be80cae4332e1, type: 2}
+      price: 800
+    - part: {fileID: 11400000, guid: 656cb98c2b9cb1c4c98e49591640d79e, type: 2}
+      price: 1100
+    - part: {fileID: 11400000, guid: 938b1418f2486f4498af9c4e279a151e, type: 2}
+      price: 1200
   - slot: 1
     initiallyUnlocked:
     - {fileID: 11400000, guid: 016dca6a71e250b3ff9979815af6a59b, type: 2}
-    - {fileID: 11400000, guid: 6df484cdc708c8a458b834bff93f67a5, type: 2}
-    - {fileID: 11400000, guid: 84b59816c48206f40a8621e366aa6235, type: 2}
-    locked: []
+    locked:
+    - part: {fileID: 11400000, guid: 6df484cdc708c8a458b834bff93f67a5, type: 2}
+      price: 900
+    - part: {fileID: 11400000, guid: 5cc6a58af8ab96a4f91639cee40fd094, type: 2}
+      price: 800
+    - part: {fileID: 11400000, guid: 84b59816c48206f40a8621e366aa6235, type: 2}
+      price: 1500
+    - part: {fileID: 11400000, guid: e98bef619c301874ea9d56376b94408e, type: 2}
+      price: 1800
   - slot: 2
     initiallyUnlocked:
     - {fileID: 11400000, guid: 74c1351ad30fceab8b372943594bff6c, type: 2}
-    - {fileID: 11400000, guid: 4a56a67074026f74b9aeb2a35d0abef3, type: 2}
-    - {fileID: 11400000, guid: 305d5292c3f0bbb43be756380582aae1, type: 2}
-    locked: []
+    locked:
+    - part: {fileID: 11400000, guid: 4a56a67074026f74b9aeb2a35d0abef3, type: 2}
+      price: 850
+    - part: {fileID: 11400000, guid: 0da02dc6fbe597d46a81cf993755afc7, type: 2}
+      price: 900
+    - part: {fileID: 11400000, guid: 305d5292c3f0bbb43be756380582aae1, type: 2}
+      price: 1000
+    - part: {fileID: 11400000, guid: 5a34ed6fd8e0cfb4d9256c4dc0f51ab9, type: 2}
+      price: 1800
   - slot: 3
     initiallyUnlocked:
     - {fileID: 11400000, guid: d649b625e07028e2a39b2089f4c7401b, type: 2}
-    - {fileID: 11400000, guid: 13a701962ca666848b3fdff3bdf206fa, type: 2}
-    - {fileID: 11400000, guid: f5ac76841a2ff164c8af99a13d5bb8ff, type: 2}
-    locked: []
+    locked:
+    - part: {fileID: 11400000, guid: 13a701962ca666848b3fdff3bdf206fa, type: 2}
+      price: 1000
+    - part: {fileID: 11400000, guid: 5883af61132291847a139d7f95142233, type: 2}
+      price: 900
+    - part: {fileID: 11400000, guid: f5ac76841a2ff164c8af99a13d5bb8ff, type: 2}
+      price: 1400
+    - part: {fileID: 11400000, guid: 377ca85dd60b26f42a172afc960cfedb, type: 2}
+      price: 1600

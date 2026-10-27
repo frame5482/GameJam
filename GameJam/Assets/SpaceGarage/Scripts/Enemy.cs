@@ -14,6 +14,8 @@ namespace SpaceGarage
         [SerializeField] private ShipPartStats armorPlatePart;
         [SerializeField] private ShipPartStats wingPart;
         [SerializeField] private ShipPartStats jetPart;
+        [Header("One material awarded on defeat, from workshop pools")]
+        [SerializeField] private RepairMaterialPool[] dropMaterialPools = new RepairMaterialPool[0];
         [Header("Part spawn points")]
         [SerializeField] private Transform gunMount = null;
         [SerializeField] private Transform armorPlateMount = null;
@@ -41,11 +43,16 @@ namespace SpaceGarage
         [SerializeField, Min(0)] private float hitReactionDuration = 0.15f;
         [SerializeField, Min(0)] private float hitKnockbackSpeed = 3f;
         public UnityEvent died = new UnityEvent();
+        public static event System.Action<Enemy, ShipHitSource> Defeated;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetDefeatedListeners() => Defeated = null;
 
         public ShipStats Stats { get; private set; }
         public float Health { get; private set; }
         public bool IsAlive => configured && Health > 0;
         private Rigidbody body;
+        private readonly ShipBarrierState barrier = new ShipBarrierState();
+        public float Barrier => barrier.Current;
         private EnemyAttackTelegraph telegraph;
         private Transform target;
         private ShipController targetShip;
@@ -108,6 +115,7 @@ namespace SpaceGarage
             CreatePart(gun, gunMount, palette); CreatePart(armor, armorPlateMount, palette);
             CreatePart(wing, wingMount, palette); CreatePart(jet, jetMount, palette);
             Stats = baseStats + gun.stats + armor.stats + wing.stats + jet.stats;
+            Stats = ShipPartTraits.Apply(Stats, armor, wing, jet, false);
             Health = Mathf.Max(1, Stats.health);
             configured = true;
             fireCycle.Reset();
@@ -132,6 +140,7 @@ namespace SpaceGarage
                 }
             }
             SetTarget(player);
+            barrier.Configure(armor, transform);
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(true, false);
             return true;
         }
@@ -189,6 +198,7 @@ namespace SpaceGarage
 
         private void FixedUpdate()
         {
+            barrier.Tick(IsAlive, Time.fixedDeltaTime);
             if (!IsAlive) return;
             body.angularVelocity = Vector3.zero;
             if (Time.time < hitEndsAt)
@@ -277,22 +287,48 @@ namespace SpaceGarage
         {
             if (!IsAlive || amount <= 0) return;
             float damage = Mathf.Max(0, amount - Mathf.Max(0, Stats.defense));
+            damage = barrier.Absorb(damage);
             if (damage <= 0) return;
             float previousHealth = Health;
             Health = Mathf.Max(0, Health - damage);
             ShipCombatFeedback.Report(source, false, previousHealth - Health, point, normal);
             StopFiring();
             hitEndsAt = Time.time + hitReactionDuration;
-            knockback = (target != null ? transform.position - target.position : -transform.forward).normalized * hitKnockbackSpeed;
+            knockback = (target != null ? transform.position - target.position : -transform.forward).normalized * hitKnockbackSpeed *
+                (wingPart != null ? wingPart.knockbackMultiplier : 1f);
             foreach (var surface in surfaces)
                 if (surface.renderer != null) surface.renderer.SetPropertyBlock(surface.flash, surface.index);
             flashing = true;
             if (Health > 0) return;
+            AwardMaterialDrop();
+            Defeated?.Invoke(this, source);
             body.linearVelocity = body.angularVelocity = Vector3.zero;
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(false, false);
             died.Invoke();
             gameObject.SetActive(false);
             Destroy(gameObject);
+        }
+
+        private void AwardMaterialDrop()
+        {
+            var resources = ResourceManager.Instance;
+            var storage = targetShip != null ? targetShip.Inventory : resources != null ? resources.Inventory : null;
+            if (storage == null)
+            { Debug.LogWarning("Enemy material drop needs the player's inventory or ResourceManager.", this); return; }
+            var options = new List<ShipMaterialData>();
+            var ids = new HashSet<string>();
+            foreach (var pool in dropMaterialPools)
+            {
+                if (pool == null) continue;
+                foreach (var option in pool.ValidOptions())
+                    if (ids.Add(option.material.itemId)) options.Add(option.material);
+            }
+            if (options.Count == 0)
+            { Debug.LogWarning("Enemy Drop Material Pools need valid workshop materials.", this); return; }
+            var material = options[Random.Range(0, options.Count)];
+            if (resources != null) resources.RegisterMaterial(material);
+            if (storage.Add(material.itemId, 1))
+                storage.NotifyPickupCollected(material, material.itemId, 1);
         }
 
         private void StopFiring()
@@ -313,8 +349,10 @@ namespace SpaceGarage
 
         private void OnDisable()
         {
+            barrier.SetVisible(false);
             StopFiring(); RestoreFlash();
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(false, false);
         }
+        private void OnDestroy() => barrier.Dispose();
     }
 }

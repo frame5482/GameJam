@@ -1,5 +1,33 @@
 # Ship Customization and JSON Save
 
+## ทดลองชิ้นส่วนตอนกดเลือก (2026-10-27)
+
+แก้ `Scripts/ShipCustomization.cs`: เมื่อคลิกรายการในหน้าปรับแต่ง ยาน CustomizationPreview เดิมเปลี่ยนเฉพาะช่องที่เลือกเป็น Part Prefab ของชิ้นนั้นทันที ทดลองได้ทั้งชิ้นที่ปลดแล้วและยังล็อก อีกสามช่องใช้ชุด Equipped ปัจจุบัน ยังคงไฮไลต์/ลอยของหมวดที่เลือกด้วย CustomizationPreviewPart เดิม ไม่เพิ่มแอนิเมชันหรือเปลี่ยน panel/layout/กล้อง
+
+เลือกอย่างเดียวไม่ซื้อ ไม่หักเงิน ไม่ใส่จริง และไม่เขียนชุดทดลองลงเซฟ ต้องกด Unlock แล้ว Equip ตามเดิม การอัปเดตเงิน/ปลดล็อกยังคงชิ้นที่กำลังทดลองไว้ เมื่อเปลี่ยนหมวดจะคืนช่องเดิมเป็นชิ้น Equipped และเริ่มเลือกชิ้น Equipped ของหมวดใหม่ เมื่อปิดหน้าปรับแต่งยานหน้าหลักกลับไปใช้ชุด Equipped จริงทั้งหมด
+
+ไม่มีช่อง Inspector ใหม่ ไม่แก้ scene/prefab และไม่ต้องตั้งค่าเพิ่ม ผลตรวจ: คอมไพล์ runtime ทั้งชุดด้วย Roslyn/references Unity จริงผ่าน ตรวจเส้นทาง SelectPart/SelectCategory/RefreshPreview/CloseCustomization และ diff แล้ว ยังไม่ได้คลิก UI/ตรวจภาพการเปลี่ยนโมเดลจริงใน Play Mode
+
+## ราคาปลดล็อกและชุดเริ่มต้นล่าสุด (2026-10-27)
+
+อัปเดตตามผู้ใช้ล่าสุด แทนรายการฟรีทั้งหมดในบันทึกก่อนหน้า: CustomizationCatalog.asset มี Initially Unlocked เฉพาะ Base Gun / Base Plate / Base Wing / Base Jet อย่างละหนึ่งชิ้น ส่วนที่เหลืออยู่ Locked หมวดละ 4 ชิ้น รวม 16 ชิ้น ใช้ระบบซื้อแล้วกด Equip แยกเดิม
+
+| ชุด | Gun | Plate | Wing | Jet |
+| --- | ---: | ---: | ---: | ---: |
+| Base | ฟรี | ฟรี | ฟรี | ฟรี |
+| Heavy | Heavy Gun 900 | Heavy Plate 900 | Tank Wing 850 | Burst Jet 1000 |
+| Light | Light Gun 800 | Light Plate 800 | Swept Wing 900 | Cruise Jet 900 |
+| Barrier | Barrier Gun 1100 | Barrier Plate 1500 | Agile Wing 1000 | Twin Jet 1400 |
+| Unity | Unity Gun 1200 | Unity Plate 1800 | Unity Wing 1800 | Overdrive 1600 |
+
+เปลี่ยนเฉพาะ Display Name ของปืน Light/Barrier/Unity ให้แยกชื่อในร้าน ไม่เปลี่ยนความสามารถ/Part ID/GUID ปืน ราคาเป็นเงินต่อการปลดล็อกถาวร ปรับได้ที่ Pools > Locked > Price บน CustomizationCatalog ไม่มีช่อง Inspector ใหม่ ไม่แก้ UI หรือวิธีเปิด/ปิดแผง
+
+ไม่มีเซฟหรือกด New Game จะเริ่ม Base ครบสี่ส่วน เซฟเก่ายังรักษารายการที่ซื้อไว้จริง ไม่ล้าง JSON/เงิน/คลังเพื่อทดสอบ การปลดฟรีจาก catalog เก่าไม่ได้ถือเป็นการซื้อ จึงจะล็อกตาม catalog ใหม่หลังโหลดและเปลี่ยนชุดที่ไม่มีสิทธิ์กลับไปชิ้นที่ปลดแล้วตาม ResourceManager เดิม
+
+ผลตรวจ: ตรวจ catalog ครบ 20 ชิ้น Slot/ID/reference ตรงหมวด ฟรีเฉพาะ Base 4 ชิ้นและ Locked ราคาบวก 16 ชิ้น พูลศัตรู/โรงซ่อมหมวดละ 5 ตรงกับ catalog ตรวจข้อมูลและ diff เฉพาะงานนี้ ไม่ได้ทดสอบซื้อ/สุ่มใน Play Mode ไม่มีการเปลี่ยน runtime code จึงไม่ได้คอมไพล์ซ้ำ ไม่ต้องตั้งค่าเพิ่ม เริ่ม Play ใหม่เพื่อโหลด asset/scene ที่แก้
+
+อัปเดต 2026-10-27: เปลี่ยนชื่อ Plate/Wing/Jet ตามประเภทครบ 15 ชิ้น เพิ่ม Light/Unity หมวดเหล่านี้ใน Initially Unlocked ตามนโยบายฟรีเดิม คง GUID/Part ID ของ Starter/Heavy/Barrier และให้ ID ไม่ซ้ำเฉพาะสำเนาใหม่ Light/Unity ที่ยังไม่อยู่ใน catalog ไม่แก้ข้อมูล JSON ผู้ใช้ ไม่เซฟ Unity mode/โล่/charge ชั่วคราว รายละเอียดชื่อไฟล์และช่องใหม่อยู่ [Examples/README.md](../Examples/README.md) ไม่เพิ่มช่องหรือเปลี่ยน layout/วิธีเปิดปิด UI
+
 อัปเดต 2026-10-26 ใช้ Canvas ของผู้ใช้ ข้อความบน UI เป็น ENG ไม่สร้างหน้าตา Panel หรือจัด layout แทน
 
 ## แก้รายการไม่ขึ้นและ Initially Unlocked ยังล็อก (2026-10-26)

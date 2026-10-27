@@ -125,7 +125,7 @@ MonoBehaviour:
   speedResponseTime: 0.6
   dodgeDuration: 1.2
   dodgeDashDuration: 0.6
-  dodgeCooldown: 4
+  dodgeCooldown: 1
   dodgeDistance: 5
   guns: []
   inventory: {fileID: 104}

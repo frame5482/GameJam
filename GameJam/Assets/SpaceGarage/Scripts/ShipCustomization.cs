@@ -53,12 +53,12 @@ namespace SpaceGarage
         {
             if (!IsOpen || slot < 0 || slot >= 4) return;
             SelectedSlot = (ShipPartSlot)slot; SelectedPart = resources.Equipped(SelectedSlot);
-            Highlight(); Changed?.Invoke();
+            RefreshPreview(); Changed?.Invoke();
         }
         public void SelectPart(ShipPartStats part)
         {
             if (!IsOpen || part == null || part.slot != SelectedSlot || resources.CustomizationCatalog.Find(part.partId) != part) return;
-            SelectedPart = part; Changed?.Invoke();
+            SelectedPart = part; RefreshPreview(); Changed?.Invoke();
         }
         public void EquipSelected()
         { if (IsOpen && resources.TryEquip(SelectedPart)) resources.SaveProgress(); }
@@ -116,7 +116,9 @@ namespace SpaceGarage
             Transform[] mounts = { gunMount, armorPlateMount, wingMount, jetMount };
             for (int i = 0; i < 4; i++)
             {
-                var data = resources.Equipped((ShipPartSlot)i);
+                // Try on only the selected slot; ownership and saved equipment remain unchanged until Equip.
+                var data = IsOpen && i == (int)SelectedSlot && SelectedPart != null
+                    ? SelectedPart : resources.Equipped((ShipPartSlot)i);
                 if (displayed[i] == data && parts[i] != null) continue;
                 if (parts[i] != null) { parts[i].gameObject.SetActive(false); Destroy(parts[i].gameObject); }
                 parts[i] = null; displayed[i] = data;

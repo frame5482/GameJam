@@ -1,5 +1,19 @@
 # ระบบซ่อมยานลูกค้า
 
+อัปเดต 2026-10-27: ศัตรูในหน้าต่อสู้ใช้ RepairMaterialPool ทั้งสี่เดียวกับโรงซ่อม สุ่มชนิดไม่ซ้ำ ID หนึ่งชนิดแล้วรับ 1 ชิ้นเข้าคลังทันทีเมื่อฆ่า ไม่สร้างของลอยตามผู้ใช้เลือก ผูก EnemyShip.prefab > Drop Material Pools ครบแล้ว ส่วนสี ShipRandomColors/RepairableShipPart รองรับผิว URP/Lit ของชุดใหม่ร่วมกับ Toon เดิมและข้ามรากเอฟเฟกต์ไอพ่น ไม่เปลี่ยน Material/shader ของผู้ใช้ รายละเอียด/ผลตรวจใน README หลัก ไม่มีช่อง Inspector ใหม่บน CustomerRepairManager หรือระบบซ่อม
+
+อัปเดต 2026-10-27: RepairMaterialDragItem เพิ่ม **Bonus Icon** รับ GameObject รูปโบนัสที่เป็นลูกใน prefab วัสดุเดิม สำหรับแถวผลสำรวจผ่าน DisplayResult ชื่อ/รูปใช้ช่องเดิม จำนวนที่เก็บและโบนัสต่อกันใน Owned Text; Bind ของหน้าซ่อมและแจ้งเตือนเก็บของจะปิด Bonus Icon เสมอ ไม่เปลี่ยนการลากหรือ layout เดิม ผู้ใช้ต้องทำ/วางรูปและลาก reference เองถ้าต้องการแสดงเครื่องหมาย รายละเอียด Container ของผลลัพธ์อยู่ [UI/README.md](../UI/README.md)
+
+อัปเดต 2026-10-27: ปุ่มกลับผลลัพธ์ Game Over/สำรวจสำเร็จใน SampleScene ใช้ ExplorationRun.ReturnToRepair โหลด Repair แบบ Single และคืนเวลาเกมเป็น 1 คงเงิน/วัสดุ/ชุดยานผ่าน ResourceManager ทั้งกรณีแพ้และสำเร็จ ไม่สร้างแผงกลับใน Repair เพิ่ม รายละเอียดช่อง Panel/Button ที่ผู้ใช้ต้องทำอยู่ [UI/README.md](../UI/README.md)
+
+อัปเดต 2026-10-27: `RepairMaterialDragItem` เพิ่มเมธอด DisplayPickup เพื่อใช้ prefab รายการวัสดุเดิมในแจ้งเตือนหน้าต่อสู้ แสดงรูป/ชื่อ/+จำนวนโดยไม่ผูก interaction ซ่อม ใช้ reference Icon/Material Name/Owned Text เดิม ไม่แก้ prefab/layout/วิธีลากในหน้าซ่อม ไม่มีช่อง Inspector ใหม่บน RepairMaterialDragItem รายละเอียดการตั้งค่าบน ShipHUD อยู่ [UI/README.md](../UI/README.md)
+
+## พูลชิ้นส่วนครบห้าชุด (2026-10-27)
+
+อัปเดต `Scenes/Repair.unity` บน RepairSystems > CustomerRepairManager: Gun Pool / Armor Plate Pool / Wing Pool / Jet Pool มีครบหมวดละ 5 ชิ้นจาก Base/Heavy/Light/Barrier/Unity รวม 20 รายการ แก้ Wing/Jet ที่เดิมชี้ Barrier Plate ผิดหมวดให้เป็น Agile Wing/Twin Jet และเติม Light/Unity ให้ตรงหมวด พูลลูกค้าเป็นอิสระจากการซื้อของผู้เล่น จึงสุ่มของล็อกได้ตามเดิม ไม่เปลี่ยน Material Pools, จุด IN/Stay/Out, UI, กล้องหรือการบิน
+
+พูลต่อสู้บน `Examples/Enemies/EnemySpawnManager.prefab` ใส่ครบชุดเดียวกันทั้งสี่หมวดแล้ว SampleScene สืบทอด prefab นี้และไม่มี override พูล ไม่ต้องลากค่าเพิ่ม ตรวจ reference/Slot/รายการไม่ซ้ำครบและ diff เฉพาะงานนี้แล้ว ยังไม่ได้ทดสอบสุ่มจริงใน Play Mode ไม่มีช่อง Inspector ใหม่
+
 อัปเดต 2026-10-26 — ใช้ Canvas/UGUI ของผู้ใช้ ไม่สร้างหน้าตา UI หรือ UI Toolkit เพิ่ม
 
 ข้อความ UI ที่ระบบสร้างใช้ภาษาอังกฤษทั้งหมดตามผู้ใช้สั่ง ชื่อวัสดุอ่านจาก Display Name ของ ShipMaterialData ให้กำหนดเป็นภาษาอังกฤษด้วย จำนวนวัสดุใน tooltip แสดงเฉพาะเลขที่ยังขาด เมื่อครบแสดง 0 ไม่แสดง Required/Owned/Complete ไม่มีช่อง Inspector ใหม่

@@ -15,6 +15,10 @@ namespace SpaceGarage
         }
         [SerializeField] private List<ItemStack> items = new List<ItemStack>();
         public UnityEvent changed = new UnityEvent();
+        // Only successful world pickups raise this; loading, purchases and repair spending do not.
+        public event Action<ShipMaterialData, string, int> pickupCollected;
+        internal void NotifyPickupCollected(ShipMaterialData material, string itemId, int amount)
+            => pickupCollected?.Invoke(material, itemId, amount);
         public IReadOnlyList<ItemStack> Items => items;
         public void Restore(IReadOnlyList<ItemStack> saved)
         {

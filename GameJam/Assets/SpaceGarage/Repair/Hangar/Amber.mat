@@ -77,6 +77,6 @@ Material:
     - _1st_ShadeColor: {r: 0.8, g: 0.656, b: 0.384, a: 1}
     - _2nd_ShadeColor: {r: 0.8, g: 0.656, b: 0.384, a: 1}
     - _BaseColor: {r: 0.8, g: 0.656, b: 0.384, a: 1}
-    - _Color: {r: 0.8, g: 0.656, b: 0.384, a: 1}
+    - _Color: {r: 0.8, g: 0.65599996, b: 0.38399997, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

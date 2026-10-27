@@ -150,6 +150,11 @@ MonoBehaviour:
   armorPlatePart: {fileID: 11400000, guid: 016dca6a71e250b3ff9979815af6a59b, type: 2}
   wingPart: {fileID: 11400000, guid: 74c1351ad30fceab8b372943594bff6c, type: 2}
   jetPart: {fileID: 11400000, guid: d649b625e07028e2a39b2089f4c7401b, type: 2}
+  dropMaterialPools:
+  - {fileID: 11400000, guid: 4e593325328ea6638210c170a875aecb, type: 2}
+  - {fileID: 11400000, guid: 910aa9c96883c0af52a16a7675a518fe, type: 2}
+  - {fileID: 11400000, guid: f51c1eb5d09440ec5cf1bc4710e72c41, type: 2}
+  - {fileID: 11400000, guid: 6751bc9579d0996b42b7b310baf7b2e4, type: 2}
   gunMount: {fileID: 106}
   armorPlateMount: {fileID: 121}
   wingMount: {fileID: 137}

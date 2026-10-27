@@ -1,5 +1,35 @@
 # ระบบควบคุมยานต้นแบบ
 
+## วัสดุจากศัตรูและสีชุดใหม่ (2026-10-27)
+
+แก้ `Enemy.cs` เพิ่มรับวัสดุทันทีตอน HP ลดจนตายจริงทุกตัว: สุ่ม 1 ชนิด จำนวน 1 ชิ้นจากวัสดุที่ valid ในพูลโรงซ่อมทั้งสี่ ตัด Item ID ซ้ำก่อนสุ่ม เพิ่มคลังผู้เล่นแล้วส่ง pickupCollected เพียงเมื่อ Add สำเร็จ จึงแสดงในแจ้งเตือน RepiarMat ระหว่างสู้และผลลัพธ์ตอนจบเดิม รวมถึงยอด Collected/สูตรโบนัส ไม่สร้างของลอยในโลกหรือ prefab ดรอปใหม่ตามผู้ใช้ยืนยัน ไม่จ่ายจากการปิด/ทำลายศัตรูเฉย ๆ และ IsAlive เดิมกันตาย/แจกซ้ำ
+
+ช่องใหม่ **Enemy > Drop Material Pools** รับ RepairMaterialPool[] ผูก GunMaterials / ArmorPlateMaterials / WingMaterials / JetMaterials ใน `Examples/Enemies/EnemyShip.prefab` แล้ว EnemySpawnManager/SampleScene ใช้ prefab นี้ตามเดิม ไม่ต้องลาก reference เพิ่ม ตอนตรวจพูลทั้งสี่มีวัสดุ valid ชนิดเดียวกัน จึงได้ชนิดเดิมทุกครั้งจนเพิ่มชนิดในพูลหน้าซ่อม (ไม่เพิ่มวัสดุสมมุติ) หากไม่มีวัสดุ valid หรือคลังปลายทางจะ warning ไม่แจกปลอม; คลังเต็มจะไม่เพิ่ม/ไม่แจ้งว่าได้รับ
+
+พบ Material ชุดใหม่ Model/Ship4, Ship5 และปืนบางชิ้นใช้ Universal Render Pipeline/Lit จึงถูก ShipRandomColors ที่รับเฉพาะ Toon/Toon ข้ามไป แก้ `ShipRandomColors.cs` ให้รองรับผิว Toon/Toon และ URP/Lit โดยใช้ palette เดิมหนึ่งชุดต่อลำทั้ง Enemy และ CustomerRepairShip ไม่เปลี่ยน shader/Material asset/texture/สีพื้นฐานในไฟล์หรือสียานผู้เล่น เพิ่มตรวจ HasProperty ก่อนอ่านสี และข้าม Renderer ที่อยู่ในรากไอพ่นปกติ/บูสต์และ VisualEffect ผ่าน ShipBoostEffect.ContainsEffect/ShipRandomColors.IsShipRenderer ใช้ตัวกรองเดียวใน RepairableShipPart ด้วย ไม่เปลี่ยน VFX/เส้นขอบหรือวิธีแฟลชคืนสีเดิม
+
+ผลตรวจ: คอมไพล์ runtime ทั้งชุดด้วย Roslyn/references จริงของ Unity ผ่าน ตรวจ prefab ผูกพูล valid ครบ, สาย EnemySpawnManager → EnemyShip และ HUD/ผลลัพธ์ผูก Container อยู่แล้ว ตรวจ diff เฉพาะไฟล์งานนี้ผ่าน ยังไม่ได้ทดสอบฆ่าจริง/รับของ/เรนเดอร์สีใน Play Mode การตรวจ prefab+MaterialPropertyBlock ผ่าน Editor ที่ลองเตรียมไม่ได้ถูกรันในเซสชันนี้ จึงไม่อ้างว่าเห็นภาพแล้ว ลบเครื่องมือ/ผลคอมไพล์ชั่วคราว ผู้ใช้ไม่ต้องตั้งค่าเพิ่มสำหรับพูลและ UI ที่ผูกไว้แล้ว ต้องให้ศัตรูเกิดใหม่/เริ่ม Play ใหม่เพื่อใช้โค้ดที่แก้
+
+อัปเดต 2026-10-27 ผลลัพธ์ตอนจบ: เพิ่มยอด Kills (ผู้เล่นฆ่าศัตรูในรอบนี้) และ Collected (จำนวนวัสดุที่เก็บรอบนี้ ไม่รวมโบนัส) ทั้ง Game Over/สำเร็จ แก้ Enemy.cs ส่งเหตุการณ์ตายจริงและ ExplorationRun รับนับเฉพาะฝ่ายผู้เล่นก่อนจบรอบ เพิ่มช่อง Game Over/Success Kills Text และ Collected Text บน MainUI > ExplorationRun ให้ผู้ใช้ลาก TMP_Text ของแต่ละแผง ไม่สร้าง UI แทน คอมไพล์ผ่าน ยังไม่ได้ตรวจ Play Mode รายละเอียดใน [UI/README.md](UI/README.md)
+
+อัปเดต 2026-10-27 ผลลัพธ์ตอนจบ: แสดงวัสดุที่เก็บรอบนี้รวมหนึ่งแถวต่อชนิด จำนวนโบนัสต่อท้ายในแถวเดียว เช่น +20 +2 เปิดรูป Bonus Icon เฉพาะชนิดที่ได้รับโบนัสจริง เพิ่ม Game Over/Success Materials Container และ Result Row Prefab บน ExplorationRun (ผูก prefab วัสดุเดิมแล้ว) กับ Bonus Icon บน RepairMaterialDragItem ผู้ใช้ต้องสร้าง/ลาก Container และรูปโบนัสเอง ไม่แก้ layout หรือสร้าง UI Toolkit ดู [UI/README.md](UI/README.md) คอมไพล์ผ่าน ยังไม่ได้ตรวจภาพ Play Mode
+
+## สำรวจ 30 วินาทีและผลลัพธ์ (2026-10-27)
+
+เพิ่ม ExplorationRun บน MainUI ของ SampleScene: ยานตายขึ้น Game Over; ครบ 30 วินาทีโดยยังรอดขึ้น Exploration Complete หยุดฉากหลังจนกดกลับ Repair เก็บวัสดุไว้แม้แพ้ สำเร็จรับโบนัสสุ่มจากชนิดที่เก็บรอบนี้ รวม 10% ของจำนวนรวมปัดลง จ่ายครั้งเดียวผ่านคลัง/เซฟเดิม เพิ่ม Scripts/ExplorationRun.cs และ ExplorationRewards.cs ไม่สร้าง UI Toolkit หรือหน้าตา UI ผู้ใช้ต้องสร้างและผูก Game Over/Success Panel และ Back Button บน component ใหม่; Timer/Title/Bonus Text เป็น optional อ่านช่อง/วิธีเปิดปิด/ข้อจำกัดใน [UI/README.md](UI/README.md) คอมไพล์ผ่านและทดสอบโบนัส 19 checks ยังไม่ได้ทดสอบ Play Mode
+
+อัปเดต 2026-10-27 หน้าปรับแต่ง: กดเลือกชิ้นส่วนแล้วเปลี่ยนโมเดลในช่องนั้นของ CustomizationPreview ทันที รวมของที่ยังล็อก ไม่ซื้อ/ใส่จริงจนกดปุ่มเดิม เปลี่ยนหมวดหรือปิดหน้าจะคืนส่วนที่ไม่ได้ทดลองเป็น Equipped จริง แก้ ShipCustomization.cs ไม่มีช่องใหม่ ไม่ต้องตั้งค่าเพิ่ม ดู [Customization/README.md](Customization/README.md) คอมไพล์ผ่าน ยังไม่ได้ตรวจภาพ Play Mode
+
+## แจ้งเตือนของที่เก็บได้ (2026-10-27)
+
+ShipHUD บน MainUI ใน SampleScene เพิ่ม Pickup Container / Pickup Row Prefab / Pickup Notification Duration ผูก prefab วัสดุหน้าซ่อม `UI/pre/RepiarMat.prefab` และเวลา 3 วินาทีแล้ว เสกหนึ่งแถวรูป/ชื่อ/+จำนวนเมื่อ ShipPickup เก็บสำเร็จ แล้วลบโดยไม่มีเฟด ไม่แจ้งตอนโหลดเซฟหรือใช้วัสดุ ไม่สร้าง/จัด Container ให้ ผู้ใช้ยังต้องสร้างและลาก RectTransform ลง **Pickup Container** รายละเอียดไฟล์/ช่อง/ผลตรวจอยู่ [UI/README.md](UI/README.md) ยังไม่ได้ตรวจภาพหรือ Play Mode เมื่อมี Container จริง
+
+## ชิ้นส่วน 5 แบบต่อหมวดและคูลดาวน์หลบล่าสุด (2026-10-27)
+
+อัปเดตพูล/ร้านล่าสุด: พูลต่อสู้บน EnemySpawnManager.prefab และพูลโรงซ่อมบน CustomerRepairManager ใน Repair.unity มี Gun/Plate/Wing/Jet หมวดละ 5 ครบ 20 ชิ้น แก้ reference Wing/Jet โรงซ่อมผิดหมวดด้วย เริ่มเกมปลดล็อกเฉพาะ Base ทั้งสี่ส่วน อีก 16 ชิ้นต้องซื้อราคา 800–1800 (Tank Wing 850) ตาม [Customization/README.md](Customization/README.md) ไม่ล้างของที่ซื้อในเซฟเก่า ไม่มีช่องใหม่และไม่ต้องตั้งค่าเพิ่ม ตรวจข้อมูลแล้ว ยังไม่ได้ทดสอบซื้อ/สุ่มใน Play Mode
+
+เพิ่ม Plate/Wing/Jet ตามรายการผู้ใช้ เปลี่ยนชื่อ asset/prefab โดยคง GUID และ Part ID ของชุดเดิม ใช้ E สลับ Unity Plate/Wing พร้อมกัน เก็บของเป็นดูดเข้าตัวอัตโนมัติ และคูลดาวน์หลบ **1 วินาทีหลังจบท่า** แทน 4 วินาทีที่ระบุในบันทึกเก่า Twin Jet หลบสองครั้งต่อชุดแล้วคูลดาวน์หลังครั้งที่สอง Barrier อัตโนมัติใช้ VFX/Barrier เดิม ศัตรูใช้โล่/สเตตัส/Tank ก่อน ไม่เพิ่ม AI บูสต์ หลบ หรือสลับโหมด รายการไฟล์ ค่าทดลอง ช่อง Inspector ใหม่ และขอบเขตการตั้งค่าพูลอยู่ [Examples/README.md](Examples/README.md)
+
 ## Material ยาน Toon พร้อมเส้น (2026-10-26)
 
 อัปเดต 2026-10-27: ยานลูกค้าที่สุ่มบินเข้าโรงซ่อมใช้ Outline World Width 0.03 บน CustomerRepairShip แยกจากเส้นยานทั่วไป 0.012 และกำหนดค่าให้ชิ้นส่วนโดยตรงตอนประกอบก่อนเริ่มบิน พร้อมรักษาค่าเส้นเมื่ออัปเดตสีพัง/ไฮไลต์ รายละเอียดและช่องปรับอยู่ `Repair/README.md` ไม่ต้องตั้งค่าเพิ่ม

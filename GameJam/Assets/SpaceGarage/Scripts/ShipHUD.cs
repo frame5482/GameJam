@@ -29,6 +29,10 @@ namespace SpaceGarage
         [Header("Spawn marked material rows into your Canvas container")]
         [SerializeField] private RectTransform materialContainer = null;
         [SerializeField] private ShipTrackedMaterialRow materialRowPrefab = null;
+        [Header("Successful pickups: reuse your repair material prefab")]
+        [SerializeField] private RectTransform pickupContainer = null;
+        [SerializeField] private RepairMaterialDragItem pickupRowPrefab = null;
+        [SerializeField, Min(0.1f)] private float pickupNotificationDuration = 3f;
         [Header("Rows made by the user, in display order")]
         [SerializeField] private ShipTrackedMaterialRow[] materialRows = new ShipTrackedMaterialRow[0];
         private readonly List<ShipMaterialRequirement> tracked = new List<ShipMaterialRequirement>();
@@ -40,10 +44,18 @@ namespace SpaceGarage
         private RectTransform spawnedContainer;
         private ShipTrackedMaterialRow spawnedRowPrefab;
         private bool materialSetupWarning;
+        private sealed class PickupNotification
+        {
+            public RepairMaterialDragItem row;
+            public float expiresAt;
+        }
+        private readonly List<PickupNotification> pickupNotifications = new List<PickupNotification>();
+        private bool pickupSetupWarning;
 
         public void SetShip(ShipController target)
         {
             Unsubscribe();
+            ClearPickupNotifications();
             ship = target;
             ResetCache();
             BindInventory();
@@ -65,11 +77,17 @@ namespace SpaceGarage
         }
 
         private void OnEnable() { ResetCache(); BindInventory(); RefreshMaterials(); }
-        private void OnDisable() { Unsubscribe(); ClearSpawnedMaterialRows(); }
+        private void OnDisable() { Unsubscribe(); ClearSpawnedMaterialRows(); ClearPickupNotifications(); }
         private void ResetCache() => lastHealth = lastMaxHealth = lastBoost = lastMaxBoost = lastSpeed = lastDodge = -1;
 
         private void LateUpdate()
         {
+            for (int i = pickupNotifications.Count - 1; i >= 0; i--)
+                if (pickupNotifications[i].row == null || Time.unscaledTime >= pickupNotifications[i].expiresAt)
+                {
+                    RemovePickupRow(pickupNotifications[i].row);
+                    pickupNotifications.RemoveAt(i);
+                }
             if (ship == null && autoFindPlayer && Time.unscaledTime >= nextPlayerSearch)
             {
                 var player = GameObject.FindGameObjectWithTag("Player");
@@ -115,14 +133,62 @@ namespace SpaceGarage
             if (ReferenceEquals(next, subscribedInventory)) return;
             Unsubscribe();
             subscribedInventory = next;
-            if (isActiveAndEnabled && subscribedInventory != null) subscribedInventory.changed.AddListener(RefreshMaterials);
+            if (isActiveAndEnabled && subscribedInventory != null)
+            {
+                subscribedInventory.changed.AddListener(RefreshMaterials);
+                subscribedInventory.pickupCollected += ShowPickupNotification;
+            }
             RefreshMaterials();
         }
 
         private void Unsubscribe()
         {
-            if (subscribedInventory != null) subscribedInventory.changed.RemoveListener(RefreshMaterials);
+            if (subscribedInventory != null)
+            {
+                subscribedInventory.changed.RemoveListener(RefreshMaterials);
+                subscribedInventory.pickupCollected -= ShowPickupNotification;
+            }
             subscribedInventory = null;
+        }
+
+        private void ShowPickupNotification(ShipMaterialData material, string itemId, int amount)
+        {
+            if (!isActiveAndEnabled || amount <= 0) return;
+            if (pickupContainer == null || pickupRowPrefab == null ||
+                pickupRowPrefab.transform == pickupContainer || pickupContainer.IsChildOf(pickupRowPrefab.transform) ||
+                pickupRowPrefab.GetComponentInChildren<ShipHUD>(true) != null)
+            {
+                if (!pickupSetupWarning)
+                {
+                    Debug.LogWarning("Assign Pickup Container and a separate repair material prefab on ShipHUD to show collected items.", this);
+                    pickupSetupWarning = true;
+                }
+                return;
+            }
+            pickupSetupWarning = false;
+            if (material == null && ResourceManager.Instance != null)
+                foreach (var data in ResourceManager.Instance.MaterialCatalog)
+                    if (data != null && data.itemId == itemId) { material = data; break; }
+            var row = Instantiate(pickupRowPrefab, pickupContainer, false);
+            row.name = "Pickup_" + itemId;
+            row.DisplayPickup(material, itemId, amount);
+            row.gameObject.SetActive(true);
+            pickupNotifications.Add(new PickupNotification
+            { row = row, expiresAt = Time.unscaledTime + Mathf.Max(0.1f, pickupNotificationDuration) });
+        }
+
+        private static void RemovePickupRow(RepairMaterialDragItem row)
+        {
+            if (row == null) return;
+            row.gameObject.SetActive(false);
+            if (Application.isPlaying) Destroy(row.gameObject);
+            else DestroyImmediate(row.gameObject);
+        }
+
+        private void ClearPickupNotifications()
+        {
+            foreach (var notification in pickupNotifications) RemovePickupRow(notification.row);
+            pickupNotifications.Clear();
         }
 
         public void RefreshMaterials()

@@ -33,7 +33,16 @@ namespace SpaceGarage
         private static Color Rgb(byte r, byte g, byte b) => new Color32(r, g, b, 255);
         public static Palette CreatePalette() => palettes[Random.Range(0, palettes.Length)];
         public static bool IsShipSurface(Material material) =>
-            material != null && material.shader != null && material.shader.name == "Toon/Toon";
+            material != null && material.shader != null &&
+            (material.shader.name == "Toon/Toon" || material.shader.name == "Universal Render Pipeline/Lit");
+        public static bool IsShipRenderer(Renderer renderer)
+        {
+            if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) return false;
+            foreach (var engine in renderer.GetComponentsInParent<ShipBoostEffect>(true))
+                if (engine.ContainsEffect(renderer.transform)) return false;
+            return renderer.GetComponentInParent<UnityEngine.VFX.VisualEffect>() == null;
+        }
+
         public static Color Shade(Color color, float factor)
         {
             float alpha = color.a;
@@ -46,14 +55,16 @@ namespace SpaceGarage
         {
             foreach (var renderer in part.GetComponentsInChildren<Renderer>(true))
             {
-                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) continue;
+                if (!IsShipRenderer(renderer)) continue;
                 var materials = renderer.sharedMaterials;
                 for (int i = 0; i < materials.Length; i++)
                 {
                     var material = materials[i];
                     if (!IsShipSurface(material)) continue;
                     var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block, i);
-                    Color color = palette.ColorFor(material.GetColor("_BaseColor"), slot);
+                    Color original = material.HasProperty("_BaseColor") ? material.GetColor("_BaseColor") :
+                        material.HasProperty("_Color") ? material.GetColor("_Color") : Color.white;
+                    Color color = palette.ColorFor(original, slot);
                     if (material.HasProperty("_BaseColor")) block.SetColor("_BaseColor", color);
                     if (material.HasProperty("_Color")) block.SetColor("_Color", color);
                     if (material.HasProperty("_1st_ShadeColor")) block.SetColor("_1st_ShadeColor", Shade(color, 0.65f));

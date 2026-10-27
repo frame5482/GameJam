@@ -95,6 +95,10 @@ namespace SpaceGarage
             }
         }
 
+        internal bool ContainsEffect(Transform candidate) =>
+            (normalEffectRoot != null && candidate.IsChildOf(normalEffectRoot.transform)) ||
+            (effectRoot != null && candidate.IsChildOf(effectRoot.transform));
+
         private void OnDisable() => SetFlightState(false, false);
     }
 }

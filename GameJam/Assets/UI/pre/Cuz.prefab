@@ -92,7 +92,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8461369387963651865
 RectTransform:
   m_ObjectHideFlags: 0
@@ -276,6 +276,7 @@ MonoBehaviour:
   materialName: {fileID: 3128978433378617596}
   ownedText: {fileID: 8313283294021824177}
   dragGhostPrefab: {fileID: 7302583585228468749}
+  bonusIcon: {fileID: 0}
 --- !u!114 &3673947128100307831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,7 +309,7 @@ MonoBehaviour:
   lockIcon: {fileID: 8069225237157000300}
   selectedIndicator: {fileID: 5729791196215996447}
   equippedIndicator: {fileID: 5729791196215996447}
-  nameText: {fileID: 3128978433378617596}
+  nameText: {fileID: 0}
   priceText: {fileID: 0}
 --- !u!114 &8079056908946007051
 MonoBehaviour:
@@ -350,7 +351,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 8082750835977365152}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []

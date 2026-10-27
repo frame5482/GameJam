@@ -65,7 +65,7 @@ namespace SpaceGarage
             }
             foreach (var renderer in model.GetComponentsInChildren<Renderer>(true))
             {
-                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) continue;
+                if (!ShipRandomColors.IsShipRenderer(renderer)) continue;
                 var materials = renderer.sharedMaterials;
                 for (int i = 0; i < materials.Length; i++)
                 {
