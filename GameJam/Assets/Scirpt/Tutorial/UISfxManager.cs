@@ -321,6 +321,7 @@ public class UISfxManager : MonoBehaviour
             _uiSource.spatialBlend = 0;
             _uiSource.ignoreListenerPause = true;
         }
+        _uiSource.volume = SpaceGarage.GarageSettings.SfxVolume;
         _uiSource.PlayOneShot(clip, volume * clipVolume);
     }
 
@@ -422,7 +423,7 @@ public class UISfxManager : MonoBehaviour
         if (clip == null) return;
         var source = m.CreateGameplaySource(clip, false);
         source.transform.position = origin.position;
-        source.volume = m.gameplayVolume * m.weaponVolume;
+        source.volume = m.gameplayVolume * m.weaponVolume * SpaceGarage.GarageSettings.SfxVolume;
         source.Play();
         m._shots.Add(new ShotVoice { source = source, gain = m.weaponVolume });
     }
@@ -479,7 +480,7 @@ public class UISfxManager : MonoBehaviour
         if (voice.source.clip != clip) { voice.source.Stop(); voice.source.clip = clip; voice.paused = false; }
         voice.gain = gain;
         voice.source.transform.position = owner.transform.position;
-        voice.source.volume = gameplayVolume * gain;
+        voice.source.volume = gameplayVolume * gain * SpaceGarage.GarageSettings.SfxVolume;
         if (Time.timeScale > 0 && !voice.paused && !voice.source.isPlaying) voice.source.Play();
     }
 
@@ -491,7 +492,7 @@ public class UISfxManager : MonoBehaviour
             var v = pair.Value;
             if (pair.Key == null || !pair.Key.isActiveAndEnabled) { DestroyVoice(v.source); _expiredLoops.Add(pair.Key); continue; }
             v.source.transform.position = pair.Key.transform.position;
-            v.source.volume = gameplayVolume * v.gain;
+            v.source.volume = gameplayVolume * v.gain * SpaceGarage.GarageSettings.SfxVolume;
             if (Time.timeScale <= 0 && !v.paused) { v.source.Pause(); v.paused = true; }
             else if (Time.timeScale > 0 && v.paused) { v.source.UnPause(); v.paused = false; if (!v.source.isPlaying) v.source.Play(); }
         }
@@ -501,12 +502,13 @@ public class UISfxManager : MonoBehaviour
             var v = _shots[i];
             if (v.source == null || !v.source.isPlaying || Time.timeScale <= 0)
             { DestroyVoice(v.source); _shots.RemoveAt(i); }
-            else v.source.volume = gameplayVolume * v.gain;
+            else v.source.volume = gameplayVolume * v.gain * SpaceGarage.GarageSettings.SfxVolume;
         }
     }
 
     void Update()
     {
+        if (_uiSource != null) _uiSource.volume = SpaceGarage.GarageSettings.SfxVolume;
         UpdateGameplayAudio();
         if (_music == null) return;
 
@@ -529,7 +531,7 @@ public class UISfxManager : MonoBehaviour
     // ★ ความดังอ่านจากสไลเดอร์ทุกเฟรม — SounddSetting เซฟลง PlayerPrefs ทุกเฟรมอยู่แล้ว ลากแล้วดังเบาตามทันที
     void UpdateMusicVolumes()
     {
-        float master = musicVolume;
+        float master = musicVolume * SpaceGarage.GarageSettings.MusicVolume;
         for (int i = 0; i < 2; i++)
             _music[i].volume = master * _musicClipVol[i] * _musicFade[i];
     }

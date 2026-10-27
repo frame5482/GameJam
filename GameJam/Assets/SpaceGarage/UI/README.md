@@ -171,3 +171,32 @@ Panel เริ่มปิดและเปิดผลลัพธ์ที�
 - ไม่มีการย้าย ลบ ซ่อน หรือเปลี่ยนขนาด MainUI/Canvas/UGUI เดิม ผู้ใช้เลือกปิดชุดที่ไม่ต้องการเองได้
 
 เสียง UI ใช้ UISfxManager เดิมที่ปรับให้ไม่มี dependency GameSfx: Auto Bind Scene Buttons ผูก click/hover โดยไม่เปลี่ยนภาพหรือ layout, CustomizationUI ผูกแถวที่สร้างใหม่ด้วย ผู้ใช้ต้องใส่ manager และคลิป Click/Hover เอง รายละเอียด Scirpt/Tutorial/README.md (2026-10-27)
+
+## Start / Settings ของผู้ใช้ (2026-10-27)
+
+ใช้ Canvas/UGUI ที่ผู้ใช้สร้างเอง ไม่มีการสร้างหรือจัดหน้าตา UI/Canvas/แอนิเมชัน สคริปต์เปิดปิดด้วย SetActive ใส่ **StartMenuUI** บน GameObject ที่ active ตลอดและอยู่นอก/ไม่เป็นลูกของแผงที่จะปิด:
+
+- **Start Panel**: GameObject หน้าแรกที่มี Start, Settings, Exit
+- **Settings Panel**: GameObject หน้าตั้งค่า
+- **Main UI**: root หน้าหลักเดิม ต้องแยกจาก Start/Settings ห้ามลาก Canvas แม่ที่ครอบทั้งสามหน้า
+- **Repair UI**: component RepairUI เดิม ถ้าว่างค้นหาในซีนรวม inactive ใช้ SetMainMenuVisible กัน Refresh เปิดเมนูทับ Start
+- **Start Button / Settings Button / Exit Button / Settings Back Button**: Button ของผู้ใช้ สคริปต์ผูก listener เอง ไม่ต้องเพิ่ม On Click ซ้ำ
+
+Start เรียก ResourceManager.BeginGame แล้วเปิด Main UI; Settings เปิดหน้าตั้งค่า; Back บันทึกค่าและกลับหน้าก่อน; Exit บันทึกแล้ว Application.Quit (Editor ไม่หยุด Play Mode) เมื่อกลับ Repair จากต่อสู้ภายในรอบเปิดแอปเดียวกันจะเข้า Main UI โดยตรง เปิดแอปใหม่แสดง Start อีกครั้งแต่ใช้เซฟเดิม
+
+ใส่ **SettingsUI** บนแผง Settings ของผู้ใช้:
+
+- **Master Volume / Music Volume / Sfx Volume**: Slider เสียงรวม/เพลง/เอฟเฟกต์ (UI/ปืน/ไอพ่น) ช่วง 0–1 สคริปต์กำหนดช่วงให้ เปลี่ยนเสียงทันที ใส่เฉพาะช่องที่ต้องการแสดงได้
+- **Resolution Dropdown**: TMP_Dropdown เติมขนาดจอที่รองรับ ตัดขนาดซ้ำ รวมขนาดปัจจุบัน/ที่เซฟไว้
+- **Fullscreen Toggle**: เปิด=FullScreenWindow ปิด=Windowed
+- **Apply Display Button**: Button ใช้ความละเอียดและโหมดจอที่เลือก ต้องกด Apply จึงเปลี่ยนจอ
+
+GarageSettings เก็บค่าผ่าน PlayerPrefs กลุ่ม SpaceGarage.Settings.* แยกจากเซฟเกม โหลดก่อนเข้าซีน Master ใช้ AudioListener.volume; เพลง/เอฟเฟกต์คูณค่าบน UISfxManager เดิม ไม่ล้างคลิปหรือ gain ที่ใส่ไว้ ต้องมี UISfxManager พร้อมคลิปหากต้องการเสียง ไม่สร้าง manager สำรอง
+
+การเปลี่ยนขนาด/โหมดจอมีผลใน Build เท่านั้น Editor บันทึกค่าแต่ไม่เปลี่ยน Game View หรือเลย์เอาต์ ผู้ใช้ต้องสร้าง/จัดฟอนต์/ข้อความภาษาอังกฤษและลาก reference ข้างต้นเอง ยังไม่ได้ผูก StartMenuUI/SettingsUI ในซีนเพราะผู้ใช้จะทำ UI เอง
+
+ผลตรวจ: คอมไพล์ Assembly-CSharp ทั้งชุดกับ Roslyn/reference Unity จริงผ่าน exit 0 ตรวจเส้นทางเริ่มครั้งแรก/เซฟเดิม/เซฟเสีย/กลับ Repair และถอด listener แล้ว ยังไม่ได้คลิก UI ฟังเสียง หรือเปลี่ยนจอใน Build ไม่ได้แตะเซฟจริง
+
+### ช่อง Repair UI รับแผงที่แยกจากโค้ด (2026-10-27)
+
+StartMenuUI > Repair UI เปลี่ยนจากบังคับ RepairUI component เป็น UnityEngine.Object เพื่อรับทั้ง GameObject แผง UI และ component เดิมโดยเก็บชื่อ field/reference เดิมไว้ โค้ด RepairUI กับ panel อยู่คนละที่ได้: ใช้ component ที่ลากโดยตรง หรือค้นหาใน GameObject ที่ลากรวมลูก inactive; ถ้าไม่มีจะค้นหา RepairUI แยกในซีนรวม inactive แล้วเรียก SetMainMenuVisible ตามเดิม ไม่ย้ายวัตถุ ไม่เปิด panel หน้าซ่อมตอนกด Start และไม่เปลี่ยน SetActive/layout เดิม ไม่มีช่องใหม่ ผู้ใช้ลาก panel ที่มีอยู่หรือ component เดิมลง Repair UI ได้ ไม่ต้องย้ายโค้ดมาอยู่บน panel

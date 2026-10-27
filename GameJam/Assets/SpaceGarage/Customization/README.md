@@ -98,3 +98,11 @@ ResourceManager เพิ่ม Enable Json Save (เริ่มต้นเป
 ## ตรวจงาน
 
 คอมไพล์สคริปต์กับ Unity assemblies ผ่าน และตรวจ reference ภายใน Repair.unity ผ่าน ทดสอบโค้ด GarageSaveData/GarageJsonStorage จริงด้วย Mono ผ่าน 21 กรณี: roundtrip เงิน/วัสดุ/ปลดล็อก/ชุดยาน, ตรวจข้อมูลผิด/ID ซ้ำ, ค่าใหญ่, เขียน .tmp/replace, backup และกู้เมื่อไฟล์หลักเสีย ใช้ JSON serializer ของ .NET ในชุดทดสอบนี้ ไม่ใช่ JsonUtility ใน Unity ยังไม่ได้ทดสอบวงจรซื้อ/ใส่/โหลดจริงใน Play Mode หรือกด UI จริง รูป lock และภาพไฮไลต์ต้องตรวจหลังใส่ Canvas/Row Prefab ของผู้ใช้ ลบไฟล์และเครื่องมือตรวจชั่วคราวแล้ว
+
+## Start เริ่มเกมเฉพาะครั้งแรก (2026-10-27)
+
+ResourceManager.BeginGame ใช้ HasStartedGame: โหลดเซฟหลักหรือ .bak สำเร็จถือว่ามีเกมแล้ว รองรับเซฟเดิม ไม่เปลี่ยน schema/Part ID เมื่อมีเกมแล้ว Start ไม่รีเซ็ตเงิน/วัสดุ/ปลดล็อก/ชุดยาน เมื่อไม่มีเซฟจึงเรียก ResetForNewGame เดิมเพื่อเริ่มเงิน 3000, Base และ Starting Materials แล้วเซฟก่อนเปิด Main UI ถ้าเซฟหลักและสำรองอ่านไม่ได้ยังป้องกันเขียนทับและไม่ให้ Start ผ่าน
+
+ก่อนกด Start เมื่อไม่มีเซฟจะไม่ autosave หรือบันทึกตอนปิดแอป เพื่อไม่สร้างไฟล์เกมที่ยังไม่ได้เริ่ม HasStartedGame เป็น runtime ตั้งจากโหลดหรือเริ่มสำเร็จ ไม่เพิ่ม field JSON `newGame.NewGame()` เปลี่ยนเป็น BeginGame ไม่มี auto OnStart/ไม่ reload ซีนแล้ว ลบค่า onStart ใน Repair.unity ส่วน ResetForNewGame ยังคงเป็น API รีเซ็ตโดยตรงที่ต้องเรียกอย่างชัดเจน ปุ่ม Start ไม่เรียกซ้ำ
+
+ผู้ใช้ต้องสร้างและลาก UI เองตาม UI/README.md คอมไพล์ทั้งชุดผ่าน ยังไม่ได้กด UI หรือทดสอบด้วยเซฟจริง

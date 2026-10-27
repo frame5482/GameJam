@@ -516,3 +516,9 @@ Prefab ใด ๆ ถูก Instantiate ตามจุดยิงได้เ�
 ## เสียงส่วนกลางและ Tutorial (2026-10-27)
 ใช้ Scirpt/Tutorial/UISfxManager.cs เดิมเป็นศูนย์เสียง UI/BGM/ปืน/ไอพ่น ตัด dependency ระบบเก่าออก เชื่อม ShipGun, ShipController, Enemy, CustomerRepairShip และ CustomizationUI แล้ว ไม่มีการสร้างหรือปรับ UI ไม่มีช่องใหม่บนสคริปต์ยาน ช่องใหม่ทั้งหมดอยู่บน UISfxManager เป็น AudioClip ปืนแต่ละชนิด/Laser Loop/Normal Jet Loop/Boost Jet Loop พร้อม volume และระยะเสียง ผู้ใช้ต้องเพิ่ม manager ในซีนเริ่มและใส่คลิปเอง เปิด Dont Destroy On Load รายละเอียดและผลตรวจใน Scirpt/Tutorial/README.md คอมไพล์ผ่าน ยังไม่ทดสอบฟังเสียงจริง
 
+
+## Start / Settings (2026-10-27)
+
+เพิ่ม Scripts/StartMenuUI.cs, SettingsUI.cs, GarageSettings.cs สำหรับ Canvas/UGUI ของผู้ใช้ เปิดปิด SetActive ไม่มี layout/UI สำรอง Start เรียก ResourceManager.BeginGame เฉพาะครั้งแรกที่ไม่มีเซฟ แล้วเปิด Main UI ครั้งต่อไปใช้เซฟเดิม `newGame` ไม่เริ่ม/reset อัตโนมัติหรือต้อง reload ซีนแล้ว RepairUI เพิ่ม SetMainMenuVisible กันเปิดทับ Start ตั้งเสียงรวม/เพลง/เอฟเฟกต์เชื่อม UISfxManager และเลือกความละเอียด+เต็มจอ/หน้าต่างผ่าน Apply บันทึก PlayerPrefs ขนาดจอมีผลใน Build ไม่แตะ Game View
+
+ผู้ใช้ต้องสร้าง UI และใส่/ลากช่อง StartMenuUI และ SettingsUI เอง รายการช่องและตำแหน่ง host อยู่ UI/README.md รายละเอียดเซฟใน Customization/README.md คอมไพล์ทั้งชุดผ่าน exit 0 ยังไม่ทดสอบกด UI/เสียง/Build และไม่แตะเซฟจริง

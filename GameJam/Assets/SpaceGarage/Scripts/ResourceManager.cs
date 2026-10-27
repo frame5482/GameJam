@@ -29,6 +29,7 @@ namespace SpaceGarage
         private readonly HashSet<string> unlockedParts = new HashSet<string>();
         private string[] equippedParts = new string[4];
         private bool ready, dirty, protectUnreadableSave;
+        public bool HasStartedGame { get; private set; }
         private float saveAt;
         public ShipCustomizationCatalog CustomizationCatalog => customizationCatalog;
         public string SavePath => Path.Combine(Application.persistentDataPath,
@@ -45,6 +46,7 @@ namespace SpaceGarage
             Inventory = GetComponent<ShipInventory>();
             Inventory.changed.AddListener(NotifyChanged);
             bool loaded = enableJsonSave && LoadProgress();
+            HasStartedGame = loaded;
             if (!loaded) foreach (var stack in startingMaterials)
                 if (stack != null && stack.material != null && stack.amount > 0)
                 { RegisterMaterial(stack.material); Inventory.Add(stack.material.itemId, stack.amount); }
@@ -109,7 +111,7 @@ namespace SpaceGarage
         }
         private void Update()
         {
-            if (dirty && enableJsonSave && !protectUnreadableSave && Time.unscaledTime >= saveAt) SaveProgress();
+            if (HasStartedGame && dirty && enableJsonSave && !protectUnreadableSave && Time.unscaledTime >= saveAt) SaveProgress();
         }
         private GarageSaveData Snapshot()
         {
@@ -120,6 +122,8 @@ namespace SpaceGarage
             data.unlockedParts.AddRange(unlockedParts); data.unlockedParts.Sort(StringComparer.Ordinal);
             return data;
         }
+        public bool BeginGame() => HasStartedGame || ResetForNewGame();
+
         public bool ResetForNewGame()
         {
             if (!ready || Inventory == null || protectUnreadableSave)
@@ -169,6 +173,7 @@ namespace SpaceGarage
                 catch (Exception error) { Debug.LogWarning("Unable to update new game backup: " + error.Message, this); }
             }
             money = data.money;
+            HasStartedGame = true;
             unlockedParts.Clear();
             equippedParts = data.equippedParts;
             foreach (var stack in startingMaterials)
@@ -180,7 +185,7 @@ namespace SpaceGarage
         [ContextMenu("Save Progress")]
         public bool SaveProgress()
         {
-            if (!ready || !enableJsonSave || protectUnreadableSave || Inventory == null) return false;
+            if (!ready || !HasStartedGame || !enableJsonSave || protectUnreadableSave || Inventory == null) return false;
             try
             {
                 string path = SavePath;

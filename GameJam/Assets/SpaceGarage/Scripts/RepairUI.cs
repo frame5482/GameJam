@@ -88,11 +88,14 @@ namespace SpaceGarage
             }
         }
 
+        private bool mainMenuVisible = true;
+        public void SetMainMenuVisible(bool visible) { mainMenuVisible = visible; Refresh(); }
+
         public void Refresh()
         {
             bool open = workshop != null && workshop.IsOpen;
             bool customizing = customization != null && customization.IsOpen;
-            if (mainMenuPanel != null && mainMenuPanel != gameObject) mainMenuPanel.SetActive(!open && !customizing);
+            if (mainMenuPanel != null && mainMenuPanel != gameObject) mainMenuPanel.SetActive(mainMenuVisible && !open && !customizing);
             if (repairPanel != null && repairPanel != gameObject) repairPanel.SetActive(open);
             if (repairCustomerButton != null) repairCustomerButton.interactable = !open && !customizing;
             if (combatButton != null) combatButton.interactable = !open && !customizing && !loadingCombat;

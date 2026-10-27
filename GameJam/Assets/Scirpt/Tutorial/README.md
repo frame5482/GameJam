@@ -13,3 +13,5 @@ UISfxManager ไม่ต้องมี GameSfx หรือ UIButtonEffect อ
 ShipGun เชื่อมเสียงอาวุธ, ShipController/Enemy เชื่อมไอพ่น และ CustomerRepairShip เชื่อมขณะบินเข้าออก ไม่เล่นจาก ShipBoostEffect แต่ละชิ้นเพื่อหลีกเลี่ยงเสียงซ้ำและ preview มีเสียง
 
 ผลตรวจ: คอมไพล์ Assembly-CSharp ด้วย Roslyn และ response file ของ Unity รวม Tutorial/SpaceGarage ผ่าน ไม่มี error ยังไม่ได้ทดสอบฟังเสียงหรือ Play Mode ใน Editor ต้อง Refresh และใส่คลิปก่อนตรวจเสียงจริง
+
+Settings (2026-10-27): UISfxManager อ่าน GarageSettings.MusicVolume/SfxVolume เพิ่มเป็นตัวคูณหน้า Settings ใหม่ ทั้ง UI/one-shot/loop ที่กำลังเล่น Master ผ่าน AudioListener.volume บันทึก PlayerPrefs ไม่ใช้ GameSfx ไม่เปลี่ยนคลิปหรือ gain เดิม ช่อง Slider อยู่ SpaceGarage/UI/README.md
