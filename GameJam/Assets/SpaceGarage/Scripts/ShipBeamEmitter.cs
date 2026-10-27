@@ -13,8 +13,9 @@ namespace SpaceGarage
         private static readonly int Size1 = Shader.PropertyToID("Size 1");
         private static readonly int BeamColor = Shader.PropertyToID("Color");
         private static readonly int BeamColor1 = Shader.PropertyToID("Color 1");
+        private static readonly int BeamPivot = Shader.PropertyToID("Beam Pivot Y");
 
-        public void Show(VisualEffectAsset graph, Transform parent, Transform muzzle, float size, Color color, Color secondaryColor)
+        public void Show(VisualEffectAsset graph, Transform parent, Transform muzzle, float size, Color color, Color secondaryColor, Quaternion rotation, float pivotY = 0)
         {
             if (graph == null) { Hide(); return; }
             if (root == null || asset != graph)
@@ -23,6 +24,7 @@ namespace SpaceGarage
                 root = new GameObject("WeaponBeam");
                 root.SetActive(false);
                 root.transform.SetParent(parent, false);
+                root.transform.SetPositionAndRotation(muzzle.position, rotation);
                 effect = root.AddComponent<VisualEffect>();
                 asset = graph;
                 effect.visualEffectAsset = graph;
@@ -34,11 +36,13 @@ namespace SpaceGarage
                 effect.SetFloat(Size, 0);
                 effect.SetFloat(Size1, 0);
                 ApplyColors(color, secondaryColor);
+                if (effect.HasFloat(BeamPivot)) effect.SetFloat(BeamPivot, pivotY);
                 root.SetActive(true);
                 effect.Play();
             }
-            root.transform.SetPositionAndRotation(muzzle.position, muzzle.rotation);
+            root.transform.SetPositionAndRotation(muzzle.position, rotation);
             ApplyColors(color, secondaryColor);
+            if (effect.HasFloat(BeamPivot)) effect.SetFloat(BeamPivot, pivotY);
             effect.SetFloat(Size, size);
             effect.SetFloat(Size1, size);
         }

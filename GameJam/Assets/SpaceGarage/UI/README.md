@@ -169,3 +169,5 @@ Panel เริ่มปิดและเปิดผลลัพธ์ที�
 - HUD แสดงเมื่อ Play; ใช้ UI Builder เปิด UXML เพื่อแก้และดูตัวอย่างใน Editor ไม่มีการสร้าง UI ค้างใน Edit Mode
 - ข้อความตัวอย่างเป็นอังกฤษและใช้ default runtime theme ถ้าข้อความวัสดุภาษาไทยแสดงไม่ครบ ต้องเตรียม PanelSettings/TextSettings และฟอนต์ไทยของจริงเอง
 - ไม่มีการย้าย ลบ ซ่อน หรือเปลี่ยนขนาด MainUI/Canvas/UGUI เดิม ผู้ใช้เลือกปิดชุดที่ไม่ต้องการเองได้
+
+เสียง UI ใช้ UISfxManager เดิมที่ปรับให้ไม่มี dependency GameSfx: Auto Bind Scene Buttons ผูก click/hover โดยไม่เปลี่ยนภาพหรือ layout, CustomizationUI ผูกแถวที่สร้างใหม่ด้วย ผู้ใช้ต้องใส่ manager และคลิป Click/Hover เอง รายละเอียด Scirpt/Tutorial/README.md (2026-10-27)

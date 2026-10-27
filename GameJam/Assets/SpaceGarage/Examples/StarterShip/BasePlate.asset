@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 016dca6a71e250b3ff9979815af6a59b
   displayName: Base Plate
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e7145cd97a0ec45439f55a3d27a2c7ec, type: 3}
   slot: 1
   partPrefab: {fileID: 100, guid: c9c476630b88b9628dbaa9f8b41516e5, type: 3}
   stats:

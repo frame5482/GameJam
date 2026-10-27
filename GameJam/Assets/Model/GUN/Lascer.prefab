@@ -80,6 +80,7 @@ MonoBehaviour:
   railSize: 20
   laserDamageInterval: 0.1
   laserRange: 20
+  laserDamageRadius: 3
   railRange: 20
   plasmaProjectilePrefab: {fileID: 0}
   getsukaProjectilePrefab: {fileID: 0}

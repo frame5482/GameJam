@@ -69,7 +69,7 @@ MonoBehaviour:
   minimumSpawnDistance: 40
   maximumSpawnDistance: 60
   spawnInterval: 5
-  maxAlive: 5
+  maxAlive: 3
   spawnImmediately: 1
   spawnClearance: 3
   spawnBlockingLayers:

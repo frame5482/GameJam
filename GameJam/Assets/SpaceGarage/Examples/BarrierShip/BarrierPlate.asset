@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 84b59816c48206f40a8621e366aa6235
   displayName: Barrier Plate
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 357ad184146cb5a438b081df1a4dc8a6, type: 3}
   slot: 1
   partPrefab: {fileID: 100, guid: c155c2fcde918a24fb5b678c5d029aeb, type: 3}
   stats:

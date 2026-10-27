@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 5883af61132291847a139d7f95142233
   displayName: Cruise Jet
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ac2a7929bb67dfb4c875edc8e32af21c, type: 3}
   slot: 3
   partPrefab: {fileID: 100, guid: c57a4f7287de288408611e62e6444c86, type: 3}
   stats:

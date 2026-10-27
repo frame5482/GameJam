@@ -28,6 +28,9 @@ namespace SpaceGarage
         [SerializeField, Min(0)] private float turnDegreesPerSecond = 54f;
         [SerializeField, Min(0.01f)] private float steeringResponseTime = 0.32f;
         [SerializeField, Min(0.01f)] private float speedResponseTime = 0.6f;
+        [Header("Boost steering assistance")]
+        [SerializeField, Min(1)] private float boostSteeringMultiplier = 2f;
+        [SerializeField, Range(0.1f, 1)] private float boostSteeringResponseMultiplier = 0.5f;
         [Header("Dodge roll (Space + A/D)")]
         [SerializeField, Min(0.01f)] private float dodgeDuration = 1.2f;
         [SerializeField, Min(0.01f)] private float dodgeDashDuration = 0.6f;
@@ -171,14 +174,16 @@ namespace SpaceGarage
                 else
                 {
                     float responseFactor = wingPart != null ? (AlternateMode && wingPart.switchableMode ? wingPart.alternateSteeringResponseMultiplier : wingPart.steeringResponseMultiplier) : 1f;
+                    float boostSteering = IsBoosting ? Mathf.Max(1, boostSteeringMultiplier) : 1f;
+                    float responseTime = steeringResponseTime * responseFactor * (IsBoosting ? boostSteeringResponseMultiplier : 1f);
                     currentBank = Mathf.MoveTowards(currentBank, -flightInput.x * bankAngle,
-                        bankDegreesPerSecond * step / Mathf.Max(0.01f, responseFactor));
+                        bankDegreesPerSecond * step * boostSteering / Mathf.Max(0.01f, responseFactor));
                     float turn = bankAngle > 0 ? -currentBank / bankAngle : 0;
                     float handlingFactor = wingPart != null ? (AlternateMode && wingPart.switchableMode ? wingPart.alternateHandlingMultiplier : wingPart.handlingMultiplier) : 1f;
-                    pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond * Mathf.Min(1, handlingFactor)),
-                        ref pitchRateVelocity, steeringResponseTime * responseFactor, Mathf.Infinity, step);
-                    turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond * Mathf.Min(1, handlingFactor)),
-                        ref turnRateVelocity, steeringResponseTime * responseFactor, Mathf.Infinity, step);
+                    pitchRate = Mathf.SmoothDamp(pitchRate, -flightInput.y * Mathf.Min(Stats.handling, pitchDegreesPerSecond * Mathf.Min(1, handlingFactor)) * boostSteering,
+                        ref pitchRateVelocity, responseTime, Mathf.Infinity, step);
+                    turnRate = Mathf.SmoothDamp(turnRate, turn * Mathf.Min(Stats.handling, turnDegreesPerSecond * Mathf.Min(1, handlingFactor)) * boostSteering,
+                        ref turnRateVelocity, responseTime, Mathf.Infinity, step);
                     pitch = Mathf.Clamp(pitch + pitchRate * step, -maxPitchAngle, maxPitchAngle);
                     // Discard outward angular momentum at the pitch stop so reversing responds smoothly.
                     if ((pitch <= -maxPitchAngle && pitchRate < 0) || (pitch >= maxPitchAngle && pitchRate > 0))
@@ -268,6 +273,7 @@ namespace SpaceGarage
 
         private void UpdateBoostEffects(bool active)
         {
+            UISfxManager.SetJetLoop(this, IsAlive && isActiveAndEnabled, active);
             foreach (var effect in boostEffects)
                 if (effect != null) effect.SetFlightState(IsAlive && isActiveAndEnabled, active);
         }

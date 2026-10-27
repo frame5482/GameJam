@@ -15,7 +15,7 @@ namespace SpaceGarage
         [SerializeField, Min(0)] private float minimumSpawnDistance = 40f;
         [SerializeField, Min(0)] private float maximumSpawnDistance = 60f;
         [SerializeField, Min(0.01f)] private float spawnInterval = 5f;
-        [SerializeField, Min(1)] private int maxAlive = 5;
+        [SerializeField, Min(1)] private int maxAlive = 3;
         [SerializeField] private bool spawnImmediately = true;
         [SerializeField, Min(0)] private float spawnClearance = 3f;
         [SerializeField] private LayerMask spawnBlockingLayers = ~0;

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: e98bef619c301874ea9d56376b94408e
   displayName: Unity Plate
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 00b329ac53f50d344a171119f4f5a5fb, type: 3}
   slot: 1
   partPrefab: {fileID: 100, guid: 6b7718af146744a459f737f6df83c644, type: 3}
   stats:

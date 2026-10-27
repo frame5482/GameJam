@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 6df484cdc708c8a458b834bff93f67a5
   displayName: Heavy Plate
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 7db14b18ef6f00240ad514dbe97cefb0, type: 3}
   slot: 1
   partPrefab: {fileID: 100, guid: 729a89bc716189d489e0a298c6d2d5a0, type: 3}
   stats:

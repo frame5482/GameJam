@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpaceGarage.ShipMaterialData
   itemId: Scrap
   displayName: Scrap
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 519c0df970f4a974b8d2d634f0c53a1e, type: 3}

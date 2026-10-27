@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 74c1351ad30fceab8b372943594bff6c
   displayName: Base Wing
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 03f77a65ec0102e439f88d8124d14c4a, type: 3}
   slot: 2
   partPrefab: {fileID: 100, guid: dab4aae17c9960291b38c6f195709004, type: 3}
   stats:

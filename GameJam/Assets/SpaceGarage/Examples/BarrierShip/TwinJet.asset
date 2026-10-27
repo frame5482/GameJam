@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: f5ac76841a2ff164c8af99a13d5bb8ff
   displayName: Twin Jet
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: eca67fc6ff0311846af9d36b8073e312, type: 3}
   slot: 3
   partPrefab: {fileID: 100, guid: 7b9b6860006954440b4216f2f8c3ee6b, type: 3}
   stats:

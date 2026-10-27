@@ -81,6 +81,7 @@ namespace SpaceGarage
             {
                 if (rows.Count <= i) rows.Add(Instantiate(partRowPrefab, partContainer, false));
                 rows[i].Bind(available[i], customization, resources); rows[i].gameObject.SetActive(true);
+                UISfxManager.BindButtons(rows[i].gameObject);
                 rows[i].transform.SetAsLastSibling();
             }
             for (int i = available.Count; i < rows.Count; i++) rows[i].gameObject.SetActive(false);

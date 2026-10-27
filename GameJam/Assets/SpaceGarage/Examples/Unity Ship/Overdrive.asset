@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 377ca85dd60b26f42a172afc960cfedb
   displayName: Overdrive
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 120a644f031eccf40be0a749a847aa0f, type: 3}
   slot: 3
   partPrefab: {fileID: 100, guid: e34a0e4221c0b9b41bb404cfa1f9e780, type: 3}
   stats:

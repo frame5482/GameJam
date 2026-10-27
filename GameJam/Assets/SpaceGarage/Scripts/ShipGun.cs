@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.VFX;
@@ -26,7 +27,8 @@ namespace SpaceGarage
         [Header("Laser / Rail Gun")]
         [SerializeField] private VisualEffectAsset cataclysmBeam = null;
         [SerializeField, Min(0)] private float laserSize = 10;
-        [SerializeField, Min(0)] private float railSize = 20;
+        [SerializeField, Min(0)] private float railSize = 50;
+        [SerializeField, Min(0.01f)] private float railGrowDuration = 0.5f;
         [SerializeField, ColorUsage(true, true)] private Color laserColor = new Color(89.4541015625f, 5.4741287231f, 0f, 1f);
         [SerializeField, ColorUsage(true, true)] private Color laserSecondaryColor = new Color(0f, 117.625579834f, 109.947380066f, 1f);
         [SerializeField, ColorUsage(true, true)] private Color railColor = new Color(0f, 45f, 110f, 1f);
@@ -34,7 +36,10 @@ namespace SpaceGarage
         [Tooltip("Time between laser hits. Each hit uses ship Attack x Damage Multiplier, like a projectile.")]
         [SerializeField, Min(0.01f)] private float laserDamageInterval = 0.1f;
         [SerializeField, Min(0.01f)] private float laserRange = 10;
-        [SerializeField, Min(0.01f)] private float railRange = 20;
+        [SerializeField, Min(0)] private float laserDamageRadius = 3f;
+        [SerializeField, Min(0.01f)] private float railRange = 50;
+        [Tooltip("Beam contact radius at full Rail Size. Scales with the beam growth; 0 uses a thin ray.")]
+        [SerializeField, Min(0)] private float railDamageRadius = 3f;
         [Header("Plasma / Getsuka projectiles")]
         [SerializeField] private GameObject plasmaProjectilePrefab = null;
         [SerializeField] private GameObject getsukaProjectilePrefab = null;
@@ -51,6 +56,8 @@ namespace SpaceGarage
         private readonly ShipBeamEmitter beam2 = new ShipBeamEmitter();
         private float laserDamageTime;
         private bool laserFiring;
+        private readonly HashSet<IShipDamageable> railHitTargets = new HashSet<IShipDamageable>();
+        private float railGrowth = 1f;
 
         public void SetTrigger(bool pressed, float shipAttack, Transform shipOwner)
         { held = pressed; attack = shipAttack; owner = shipOwner; aiControlled = false; aiTarget = null; }
@@ -73,6 +80,7 @@ namespace SpaceGarage
                 if (muzzle != null) Fire(prefab, muzzle, aimPoint);
                 if (muzzle2 != null && muzzle2 != muzzle) Fire(prefab, muzzle2, aimPoint);
             }
+            UISfxManager.PlayWeaponShot(weaponType, transform);
             nextShot = Time.time + 1f / Mathf.Max(0.01f, shotsPerSecond);
         }
 
@@ -87,6 +95,7 @@ namespace SpaceGarage
                 if (!held || cataclysmBeam == null || Time.deltaTime <= 0)
                 { HideBeams(); laserFiring = false; laserDamageTime = 0; return; }
                 ShowBeams(laserSize);
+                UISfxManager.SetLaserLoop(this, true);
                 if (!laserFiring)
                 {
                     laserFiring = true;
@@ -104,9 +113,14 @@ namespace SpaceGarage
             }
             if (weaponType == ShipWeaponType.RailGun)
             {
-                if (held && cataclysmBeam != null && cycle.TryFire(Time.time, 1, 1))
-                    DamageBeams(railRange, attack * damageMultiplier);
-                if (cycle.IsPulsing(Time.time) && (!aiControlled || held)) ShowBeams(railSize);
+                if (Time.deltaTime > 0 && held && cataclysmBeam != null && cycle.TryFire(Time.time, 1, 1))
+                { railHitTargets.Clear(); UISfxManager.PlayWeaponShot(weaponType, transform); }
+                if (Time.deltaTime > 0 && cycle.IsPulsing(Time.time) && (!aiControlled || held))
+                {
+                    railGrowth = Mathf.Clamp01((Time.time - cycle.PulseStartedAt) / Mathf.Max(0.01f, railGrowDuration));
+                    ShowBeams(railSize * railGrowth);
+                    if (railGrowth > 0) DamageBeams(railRange, attack * damageMultiplier);
+                }
                 else { HideBeams(); if (aiControlled && !held) cycle.StopPulse(); }
                 return;
             }
@@ -114,6 +128,7 @@ namespace SpaceGarage
             var prefab = weaponType == ShipWeaponType.Plasma ? plasmaProjectilePrefab : getsukaProjectilePrefab;
             if (!held || prefab == null || !TryGetAimPoint(out Vector3 point)) return;
             if (!cycle.TryFire(Time.time, 0, weaponType == ShipWeaponType.Plasma ? 2 : 3)) return;
+            UISfxManager.PlayWeaponShot(weaponType, transform);
             if (muzzle == null && muzzle2 == null) Fire(prefab, transform, point, true);
             else
             {
@@ -126,14 +141,18 @@ namespace SpaceGarage
         {
             Color color = weaponType == ShipWeaponType.RailGun ? railColor : laserColor;
             Color secondary = weaponType == ShipWeaponType.RailGun ? railSecondaryColor : laserSecondaryColor;
-            if (muzzle == null && muzzle2 == null) { beam1.Show(cataclysmBeam, transform, transform, size, color, secondary); beam2.Hide(); }
+            float pivot = weaponType == ShipWeaponType.RailGun ? -0.5f : 0f;
+            if (muzzle == null && muzzle2 == null) { beam1.Show(cataclysmBeam, transform, transform, size, color, secondary, BeamRotation(transform), pivot); beam2.Hide(); }
             else
             {
-                if (muzzle != null) beam1.Show(cataclysmBeam, transform, muzzle, size, color, secondary); else beam1.Hide();
-                if (muzzle2 != null && muzzle2 != muzzle) beam2.Show(cataclysmBeam, transform, muzzle2, size, color, secondary); else beam2.Hide();
+                if (muzzle != null) beam1.Show(cataclysmBeam, transform, muzzle, size, color, secondary, BeamRotation(muzzle), pivot); else beam1.Hide();
+                if (muzzle2 != null && muzzle2 != muzzle) beam2.Show(cataclysmBeam, transform, muzzle2, size, color, secondary, BeamRotation(muzzle2), pivot); else beam2.Hide();
             }
         }
-        private void HideBeams() { beam1.Hide(); beam2.Hide(); }
+        private void HideBeams() { beam1.Hide(); beam2.Hide(); UISfxManager.StopLoop(this); }
+
+        private Vector3 BeamDirection(Transform origin) => origin.forward;
+        private Quaternion BeamRotation(Transform origin) => origin.rotation;
 
         private void DamageBeams(float range, float damage)
         {
@@ -147,17 +166,28 @@ namespace SpaceGarage
         }
         private void DamageBeam(Transform origin, float range, float damage)
         {
+            Vector3 direction = BeamDirection(origin);
+            float radius = weaponType == ShipWeaponType.RailGun
+                ? Mathf.Max(0, railDamageRadius) * Mathf.Clamp01(railGrowth)
+                : weaponType == ShipWeaponType.Laser ? Mathf.Max(0, laserDamageRadius) : 0;
+            radius = Mathf.Min(radius, Mathf.Max(0, range));
             // Raycasts omit colliders containing their origin. A moving muzzle can enter
             // the enemy hitbox during a held beam; keep applying ticks while inside it.
-            foreach (var overlap in Physics.OverlapSphere(origin.position, 0.001f, aimLayers, QueryTriggerInteraction.Collide))
+            foreach (var overlap in Physics.OverlapSphere(origin.position, Mathf.Max(0.001f, radius), aimLayers, QueryTriggerInteraction.Collide))
             {
-                if (!CanAimAt(overlap) || (overlap.ClosestPoint(origin.position) - origin.position).sqrMagnitude > 0.000001f) continue;
-                ApplyBeamDamage(overlap, damage, origin.position, -origin.forward);
+                if (!CanAimAt(overlap)) continue;
+                Vector3 point = overlap.ClosestPoint(origin.position);
+                Vector3 offset = point - origin.position;
+                if (offset.sqrMagnitude > Mathf.Max(0.000001f, radius * radius) || Vector3.Dot(offset, direction) < -0.001f) continue;
+                ApplyBeamDamage(overlap, damage, point, -direction);
                 return;
             }
             RaycastHit nearest = default;
             float distance = float.PositiveInfinity;
-            foreach (var hit in Physics.RaycastAll(origin.position, origin.forward, range, aimLayers, QueryTriggerInteraction.Collide))
+            var hits = radius > 0
+                ? Physics.SphereCastAll(origin.position, radius, direction, Mathf.Max(0, range - radius), aimLayers, QueryTriggerInteraction.Collide)
+                : Physics.RaycastAll(origin.position, direction, range, aimLayers, QueryTriggerInteraction.Collide);
+            foreach (var hit in hits)
             {
                 if (!CanAimAt(hit.collider) || hit.distance >= distance) continue;
                 nearest = hit; distance = hit.distance;
@@ -170,6 +200,7 @@ namespace SpaceGarage
             foreach (var behaviour in targetCollider.GetComponentsInParent<MonoBehaviour>())
                 if (behaviour is IShipDamageable target)
                 {
+                    if (weaponType == ShipWeaponType.RailGun && !railHitTargets.Add(target)) return;
                     if (target is IShipHitReceiver receiver)
                         receiver.TakeHit(damage, ShipCombatFeedback.SourceOf(owner), point, normal);
                     else target.TakeDamage(damage);
@@ -253,7 +284,9 @@ namespace SpaceGarage
 
         private void OnDisable()
         {
+            UISfxManager.StopLoop(this);
             held = false; aiTarget = null; aiControlled = false;
+            railHitTargets.Clear();
             cycle.StopPulse(); laserDamageTime = 0; laserFiring = false;
             beam1.Dispose(); beam2.Dispose();
         }

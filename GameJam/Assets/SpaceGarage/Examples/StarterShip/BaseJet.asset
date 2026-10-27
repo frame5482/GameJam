@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: d649b625e07028e2a39b2089f4c7401b
   displayName: Base Jet
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c16720b095638574ba9b0299b9bd50ca, type: 3}
   slot: 3
   partPrefab: {fileID: 100, guid: 5a942b11c438ed71ad128337b4da46bf, type: 3}
   stats:

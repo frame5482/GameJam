@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 5a34ed6fd8e0cfb4d9256c4dc0f51ab9
   displayName: Unity Wing
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 2e483b9f6aa39e343900c21e3a3a51ca, type: 3}
   slot: 2
   partPrefab: {fileID: 100, guid: a2f065297830cbb46a3c7d92b2f36ba2, type: 3}
   stats:

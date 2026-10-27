@@ -123,6 +123,8 @@ MonoBehaviour:
   turnDegreesPerSecond: 54
   steeringResponseTime: 0.32
   speedResponseTime: 0.6
+  boostSteeringMultiplier: 2
+  boostSteeringResponseMultiplier: 0.5
   dodgeDuration: 1.2
   dodgeDashDuration: 0.6
   dodgeCooldown: 1

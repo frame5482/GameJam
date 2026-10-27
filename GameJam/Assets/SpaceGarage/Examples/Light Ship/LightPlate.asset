@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 5cc6a58af8ab96a4f91639cee40fd094
   displayName: Light Plate
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1455483f744b1134d8c1d4d7993a3cd0, type: 3}
   slot: 1
   partPrefab: {fileID: 100, guid: 07ef7476f0becb44fb48173f34ef3e3e, type: 3}
   stats:

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 4a56a67074026f74b9aeb2a35d0abef3
   displayName: Tank Wing
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ad12f18cd84b63a4bb0c0f489a543c19, type: 3}
   slot: 2
   partPrefab: {fileID: 100, guid: f6f9bbed8a8c8094397fb6eab45655e9, type: 3}
   stats:

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 305d5292c3f0bbb43be756380582aae1
   displayName: Agile Wing
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 4127bfe54fbfea04285656689d4f52ee, type: 3}
   slot: 2
   partPrefab: {fileID: 100, guid: 852e7410109d3d3458921f318d6dfeff, type: 3}
   stats:

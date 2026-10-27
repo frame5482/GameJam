@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 13a701962ca666848b3fdff3bdf206fa
   displayName: Burst Jet
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e1f83f21f38633c4eb253764f2fb05cc, type: 3}
   slot: 3
   partPrefab: {fileID: 100, guid: 403e7ac71f43f7d4aab8bf1381fd0675, type: 3}
   stats:

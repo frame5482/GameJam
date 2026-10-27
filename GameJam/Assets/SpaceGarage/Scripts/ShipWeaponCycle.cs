@@ -6,11 +6,13 @@ namespace SpaceGarage
     public sealed class ShipWeaponCycle
     {
         public float PulseEndsAt { get; private set; }
+        public float PulseStartedAt { get; private set; }
         public float ReadyAt { get; private set; }
         public bool IsPulsing(float now) => now < PulseEndsAt;
         public bool TryFire(float now, float activeDuration, float cooldown)
         {
             if (now < ReadyAt) return false;
+            PulseStartedAt = now;
             PulseEndsAt = now + activeDuration;
             ReadyAt = PulseEndsAt + cooldown;
             return true;

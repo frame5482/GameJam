@@ -64,7 +64,7 @@ Material:
     - _VorromoiScale: 6
     m_Colors:
     - _BackColor: {r: 0, g: 0.118744574, b: 0.3433962, a: 1}
-    - _FontColur: {r: 0.074574724, g: 0.12840012, b: 0.20012458, a: 0.15294118}
+    - _FontColur: {r: 0.0093218405, g: 0.016050015, b: 0.025015572, a: 0.15294118}
     - _FresneColor: {r: 0.096226394, g: 0.20964111, b: 1, a: 0}
     - _VectorAmunt: {r: 0.002, g: 0.002, b: 0.002, a: 0}
   m_BuildTextureStacks: []

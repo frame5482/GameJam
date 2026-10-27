@@ -142,6 +142,7 @@ namespace SpaceGarage
             SetTarget(player);
             barrier.Configure(armor, transform);
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(true, false);
+            UISfxManager.SetJetLoop(this, true, false);
             return true;
         }
 
@@ -349,6 +350,7 @@ namespace SpaceGarage
 
         private void OnDisable()
         {
+            UISfxManager.StopLoop(this);
             barrier.SetVisible(false);
             StopFiring(); RestoreFlash();
             foreach (var effect in engineEffects) if (effect != null) effect.SetFlightState(false, false);

@@ -79,7 +79,9 @@ namespace SpaceGarage
             else { IsDocked = true; SetEngines(false); Docked?.Invoke(this); }
         }
         private void SetEngines(bool running)
-        { foreach (var engine in engines) if (engine != null) engine.SetFlightState(running, false); }
+        { UISfxManager.SetJetLoop(this, running, false); foreach (var engine in engines) if (engine != null) engine.SetFlightState(running, false); }
+
+        private void OnDisable() => UISfxManager.StopLoop(this);
 
         private static Quaternion FacingDirection(Vector3 heading, Quaternion fallback)
         {

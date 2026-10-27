@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07232644cd5a4ba4f9447ef19d3cd034, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpaceGarage.RepairRequirementRow
-  icon: {fileID: 2478169378580714480}
+  icon: {fileID: 6581245618213328885}
   materialName: {fileID: 3128978433378617596}
   amountText: {fileID: 8313283294021824177}
 --- !u!1 &5783153187820331551

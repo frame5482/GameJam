@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   partId: 0da02dc6fbe597d46a81cf993755afc7
   displayName: Swept Wing
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 40e723fa3130351478783c7594a77d0d, type: 3}
   slot: 2
   partPrefab: {fileID: 100, guid: 494dc2dc6903ff14d871bc6808d15867, type: 3}
   stats:
