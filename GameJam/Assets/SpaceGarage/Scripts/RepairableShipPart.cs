@@ -49,7 +49,8 @@ namespace SpaceGarage
             restPosition = model.localPosition; restRotation = model.localRotation;
             hoverLift = liftHeight; noiseAmount = noise; hoverBrightness = highlight;
             noiseSeed = UnityEngine.Random.value * 500;
-            var options = pool.ValidOptions();
+            var options = pool.ValidOptions(data);
+            if (options.Count == 0) return;
             int min = Mathf.Clamp(pool.minimumMaterialTypes, 1, options.Count);
             int max = Mathf.Clamp(pool.maximumMaterialTypes, min, options.Count);
             int count = UnityEngine.Random.Range(min, max + 1);

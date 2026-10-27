@@ -16,6 +16,31 @@ MonoBehaviour:
   minimumMaterialTypes: 1
   maximumMaterialTypes: 2
   materials:
+  - material: {fileID: 11400000, guid: e036df5583494ad78d8e3182196fd4b2, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []
   - material: {fileID: 11400000, guid: 49d65809522385c428df7a37c6d9e860, type: 2}
     unitsAtFullDamage: 10
     paymentPerUnit: 100
+    allowedParts: []
+  - material: {fileID: 11400000, guid: eeaac8652a65430d85ec6955d322d806, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []
+  - material: {fileID: 11400000, guid: 0cbe293a87be45149af94661bb4b5ddf, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []
+  - material: {fileID: 11400000, guid: fc32f6bd5f58423bb54e0da6f62ec8b8, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []
+  - material: {fileID: 11400000, guid: 1110cefd3b054f5a859ec02be9a70a53, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []
+  - material: {fileID: 11400000, guid: 634cfedc91424c0284e82328691224a2, type: 2}
+    unitsAtFullDamage: 10
+    paymentPerUnit: 100
+    allowedParts: []

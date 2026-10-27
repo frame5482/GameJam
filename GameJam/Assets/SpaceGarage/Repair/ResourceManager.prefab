@@ -60,8 +60,40 @@ MonoBehaviour:
   money: 0
   persistAcrossScenes: 1
   materialCatalog:
+  - {fileID: 11400000, guid: e036df5583494ad78d8e3182196fd4b2, type: 2}
   - {fileID: 11400000, guid: 49d65809522385c428df7a37c6d9e860, type: 2}
-  startingMaterials: []
+  - {fileID: 11400000, guid: d1d9c4ac1cb347ad9a287812e7139717, type: 2}
+  - {fileID: 11400000, guid: eeaac8652a65430d85ec6955d322d806, type: 2}
+  - {fileID: 11400000, guid: 0cbe293a87be45149af94661bb4b5ddf, type: 2}
+  - {fileID: 11400000, guid: bfe6e45f8c374a708e742f3ce925b8e1, type: 2}
+  - {fileID: 11400000, guid: 7bafde38ddeb47fea67539d9bf82ba05, type: 2}
+  - {fileID: 11400000, guid: fc32f6bd5f58423bb54e0da6f62ec8b8, type: 2}
+  - {fileID: 11400000, guid: 1110cefd3b054f5a859ec02be9a70a53, type: 2}
+  - {fileID: 11400000, guid: 6a1973d5e2e54232a43235ab44ccccc0, type: 2}
+  - {fileID: 11400000, guid: 634cfedc91424c0284e82328691224a2, type: 2}
+  startingMaterials:
+  - material: {fileID: 11400000, guid: e036df5583494ad78d8e3182196fd4b2, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 49d65809522385c428df7a37c6d9e860, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: d1d9c4ac1cb347ad9a287812e7139717, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: eeaac8652a65430d85ec6955d322d806, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 0cbe293a87be45149af94661bb4b5ddf, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: bfe6e45f8c374a708e742f3ce925b8e1, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 7bafde38ddeb47fea67539d9bf82ba05, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: fc32f6bd5f58423bb54e0da6f62ec8b8, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 1110cefd3b054f5a859ec02be9a70a53, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 6a1973d5e2e54232a43235ab44ccccc0, type: 2}
+    amount: 10
+  - material: {fileID: 11400000, guid: 634cfedc91424c0284e82328691224a2, type: 2}
+    amount: 10
   changed:
     m_PersistentCalls:
       m_Calls: []

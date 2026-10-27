@@ -109,3 +109,24 @@ ResourceManager เป็น singleton คงอยู่ข้ามซีน �
 ### Agile Wing: เลือกซ่อมเฉพาะปีกซ้ายขวา (2026-10-27)
 AgileWingPart.prefab เพิ่ม BoxCollider แบบ Trigger สองตัวบน root เดิม Center X=-3.5/+3.5, Y=-0.55, Z=0.21 และ Size=(2.05,3,5) ทั้งคู่ เว้นช่องกลาง X=-2.475 ถึง 2.475 ไม่ให้กล่องเลือกซ่อมบัง Armor/Gun/Jet ระบบ RepairableShipPart.EnsurePickCollider พบ collider ที่กำหนดแล้วจึงไม่สร้างกล่องครอบทั้งชิ้นอีก RepairInteraction อ่าน component จาก parent/root ได้เหมือนเดิม ไม่เปลี่ยนโมเดล/สคริปต์/UI ไม่มีช่องสคริปต์ใหม่ ผู้ใช้ไม่ต้องลาก reference เพิ่ม เริ่ม Play ใหม่หากมีลูกค้าที่ประกอบค้างก่อนแก้ ตรวจ fileID ไม่ซ้ำ/จำนวนกล่อง/reference และทางเดิน raycast ในโค้ดแล้ว ยังไม่ได้ทดสอบคลิกจริงใน Play Mode
 
+
+## วัสดุจาก UI/Item และของเริ่มต้น (2026-10-27)
+
+สร้าง ShipMaterialData 11 asset ใน Materials/ ใช้ Sprite รูปเดิมใน UI/Item ไม่สร้างรูปใหม่/ไม่แก้ importer ชื่อในเกมเป็นอังกฤษ: Screw, Metal Scrap, Titanium Plate, Wiring Bundle (Wire.png), Control Circuit (Wiring Circuit.png), Servo Mechanism (Servo Mechannism.png), Nanocarbon Tube, Energy Cell, Coolant, Shield Crystal, Plasma Core รูป/ชื่อที่สะกดไม่ตรงใช้การจับคู่ข้างต้น
+
+MetalScrap.asset ใช้ GUID 49d65809522385c428df7a37c6d9e860 ของ reference วัสดุเดิมที่ไม่พบ asset/.meta ใน workspace เพื่อซ่อม reference เดิม เก็บ itemId Scrap ตามค่า inventory เดิม ส่วนชนิดใหม่ใช้ ID คงที่ไม่ซ้ำตามชื่อ asset ห้ามเปลี่ยนหลังมีเซฟ
+
+| พูล | วัสดุ |
+| --- | --- |
+| Gun | Screw, Metal Scrap, Wiring Bundle, Control Circuit, Servo Mechanism, Energy Cell, Coolant, Plasma Core |
+| Armor Plate | Screw, Metal Scrap, Titanium Plate, Control Circuit, Nanocarbon Tube, Shield Crystal |
+| Wing | Screw, Metal Scrap, Titanium Plate, Control Circuit, Servo Mechanism, Nanocarbon Tube |
+| Jet | Screw, Metal Scrap, Wiring Bundle, Control Circuit, Energy Cell, Coolant, Plasma Core |
+
+RepairMaterialPool > Materials แต่ละตัวเพิ่ม **Allowed Parts** (List ของ ShipPartStats) ว่าง=ใช้ได้ทุกชิ้นใน slot; ใส่รายการ=ใช้ซ่อมเฉพาะชิ้นนั้น ตั้ง Shield Crystal เฉพาะ BarrierPlate.asset แล้ว ส่วน Plasma Core ผู้ใช้ยืนยันให้ใช้กับปืนและ Jet ทุกชิ้น ไม่จำกัดระดับ RepairableShipPart ส่งข้อมูลชิ้นส่วนไปกรองตอนสุ่มสูตร ถ้าเรียก ValidOptions() โดยไม่ระบุชิ้น (เช่นพูลดรอป) ยังคงเห็นวัสดุทั้งหมด ทุกตัวใช้ Units At Full Damage=10, Payment Per Unit=100 ตามค่าเดิม พูลสุ่ม 1–2 ชนิดต่อชิ้นตามเดิม
+
+ResourceManager.prefab ตั้ง Material Catalog ครบ 11 และ Starting Materials อย่างละ 10 รวม 110 ชิ้น เอา override รายการเก่าใน Scenes/Repair.unity ออกให้สืบทอด prefab จริง ไม่มีการเขียนเซฟผู้ใช้ เซฟเดิมยังเก็บจำนวนเดิม ของเริ่มต้นใช้เมื่อเริ่มเกมใหม่เท่านั้น
+
+Enemy.AwardMaterialDrop เปลี่ยนจำนวนจาก 1 เป็น Random.Range(1,11) จึงได้ 1–10 ชิ้นโอกาสเท่ากันต่อจำนวน สุ่มชนิดหนึ่งจากผลรวมวัสดุไม่ซ้ำ ID ของพูลเดิม รับทันทีเมื่อฆ่าและส่ง NotifyPickupCollected ด้วยจำนวนจริงไปแจ้งเตือน/ผลลัพธ์เดิม ไม่มี prefab ดรอปโลกและไม่มีช่องใหม่บน Enemy EnemyShip ผูกพูลทั้งสี่เดิมแล้วจึงดรอปวัสดุใหม่ได้ครบทุกชนิด
+
+ผลตรวจ: 11 asset ID ไม่ซ้ำ/Sprite GUID ตรงรูปจริง, catalog 11, starting x10 ครบ, scene ไม่มี override รายการเก่า, พูล Gun 8/Armor 6/Wing 6/Jet 7 reference ครบ คอมไพล์ Assembly-CSharp ทั้งชุดกับ Roslyn/reference Unity ผ่าน exit 0 ยังไม่ได้ทดสอบสุ่มงาน/ฆ่ามอน/UI จริงใน Play Mode ไม่มีไฟล์ตรวจชั่วคราวค้าง ไม่ต้องลากค่าเพิ่ม

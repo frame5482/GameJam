@@ -50,7 +50,7 @@ namespace SpaceGarage
             if (starting || enteredMain) return;
             starting = true;
             var resources = ResourceManager.Instance;
-            if (resources == null || !resources.BeginGame())
+            if (resources == null || !newGame.TryInitializeOnce())
             {
                 Debug.LogWarning("Cannot start: ResourceManager is missing or progress could not be initialized.", this);
                 starting = false;

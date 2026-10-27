@@ -328,8 +328,9 @@ namespace SpaceGarage
             { Debug.LogWarning("Enemy Drop Material Pools need valid workshop materials.", this); return; }
             var material = options[Random.Range(0, options.Count)];
             if (resources != null) resources.RegisterMaterial(material);
-            if (storage.Add(material.itemId, 1))
-                storage.NotifyPickupCollected(material, material.itemId, 1);
+            int amount = Random.Range(1, 11);
+            if (storage.Add(material.itemId, amount))
+                storage.NotifyPickupCollected(material, material.itemId, amount);
         }
 
         private void StopFiring()

@@ -106,3 +106,15 @@ ResourceManager.BeginGame ใช้ HasStartedGame: โหลดเซฟหล�
 ก่อนกด Start เมื่อไม่มีเซฟจะไม่ autosave หรือบันทึกตอนปิดแอป เพื่อไม่สร้างไฟล์เกมที่ยังไม่ได้เริ่ม HasStartedGame เป็น runtime ตั้งจากโหลดหรือเริ่มสำเร็จ ไม่เพิ่ม field JSON `newGame.NewGame()` เปลี่ยนเป็น BeginGame ไม่มี auto OnStart/ไม่ reload ซีนแล้ว ลบค่า onStart ใน Repair.unity ส่วน ResetForNewGame ยังคงเป็น API รีเซ็ตโดยตรงที่ต้องเรียกอย่างชัดเจน ปุ่ม Start ไม่เรียกซ้ำ
 
 ผู้ใช้ต้องสร้างและลาก UI เองตาม UI/README.md คอมไพล์ทั้งชุดผ่าน ยังไม่ได้กด UI หรือทดสอบด้วยเซฟจริง
+
+### คืนตัวเลือก On Start (2026-10-27)
+
+newGame คืนช่อง bool On Start (ชื่อ serialized onStart เดิม) ค่าเริ่มต้น false ผู้ใช้ติ๊ก true เพื่อเรียก NewGame() อัตโนมัติใน Start ได้ โดยยังผ่าน ResourceManager.BeginGame: ไม่มีเซฟจึงเริ่มเกมครั้งแรก มีเซฟหรือเริ่มแล้วไม่รีเซ็ต/ไม่โหลดซีนซ้ำ ไม่เปลี่ยนค่าในซีนแทนผู้ใช้และไม่กระทบการเปิดปิดแผง StartMenuUI ช่องนี้เป็นตัวเลือกเริ่มข้อมูลเกมเท่านั้น ไม่ใช่การกดปุ่ม Start เพื่อเปิด Main UI
+
+วัสดุเริ่มต้นล่าสุด (2026-10-27): ResourceManager.prefab ใส่ Starting Materials ครบ 11 ชนิดจาก UI/Item อย่างละ 10 แล้ว รวม 110 New Game ใช้รายการนี้ เซฟเดิมไม่เติม/รีเซ็ตจำนวนอัตโนมัติ รายละเอียด asset/pool อยู่ Repair/README.md
+
+### New Game ใช้ PlayerPrefs ครั้งเดียวตามคำสั่งล่าสุด (2026-10-27)
+
+แทนเงื่อนไขดู JSON เดิม: newGame.TryInitializeOnce ตรวจ PlayerPrefs key `SpaceGarage.NewGame.Completed` ถ้ายังไม่เป็น 1 จะเรียก ResourceManager.ResetForNewGame แม้มีเซฟเดิม เพื่อเริ่มเงินจริง 3000/Base/Starting Materials (11 ชนิดอย่างละ 10) หลังเริ่มและเขียนเซฟสำเร็จเท่านั้นจึง SetInt=1 และ PlayerPrefs.Save หากล้มเหลว/เซฟถูกป้องกันจะไม่มาร์กสำเร็จ ปุ่ม Start บน StartMenuUI กับ newGame.On Start ใช้เมธอดเดียวกันจึงไม่เริ่มซ้ำ เมื่อ key เป็น 1 จะไม่รีเซ็ตอีกแม้ปิดเปิดเกมใหม่
+
+newGame เพิ่มช่อง **Completed** แสดง bool runtime จาก PlayerPrefs ใน Awake และติ๊ก true ให้ instance ในซีนหลังสำเร็จ ไม่ใช้ checkbox นี้เป็นตัวตัดสินแทน PlayerPrefs ไม่ต้องติ๊ก Completed เอง ผู้ใช้ติ๊ก On Start หากต้องการให้ทำอัตโนมัติ; Repair.unity ปัจจุบัน On Start=1 ที่ผู้ใช้ตั้งไว้คงเดิม ไม่มีการแก้เซฟ/PlayerPrefs จริงระหว่างพัฒนา สถานะ Play Mode แสดงใน Inspector ส่วนการคงสถานะข้ามเปิดเกมมาจาก PlayerPrefs ไม่ใช่การเขียน prefab ตอนเล่น

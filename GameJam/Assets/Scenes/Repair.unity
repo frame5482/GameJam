@@ -348,26 +348,6 @@ PrefabInstance:
       propertyPath: changed.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 103, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
-      propertyPath: materialCatalog.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 103, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
-      propertyPath: startingMaterials.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 103, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
-      propertyPath: 'materialCatalog.Array.data[0]'
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 103, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
-      propertyPath: startingMaterials.Array.data[0].amount
-      value: 40
-      objectReference: {fileID: 0}
-    - target: {fileID: 103, guid: 0bb8c82847213ff4e659722c95c01766, type: 3}
-      propertyPath: startingMaterials.Array.data[0].material
-      value: 
-      objectReference: {fileID: 11400000, guid: 49d65809522385c428df7a37c6d9e860, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2173,17 +2153,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 359673894}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 8.1069, y: 8.1069, z: 8.1069}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 688642960}
-  m_Father: {fileID: 375291721}
+  m_Father: {fileID: 1367660812}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 132.7, y: 84.8}
+  m_AnchoredPosition: {x: 979.7857, y: 683.465}
   m_SizeDelta: {x: 63.70394, y: 23.54116}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &359673896
@@ -2566,7 +2546,6 @@ RectTransform:
   - {fileID: 1875095381}
   - {fileID: 610319498}
   - {fileID: 1268378449}
-  - {fileID: 359673895}
   m_Father: {fileID: 1367660812}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -8137,6 +8116,7 @@ RectTransform:
   m_Children:
   - {fileID: 1931197560}
   - {fileID: 1287128426}
+  - {fileID: 359673895}
   - {fileID: 1159720661}
   - {fileID: 375291721}
   m_Father: {fileID: 373623358}
@@ -10168,6 +10148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e10d78d5bd745e1b204f068ea3f5aca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpaceGarage.newGame
+  onStart: 1
 --- !u!1 &2018531954
 GameObject:
   m_ObjectHideFlags: 0

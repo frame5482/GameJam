@@ -522,3 +522,7 @@ Prefab ใด ๆ ถูก Instantiate ตามจุดยิงได้เ�
 เพิ่ม Scripts/StartMenuUI.cs, SettingsUI.cs, GarageSettings.cs สำหรับ Canvas/UGUI ของผู้ใช้ เปิดปิด SetActive ไม่มี layout/UI สำรอง Start เรียก ResourceManager.BeginGame เฉพาะครั้งแรกที่ไม่มีเซฟ แล้วเปิด Main UI ครั้งต่อไปใช้เซฟเดิม `newGame` ไม่เริ่ม/reset อัตโนมัติหรือต้อง reload ซีนแล้ว RepairUI เพิ่ม SetMainMenuVisible กันเปิดทับ Start ตั้งเสียงรวม/เพลง/เอฟเฟกต์เชื่อม UISfxManager และเลือกความละเอียด+เต็มจอ/หน้าต่างผ่าน Apply บันทึก PlayerPrefs ขนาดจอมีผลใน Build ไม่แตะ Game View
 
 ผู้ใช้ต้องสร้าง UI และใส่/ลากช่อง StartMenuUI และ SettingsUI เอง รายการช่องและตำแหน่ง host อยู่ UI/README.md รายละเอียดเซฟใน Customization/README.md คอมไพล์ทั้งชุดผ่าน exit 0 ยังไม่ทดสอบกด UI/เสียง/Build และไม่แตะเซฟจริง
+
+## วัสดุ 11 ชนิดและมอนดรอป 1–10 (2026-10-27)
+
+สร้าง Repair/Materials/*.asset ใช้รูป UI/Item ครบ Screw + วัสดุสิบชนิดตามภาพ ผูกพูลซ่อมสี่ slot และ ResourceManager.prefab catalog/เริ่มต้นอย่างละ 10 แล้ว ลบ override รายการเก่าใน Repair.unity ให้สืบทอด prefab เซฟเดิมไม่เปลี่ยนจำนวน RepairMaterialOption เพิ่ม Allowed Parts กรอง Shield Crystal ให้เฉพาะ Barrier Plate; Plasma Core ใช้กับ Gun/Jet ทุกชิ้นตามผู้ใช้เลือก Enemy ดรอปหนึ่งชนิด จำนวนสุ่ม 1–10 เข้าคลังและ UI เดิม ไม่มีช่องใหม่บน Enemy หรือ UI ไม่ต้องลากเพิ่ม รายการทั้งหมดและผลตรวจใน Repair/README.md คอมไพล์และตรวจ reference ผ่าน ยังไม่ได้ทดสอบ Play Mode

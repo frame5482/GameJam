@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a835cc466445e5e47abb8f6279642fb1, type: 3}
-  m_Name: Scrap
-  m_EditorClassIdentifier: Assembly-CSharp::SpaceGarage.ShipMaterialData
-  itemId: Scrap
-  displayName: Scrap
-  icon: {fileID: 21300000, guid: 519c0df970f4a974b8d2d634f0c53a1e, type: 3}
+  m_Name: ServoMechanism
+  m_EditorClassIdentifier: 
+  itemId: ServoMechanism
+  displayName: Servo Mechanism
+  icon: {fileID: 21300000, guid: 105b6f10f5d9e684ab0852da98813d72, type: 3}
