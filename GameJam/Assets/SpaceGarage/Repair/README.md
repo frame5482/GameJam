@@ -130,3 +130,9 @@ ResourceManager.prefab ตั้ง Material Catalog ครบ 11 และ Star
 Enemy.AwardMaterialDrop เปลี่ยนจำนวนจาก 1 เป็น Random.Range(1,11) จึงได้ 1–10 ชิ้นโอกาสเท่ากันต่อจำนวน สุ่มชนิดหนึ่งจากผลรวมวัสดุไม่ซ้ำ ID ของพูลเดิม รับทันทีเมื่อฆ่าและส่ง NotifyPickupCollected ด้วยจำนวนจริงไปแจ้งเตือน/ผลลัพธ์เดิม ไม่มี prefab ดรอปโลกและไม่มีช่องใหม่บน Enemy EnemyShip ผูกพูลทั้งสี่เดิมแล้วจึงดรอปวัสดุใหม่ได้ครบทุกชนิด
 
 ผลตรวจ: 11 asset ID ไม่ซ้ำ/Sprite GUID ตรงรูปจริง, catalog 11, starting x10 ครบ, scene ไม่มี override รายการเก่า, พูล Gun 8/Armor 6/Wing 6/Jet 7 reference ครบ คอมไพล์ Assembly-CSharp ทั้งชุดกับ Roslyn/reference Unity ผ่าน exit 0 ยังไม่ได้ทดสอบสุ่มงาน/ฆ่ามอน/UI จริงใน Play Mode ไม่มีไฟล์ตรวจชั่วคราวค้าง ไม่ต้องลากค่าเพิ่ม
+
+## Scroll View วัสดุหน้าซ่อมเลื่อนแนวนอน (2026-10-27)
+
+Scenes/Repair.unity > MainUi/Repair panel/invent/Scroll View เปิด Horizontal เดิมอยู่แล้ว แต่ Content เป็นความกว้างคงที่และเปิด Vertical ด้วย ล้อเมาส์จึงเลื่อนแกน Y แทน แก้เฉพาะ ScrollRect นี้ให้ Horizontal=true/Vertical=false และเพิ่ม ContentSizeFitter บน Content (849228417) Horizontal Fit=Preferred Size, Vertical Fit=Unconstrained ให้ความกว้างตาม HorizontalLayoutGroup/จำนวนรายการที่ active จริง คง scale, padding, spacing, ขนาดการ์ด, viewport, anchors และตำแหน่งที่ผู้ใช้จัดไว้ ไม่แก้ Scroll View หน้าปรับแต่งหรือ dropdown
+
+ใช้ล้อเมาส์เหนือรายการเพื่อเลื่อนซ้ายขวา หรือคลิกลากบริเวณว่างใน Scroll View การลากเริ่มบนการ์ดวัสดุยังใช้ส่งวัสดุซ่อมตามเดิม ไม่เปลี่ยนการรับ drag ของ RepairMaterialDragItem ไม่มีช่องสคริปต์ใหม่/ไม่ต้องลากเพิ่ม ตรวจ fileID/reference, ค่าฟิต/แกน และโค้ด ScrollRect ของแพ็กเกจที่ติดตั้งยืนยัน wheel Y ส่งไป X เมื่อ horizontal-only แล้ว ยังไม่ได้ทดสอบเลื่อนจริงใน Play Mode

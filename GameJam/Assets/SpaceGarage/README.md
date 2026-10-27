@@ -526,3 +526,17 @@ Prefab ใด ๆ ถูก Instantiate ตามจุดยิงได้เ�
 ## วัสดุ 11 ชนิดและมอนดรอป 1–10 (2026-10-27)
 
 สร้าง Repair/Materials/*.asset ใช้รูป UI/Item ครบ Screw + วัสดุสิบชนิดตามภาพ ผูกพูลซ่อมสี่ slot และ ResourceManager.prefab catalog/เริ่มต้นอย่างละ 10 แล้ว ลบ override รายการเก่าใน Repair.unity ให้สืบทอด prefab เซฟเดิมไม่เปลี่ยนจำนวน RepairMaterialOption เพิ่ม Allowed Parts กรอง Shield Crystal ให้เฉพาะ Barrier Plate; Plasma Core ใช้กับ Gun/Jet ทุกชิ้นตามผู้ใช้เลือก Enemy ดรอปหนึ่งชนิด จำนวนสุ่ม 1–10 เข้าคลังและ UI เดิม ไม่มีช่องใหม่บน Enemy หรือ UI ไม่ต้องลากเพิ่ม รายการทั้งหมดและผลตรวจใน Repair/README.md คอมไพล์และตรวจ reference ผ่าน ยังไม่ได้ทดสอบ Play Mode
+
+## แก้ Build CS0006 จาก DLL ตรวจงานที่ลบแล้ว (2026-10-27)
+
+Editor.log ล่าสุดมี CS0006 Assets/FlightCheck.dll และ Assets/PickupCheck.dll ไม่พบไฟล์เหล่านี้หรือ explicit reference ใน source/asmdef/rsp ของ Assets/ProjectSettings/Packages แต่แคช Library/Bee ของ Player ยังอ้าง plugin เก่า จึงให้ Unity รัน AssetDatabase.Refresh(ForceSynchronousImport|ForceUpdate) และ CompilationPipeline.RequestScriptCompilation(CleanBuildCache) ผ่านสคริปต์ Editor ชั่วคราว หลังผู้ใช้ Refresh สคริปต์ลบตัวเองพร้อม .meta แล้ว ไม่เพิ่ม DLL ปลอมหรือแก้ runtime/UI/เซฟ
+
+ผลจริงจาก Unity Editor.log หลังซ่อม: GarageCacheRepair รายงาน refresh/ลบตัวเอง/request clean, Tundra build success (55.31 seconds), 826 items updated, 979 evaluated และ Mono successfully reloaded assembly ตรวจแคช Bee ใหม่ไม่พบ reference สอง DLL ใน rsp/inputdata/dag แล้ว ไม่มีไฟล์ตรวจชั่วคราวค้าง ยังไม่ได้สั่ง Player Build ซ้ำ ผลยืนยันนี้เป็นการคอมไพล์ Editor จริง ผู้ใช้ลอง Build อีกครั้งได้ ไม่มีช่องหรือ reference ใหม่ที่ต้องตั้งค่า
+
+### CS0006 แก้ที่ฐานข้อมูลนำเข้าจริง (2026-10-27, แทนข้อสรุปรอบก่อน)
+
+Build ซ้ำยังมี CS0006 แม้ Editor คอมไพล์ผ่าน จึงตรวจ PluginImporter ผ่าน Unity จริง พบ Assets/FlightCheck.dll และ Assets/PickupCheck.dll มี importer/GUID ค้างทั้งที่ File.Exists=false และ AssetDatabase.DeleteAsset คืน false ทั้งคู่ การ Refresh/RequestScriptCompilation(CleanBuildCache) อย่างเดียวไม่พอ หลังผู้ใช้เซฟและปิด Unity ตรวจ process ปิดจริงแล้วลบเฉพาะ cache ที่สร้างใหม่ได้ใน Library: Bee, ScriptAssemblies, PlayerDataCache, SourceAssetDB/lock, ArtifactDB/lock ไม่แตะ Assets/ProjectSettings/เซฟเกม
+
+เปิด Unity batchmode ครั้งเดียวเพื่อสร้างฐานข้อมูลใหม่และยืนยัน Player Build Windows จริง: ไม่พบ importer ของสอง DLL แล้ว, Build Finished Result Success, result=Succeeded errors=0 warnings=13, ระยะ 00:02:44.2490096; rsp/inputdata/dag ใหม่ไม่มี reference สอง DLL Warning ที่เหลือเป็น shader pow ค่าติดลบ/หารศูนย์และ shader ที่ไม่รองรับ pipeline ไม่ใช่ Error ที่ขวาง Build ไม่แก้กราฟภาพแทนผู้ใช้ ผลทดสอบไม่ใช่การตรวจภาพหรือเล่นเกมจริง
+
+ผู้ใช้แจ้งว่าจะ Build เอง จึงไม่สั่ง Build เพิ่ม เก็บกวาด RemoveMissingTestPlugins/VerifyPlayerBuild scripts และ .meta พร้อมผล/Log ชั่วคราวใน Temp แล้ว ไม่วาง DLL ทดแทน ไม่แก้โค้ดเกม/UI/prefab เพื่อซ่อน Error ไม่มีช่องใหม่ ไม่ต้องตั้งค่า reference เพิ่ม ผู้ใช้เปิด Unity แล้ว Build ในโฟลเดอร์ของตนได้ตามเดิม
