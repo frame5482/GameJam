@@ -26,6 +26,10 @@ namespace SpaceGarage
         [SerializeField] private Image dodgeReadyFill = null;
         [Header("Existing speed UI")]
         [SerializeField] private TMP_Text speedText = null;
+        [Header("Your controls explanation text")]
+        [SerializeField] private TMP_Text controlsText = null;
+        [SerializeField, TextArea(5, 12)] private string controlsDescription =
+            "Ship flies forward automatically\nW / S: Pitch down / up\nA / D: Bank and turn\nHold Shift: Boost\nSpace + A / D: Dodge\nHold Left Mouse: Fire at cursor\nHold Right Mouse + Drag: Orbit camera\nE: Switch Unity modes\nMaterials are collected automatically";
         [Header("Spawn marked material rows into your Canvas container")]
         [SerializeField] private RectTransform materialContainer = null;
         [SerializeField] private ShipTrackedMaterialRow materialRowPrefab = null;
@@ -76,7 +80,11 @@ namespace SpaceGarage
             RefreshMaterials();
         }
 
-        private void OnEnable() { ResetCache(); BindInventory(); RefreshMaterials(); }
+        private void OnEnable()
+        {
+            if (controlsText != null) controlsText.text = controlsDescription;
+            ResetCache(); BindInventory(); RefreshMaterials();
+        }
         private void OnDisable() { Unsubscribe(); ClearSpawnedMaterialRows(); ClearPickupNotifications(); }
         private void ResetCache() => lastHealth = lastMaxHealth = lastBoost = lastMaxBoost = lastSpeed = lastDodge = -1;
 

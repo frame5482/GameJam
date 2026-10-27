@@ -139,8 +139,12 @@ namespace SpaceGarage
             previousTimeScale = Time.timeScale;
             ownsPause = true;
             Time.timeScale = 0;
-            SetPanel(gameOverPanel, !success);
-            SetPanel(successPanel, success);
+            var resultPanel = success ? successPanel : gameOverPanel;
+            var otherPanel = success ? gameOverPanel : successPanel;
+            if (otherPanel != resultPanel) SetPanel(otherPanel, false);
+            var title = success ? successTitleText : gameOverTitleText;
+            if (title != null) title.text = success ? "Exploration Complete" : "Game Over";
+            SetPanel(resultPanel, true);
             if ((success ? successPanel : gameOverPanel) == null)
                 Debug.LogWarning("Assign the result panels and Back buttons on ExplorationRun. The result is ready but its Canvas panel is missing.", this);
         }

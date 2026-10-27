@@ -193,7 +193,7 @@ namespace SpaceGarage
                     if (parameter.name == "Attack" && parameter.type == AnimatorControllerParameterType.Trigger)
                     { animator.SetTrigger("Attack"); break; }
             firing = ready;
-            foreach (var gun in guns) if (gun != null) gun.SetAITarget(ready, Mathf.Max(0, Stats.attack), transform, target);
+            foreach (var gun in guns) if (gun != null) gun.SetAITarget(ready, Mathf.Max(0, Stats.attack) * 0.5f, transform, target);
         }
 
         private void FixedUpdate()

@@ -11,8 +11,10 @@ namespace SpaceGarage
         private VisualEffectAsset asset;
         private static readonly int Size = Shader.PropertyToID("Size");
         private static readonly int Size1 = Shader.PropertyToID("Size 1");
+        private static readonly int BeamColor = Shader.PropertyToID("Color");
+        private static readonly int BeamColor1 = Shader.PropertyToID("Color 1");
 
-        public void Show(VisualEffectAsset graph, Transform parent, Transform muzzle, float size)
+        public void Show(VisualEffectAsset graph, Transform parent, Transform muzzle, float size, Color color, Color secondaryColor)
         {
             if (graph == null) { Hide(); return; }
             if (root == null || asset != graph)
@@ -31,12 +33,20 @@ namespace SpaceGarage
                 }
                 effect.SetFloat(Size, 0);
                 effect.SetFloat(Size1, 0);
+                ApplyColors(color, secondaryColor);
                 root.SetActive(true);
                 effect.Play();
             }
             root.transform.SetPositionAndRotation(muzzle.position, muzzle.rotation);
+            ApplyColors(color, secondaryColor);
             effect.SetFloat(Size, size);
             effect.SetFloat(Size1, size);
+        }
+
+        private void ApplyColors(Color color, Color secondaryColor)
+        {
+            if (effect.HasVector4(BeamColor)) effect.SetVector4(BeamColor, (Vector4)color);
+            if (effect.HasVector4(BeamColor1)) effect.SetVector4(BeamColor1, (Vector4)secondaryColor);
         }
 
         public void Hide()

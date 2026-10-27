@@ -21,12 +21,12 @@ namespace SpaceGarage
         [SerializeField] private Transform jetMount = null;
         [Header("3D aircraft banking")]
         [SerializeField, Range(0, 70)] private float bankAngle = 25f;
-        [SerializeField, Min(0)] private float bankDegreesPerSecond = 60f;
+        [SerializeField, Min(0)] private float bankDegreesPerSecond = 75f;
         [Header("Weighted flight response")]
         [SerializeField, Range(1, 80)] private float maxPitchAngle = 30f;
-        [SerializeField, Min(0)] private float pitchDegreesPerSecond = 30f;
-        [SerializeField, Min(0)] private float turnDegreesPerSecond = 45f;
-        [SerializeField, Min(0.01f)] private float steeringResponseTime = 0.4f;
+        [SerializeField, Min(0)] private float pitchDegreesPerSecond = 36f;
+        [SerializeField, Min(0)] private float turnDegreesPerSecond = 54f;
+        [SerializeField, Min(0.01f)] private float steeringResponseTime = 0.32f;
         [SerializeField, Min(0.01f)] private float speedResponseTime = 0.6f;
         [Header("Dodge roll (Space + A/D)")]
         [SerializeField, Min(0.01f)] private float dodgeDuration = 1.2f;

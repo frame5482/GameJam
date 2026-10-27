@@ -27,6 +27,10 @@ namespace SpaceGarage
         [SerializeField] private VisualEffectAsset cataclysmBeam = null;
         [SerializeField, Min(0)] private float laserSize = 10;
         [SerializeField, Min(0)] private float railSize = 20;
+        [SerializeField, ColorUsage(true, true)] private Color laserColor = new Color(89.4541015625f, 5.4741287231f, 0f, 1f);
+        [SerializeField, ColorUsage(true, true)] private Color laserSecondaryColor = new Color(0f, 117.625579834f, 109.947380066f, 1f);
+        [SerializeField, ColorUsage(true, true)] private Color railColor = new Color(0f, 45f, 110f, 1f);
+        [SerializeField, ColorUsage(true, true)] private Color railSecondaryColor = new Color(0f, 45f, 110f, 1f);
         [Tooltip("Time between laser hits. Each hit uses ship Attack x Damage Multiplier, like a projectile.")]
         [SerializeField, Min(0.01f)] private float laserDamageInterval = 0.1f;
         [SerializeField, Min(0.01f)] private float laserRange = 10;
@@ -46,6 +50,7 @@ namespace SpaceGarage
         private readonly ShipBeamEmitter beam1 = new ShipBeamEmitter();
         private readonly ShipBeamEmitter beam2 = new ShipBeamEmitter();
         private float laserDamageTime;
+        private bool laserFiring;
 
         public void SetTrigger(bool pressed, float shipAttack, Transform shipOwner)
         { held = pressed; attack = shipAttack; owner = shipOwner; aiControlled = false; aiTarget = null; }
@@ -55,6 +60,7 @@ namespace SpaceGarage
 
         private void LateUpdate()
         {
+            if (weaponType != ShipWeaponType.Laser) { laserFiring = false; laserDamageTime = 0; }
             if (weaponType != ShipWeaponType.Projectile) { UpdateSpecialWeapon(); return; }
             HideBeams();
             var prefab = projectilePrefabObject != null ? projectilePrefabObject :
@@ -78,9 +84,15 @@ namespace SpaceGarage
             { cycle.StopPulse(); HideBeams(); laserDamageTime = 0; return; }
             if (weaponType == ShipWeaponType.Laser)
             {
-                if (!held || cataclysmBeam == null)
-                { HideBeams(); laserDamageTime = 0; return; }
+                if (!held || cataclysmBeam == null || Time.deltaTime <= 0)
+                { HideBeams(); laserFiring = false; laserDamageTime = 0; return; }
                 ShowBeams(laserSize);
+                if (!laserFiring)
+                {
+                    laserFiring = true;
+                    laserDamageTime = 0;
+                    DamageBeams(laserRange, attack * damageMultiplier);
+                }
                 laserDamageTime += Time.deltaTime;
                 float interval = Mathf.Max(0.01f, laserDamageInterval);
                 while (laserDamageTime >= interval)
@@ -112,11 +124,13 @@ namespace SpaceGarage
 
         private void ShowBeams(float size)
         {
-            if (muzzle == null && muzzle2 == null) { beam1.Show(cataclysmBeam, transform, transform, size); beam2.Hide(); }
+            Color color = weaponType == ShipWeaponType.RailGun ? railColor : laserColor;
+            Color secondary = weaponType == ShipWeaponType.RailGun ? railSecondaryColor : laserSecondaryColor;
+            if (muzzle == null && muzzle2 == null) { beam1.Show(cataclysmBeam, transform, transform, size, color, secondary); beam2.Hide(); }
             else
             {
-                if (muzzle != null) beam1.Show(cataclysmBeam, transform, muzzle, size); else beam1.Hide();
-                if (muzzle2 != null && muzzle2 != muzzle) beam2.Show(cataclysmBeam, transform, muzzle2, size); else beam2.Hide();
+                if (muzzle != null) beam1.Show(cataclysmBeam, transform, muzzle, size, color, secondary); else beam1.Hide();
+                if (muzzle2 != null && muzzle2 != muzzle) beam2.Show(cataclysmBeam, transform, muzzle2, size, color, secondary); else beam2.Hide();
             }
         }
         private void HideBeams() { beam1.Hide(); beam2.Hide(); }
@@ -133,6 +147,14 @@ namespace SpaceGarage
         }
         private void DamageBeam(Transform origin, float range, float damage)
         {
+            // Raycasts omit colliders containing their origin. A moving muzzle can enter
+            // the enemy hitbox during a held beam; keep applying ticks while inside it.
+            foreach (var overlap in Physics.OverlapSphere(origin.position, 0.001f, aimLayers, QueryTriggerInteraction.Collide))
+            {
+                if (!CanAimAt(overlap) || (overlap.ClosestPoint(origin.position) - origin.position).sqrMagnitude > 0.000001f) continue;
+                ApplyBeamDamage(overlap, damage, origin.position, -origin.forward);
+                return;
+            }
             RaycastHit nearest = default;
             float distance = float.PositiveInfinity;
             foreach (var hit in Physics.RaycastAll(origin.position, origin.forward, range, aimLayers, QueryTriggerInteraction.Collide))
@@ -141,11 +163,15 @@ namespace SpaceGarage
                 nearest = hit; distance = hit.distance;
             }
             if (nearest.collider == null) return;
-            foreach (var behaviour in nearest.collider.GetComponentsInParent<MonoBehaviour>())
+            ApplyBeamDamage(nearest.collider, damage, nearest.point, nearest.normal);
+        }
+        private void ApplyBeamDamage(Collider targetCollider, float damage, Vector3 point, Vector3 normal)
+        {
+            foreach (var behaviour in targetCollider.GetComponentsInParent<MonoBehaviour>())
                 if (behaviour is IShipDamageable target)
                 {
                     if (target is IShipHitReceiver receiver)
-                        receiver.TakeHit(damage, ShipCombatFeedback.SourceOf(owner), nearest.point, nearest.normal);
+                        receiver.TakeHit(damage, ShipCombatFeedback.SourceOf(owner), point, normal);
                     else target.TakeDamage(damage);
                     break;
                 }
@@ -228,7 +254,7 @@ namespace SpaceGarage
         private void OnDisable()
         {
             held = false; aiTarget = null; aiControlled = false;
-            cycle.StopPulse(); laserDamageTime = 0;
+            cycle.StopPulse(); laserDamageTime = 0; laserFiring = false;
             beam1.Dispose(); beam2.Dispose();
         }
     }

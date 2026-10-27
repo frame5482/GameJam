@@ -271,6 +271,7 @@ MonoBehaviour:
   materialName: {fileID: 3128978433378617596}
   ownedText: {fileID: 8313283294021824177}
   dragGhostPrefab: {fileID: 7302583585228468749}
+  bonusIcon: {fileID: 0}
 --- !u!114 &3673947128100307831
 MonoBehaviour:
   m_ObjectHideFlags: 0

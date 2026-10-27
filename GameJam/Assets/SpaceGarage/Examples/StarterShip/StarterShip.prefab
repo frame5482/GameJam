@@ -117,11 +117,11 @@ MonoBehaviour:
   wingMount: {fileID: 137}
   jetMount: {fileID: 157}
   bankAngle: 25
-  bankDegreesPerSecond: 60
+  bankDegreesPerSecond: 75
   maxPitchAngle: 30
-  pitchDegreesPerSecond: 30
-  turnDegreesPerSecond: 45
-  steeringResponseTime: 0.4
+  pitchDegreesPerSecond: 36
+  turnDegreesPerSecond: 54
+  steeringResponseTime: 0.32
   speedResponseTime: 0.6
   dodgeDuration: 1.2
   dodgeDashDuration: 0.6

@@ -1,5 +1,47 @@
 # ระบบควบคุมยานต้นแบบ
 
+## ตรวจ Laser หลังโดนครั้งแรก/ปากกระบอกเข้า hitbox (2026-10-27)
+
+ผู้ใช้แจ้งว่าเดิมโดนครั้งแรกแล้วกดค้างไม่ลดต่อ ตรวจ ShipGun พบลูป interval ไม่ได้หยุดหลังครั้งแรก และ Enemy.TakeHit ไม่มีช่วงอมตะจาก Hit Reaction แต่พบช่องโหว่ของ Physics.RaycastAll ที่ไม่รายงาน collider ซึ่งครอบ origin ของ ray อยู่ เมื่อยานบินต่อแล้วปากกระบอกเข้า hitbox อาจทำให้การตรวจครั้งถัดไปข้ามศัตรู แก้ DamageBeam ให้ตรวจ OverlapSphere ขนาด 0.001 ที่ปากกระบอกและ ClosestPoint ก่อน ray เพื่อรับกรณีอยู่ข้างใน ใช้ CanAimAt เดิมข้ามเจ้าของ/กระสุน/Trigger อื่น หากพบ collider ที่รับได้ตรง origin จะหยุดที่นั้นเช่นเดียวกับการชนระยะ 0 ไม่ทะลุสิ่งกีดขวาง ไม่เพิ่มความหนาหรือระยะลำแสง
+
+แยก ApplyBeamDamage ให้ overlap/ray ใช้การส่งดาเมจเดียวกัน หนึ่งครั้งต่อปากต่อ tick แม้ collider ซ้อนกัน กดค้างยังตรวจซ้ำทุก Laser Damage Interval เดิม เริ่มโดนทันที ไม่มีพัก Rail ใช้ helper เดียวกันจึงรับ origin-inside ด้วยโดยยังโดนครั้งเดียวต่อพัลส์ ไม่แก้ prefab/scene/VFX/ดาเมจ/ระยะ/Def/Hit Reaction และไม่มีช่องใหม่
+
+คอมไพล์ runtime ทั้งชุดด้วย Roslyn/references Unity จริงผ่าน ตรวจเส้นทางปล่อย/กดค้าง/overlap/ray/ข้ามเจ้าของแล้ว ยังไม่ได้ทดสอบถือ Laser ยิงศัตรูจริงใน Play Mode จึงยังยืนยันไม่ได้ว่ากรณี origin-inside นี้เป็นสาเหตุเดียวกับที่ผู้ใช้พบ ไม่ต้องตั้งค่าเพิ่ม เริ่ม Play ใหม่เพื่อใช้โค้ด หากภาพลำแสงถึงแต่ ray ไปไม่ถึง การตรวจยังใช้ Laser Range เดิม (เริ่มต้น 10 หน่วย) แยกจากขนาด VFX ตามที่ตั้งไว้เดิม
+
+## Laser ทำดาเมจตลอดการกดค้าง (2026-10-27)
+
+ยืนยันตามผู้ใช้: โหมด Laser ไม่มีพัลส์หรือเวลาพักแบบ Rail Gun ทำดาเมจซ้ำตลอดเวลาที่กดค้าง แก้ ShipGun.cs ให้ยิงตรวจดาเมจทันทีเมื่อเริ่มกด แล้วตรวจซ้ำทุก Laser Damage Interval เดิม (ค่าเริ่มต้น 0.1s) จนปล่อย แต่ละครั้ง/ปากใช้ Attack × Damage Multiplier ผ่าน Def/โล่/Hit Feedback ตามเดิม ไม่เปลี่ยนเป็น DPS ต่อเฟรมหรือเพิ่มตัวคูณดาเมจ เมื่อปล่อย/ปิดปืน/เปลี่ยนชนิดปืนจะรีเซ็ตสถานะเริ่มยิง และไม่ทำดาเมจ Laser เมื่อ Time.deltaTime=0 โหมดยิงตรงตาม +Z ของ Muzzle, Range/Size/สีและ Rail เดิมไม่เปลี่ยน
+
+ไม่มีช่อง Inspector ใหม่ ไม่ต้องตั้งค่าเพิ่ม หากต้องการปรับความถี่ใช้ Laser Damage Interval บน ShipGun ช่องเดิม คอมไพล์ runtime ด้วย Roslyn/references Unity จริงผ่าน ยังไม่ได้ทดสอบกดค้าง/ดาเมจจริงใน Play Mode ให้เริ่ม Play ใหม่เพื่อใช้โค้ด
+
+## สี Laser / Rail Gun แยกบนปืน (2026-10-27)
+
+เพิ่มช่อง HDR Color บน **ShipGun > Laser / Rail Gun** ของ Gun Part prefab แต่ละตัว: **Laser Color / Laser Secondary Color** คุม exposed `Color` / `Color 1` ของลำแสงเมื่อ Weapon Type=Laser; **Rail Color / Rail Secondary Color** คุมสอง property เดียวกันเมื่อ Weapon Type=Rail Gun ตั้งสี Laser เริ่มต้นตามค่ากราฟ CataclysmBeam เดิมทั้งสองชั้น (89.4541,5.474129,0,1) และ (0,117.62558,109.94738,1) ตามที่ผู้ใช้ขอ ส่วน Rail ทั้งสองชั้นเริ่มสีฟ้า HDR (0,45,110,1) ปรับ hue/Intensity/alpha ได้ใน color picker บนปืนแล้วบันทึก prefab
+
+แก้ Scripts/ShipGun.cs เลือกสีตามชนิดปืน ส่งทั้งสองปากผ่าน ShipBeamEmitter.cs เขียนสีเฉพาะ VisualEffect instance ของปืนก่อน Play ครั้งแรกและตอนแสดงแต่ละเฟรม ไม่แก้กราฟ/Material/reference กระสุน/ปากกระบอกหรือสีปืนตัวอื่น ใช้ได้กับทั้งปืนผู้เล่นและศัตรูที่ประกอบจาก prefab นั้น ช่วงเปิดปิด Size/Size 1, ทิศยิงตรง, ระยะ ดาเมจ และรอบพัลส์เดิมทั้งหมด หากเปลี่ยน Cataclysm Beam เป็นกราฟอื่น ต้องมี exposed Color/Color 1 ชนิด Color/Vector4 จึงรับค่าสีได้; ไม่มี property จะข้ามเฉพาะค่าสีนั้น
+
+ผลตรวจ: runtime ทั้งชุดคอมไพล์ด้วย Roslyn/references Unity จริงผ่าน ตรวจ graph มี Color/Color 1 ชนิด Color และ default Laser ตรงกราฟเดิม ไม่ได้แก้ไฟล์กราฟ/prefab/scene ไม่ต้องลาก reference เพิ่ม สีเริ่มต้นพร้อมใช้ หากต้องการสีอื่นเลือกบน ShipGun ของ prefab ปืนนั้น ยังไม่ได้ตรวจภาพแสง/Bloom/สีจริงใน Play Mode
+
+## ลดดาเมจศัตรู 50% (2026-10-27)
+
+แก้ `Scripts/Enemy.cs` ตอนส่งค่าปืนผ่าน SetAITarget ให้ใช้ Attack รวมของศัตรู × 0.5 ก่อนตัวคูณปืน ครอบคลุมกระสุน/เลเซอร์/เรล/กระสุนพิเศษที่ผ่าน ShipGun เดิม ไม่แก้ ShipPartStats, prefab ปืนร่วม หรือดาเมจผู้เล่น ความถี่ยิงยังเดิม ดาเมจนี้เป็นค่าก่อนหัก Def/โล่ จึงไม่จำเป็นว่า HP ที่เสียจะเท่าครึ่งหนึ่งพอดีเมื่อมี Def ไม่มีช่องใหม่ ไม่ต้องตั้งค่าเพิ่ม เริ่ม Play ใหม่เพื่อโหลดโค้ด คอมไพล์ runtime ด้วย Roslyn/references Unity จริงผ่าน ยังไม่ได้ทดสอบดาเมจจริงใน Play Mode
+
+## ขยายพื้นที่ยิงโดนศัตรู (2026-10-27)
+
+ตามผู้ใช้ขอให้ยิงโดนง่ายขึ้น ปรับเฉพาะ `Examples/Enemies/EnemyShip.prefab > DamageHitbox > BoxCollider > Size` จาก (4.2,1.8,4.5) เป็น **(5.6,2.6,5.6)** หน่วย คงตำแหน่งลูก (0,0,0.2), Is Trigger=true และ ShipDamageHitbox เดิม ช่วยให้กระสุน/เลเซอร์/เรลที่รองรับ hitbox เดิมยิงเฉียดด้านข้าง/บนล่างได้ง่ายขึ้น ไม่เพิ่มการดูดเป้าหรือกระสุนติดตาม ไม่เปลี่ยนความแม่นยำ/ดาเมจ/รัศมีกระสุนของผู้เล่นหรือศัตรู Collider ชนจริงบน root ยังคง (2.8,0.8,3.25)
+
+ไม่มีช่องใหม่ หากต้องการปรับต่อใช้ BoxCollider > Size ของลูก DamageHitbox เดิม EnemySpawnManager ที่ SampleScene ใช้ EnemyShip prefab นี้อยู่แล้ว ไม่ต้องตั้งค่าเพิ่ม ให้ศัตรูเกิดใหม่หรือเริ่ม Play ใหม่เพื่อใช้ hitbox ใหม่ ตรวจค่า serialized, marker GUID และ reference manager→prefab แล้วผ่าน ไม่มีการแก้สคริปต์จึงไม่คอมไพล์ซ้ำ ยังไม่ได้ทดสอบยิง/ดูภาพใน Play Mode
+
+อัปเดต 2026-10-27 เพิ่มคำอธิบายควบคุม: ShipHUD มี Controls Text รับ TMP_Text ของผู้ใช้ และ Controls Description ข้อความอังกฤษหลายบรรทัดแก้ใน Inspector ได้ ใส่ข้อความตอนเปิด HUD ไม่สร้าง/เปิดปิด/ย้าย UI ผู้ใช้ต้องลาก Text ลง Controls Text ก่อนเห็นคำอธิบาย รายละเอียดใน [UI/README.md](UI/README.md) คอมไพล์ผ่าน ยังไม่ได้ดูภาพ Play Mode
+
+อัปเดต 2026-10-27 แก้ตายแล้ว Game Over ไม่ขึ้น: SampleScene ใช้ Game Over/Success Panel ร่วม object เดียว โค้ดเก่าตอนแพ้เปิดแล้วปิด object เดิมตาม success=false แก้ ExplorationRun.Finish ให้ไม่ปิดซ้ำเมื่อใช้แผงร่วม และอัปเดตหัวข้อ Game Over/Exploration Complete ตอนแสดงจริง ไม่แก้ UI/reference ไม่มีช่องใหม่ ไม่ต้องตั้งค่าเพิ่ม คอมไพล์ผ่าน ยังไม่ได้ตรวจภาพ Play Mode รายละเอียดใน [UI/README.md](UI/README.md)
+
+## เพิ่มความไวหัน/เลี้ยวผู้เล่นเล็กน้อย (2026-10-27)
+
+ตามผู้ใช้ขอให้หันยิงตามทัน ปรับ ShipController ค่าเริ่มต้นและ prefab ผู้เล่น `Examples/StarterShip/StarterShip.prefab`, `Examples/HeavyShip 2/StarterShip.prefab`: Turn Degrees Per Second 45 → 54, Pitch Degrees Per Second 30 → 36, Bank Degrees Per Second 60 → 75 และ Steering Response Time 0.4 → 0.32 วินาที ยังคง Max Pitch Angle ±30 องศา, Bank Angle 25 องศา และ Speed Response Time 0.6 เดิม ตัวคูณ Wing ยังคงมีผลตามเดิม ไม่มีช่องใหม่ ไม่เปลี่ยนความเร็วบิน/ศัตรู/การเล็งปืน/กล้อง/UI SampleScene สืบทอด prefab โดยไม่มี override ค่ากลุ่มนี้ ไม่ต้องตั้งค่าเพิ่ม เริ่ม Play ใหม่เพื่อโหลดค่า
+
+ตรวจค่า serialized/การสืบทอดและคอมไพล์ runtime ด้วย Roslyn/references Unity จริงผ่าน ยังไม่ได้ลองบังคับบินหรือวัดความรู้สึกหันยิงใน Play Mode ตัวเลขนี้แทนเพดาน 30/45 และหน่วง 0.4 ในบันทึกเก่าก่อนหน้า
+
 ## วัสดุจากศัตรูและสีชุดใหม่ (2026-10-27)
 
 แก้ `Enemy.cs` เพิ่มรับวัสดุทันทีตอน HP ลดจนตายจริงทุกตัว: สุ่ม 1 ชนิด จำนวน 1 ชิ้นจากวัสดุที่ valid ในพูลโรงซ่อมทั้งสี่ ตัด Item ID ซ้ำก่อนสุ่ม เพิ่มคลังผู้เล่นแล้วส่ง pickupCollected เพียงเมื่อ Add สำเร็จ จึงแสดงในแจ้งเตือน RepiarMat ระหว่างสู้และผลลัพธ์ตอนจบเดิม รวมถึงยอด Collected/สูตรโบนัส ไม่สร้างของลอยในโลกหรือ prefab ดรอปใหม่ตามผู้ใช้ยืนยัน ไม่จ่ายจากการปิด/ทำลายศัตรูเฉย ๆ และ IsAlive เดิมกันตาย/แจกซ้ำ

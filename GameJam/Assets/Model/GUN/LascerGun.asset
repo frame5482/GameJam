@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01e962177816680468297d3767f3fb8d, type: 3}
-  m_Name: HeavyGun
+  m_Name: LascerGun
   m_EditorClassIdentifier: 
   partId: 3f97dd7dda621ce499d8bf1a9855da06
-  displayName: Heavy Gun
+  displayName: Lascer  Gun
   icon: {fileID: 0}
   slot: 0
   partPrefab: {fileID: 100, guid: 7a13d5f1637713246b8a2b98b051deb9, type: 3}
@@ -28,3 +28,21 @@ MonoBehaviour:
   boostDrainPerSecond: 25
   boostRecoveryPerSecond: 15
   boostRecoveryDelay: 1
+  speedMultiplier: 1
+  healthMultiplier: 1
+  handlingMultiplier: 1
+  steeringResponseMultiplier: 1
+  knockbackMultiplier: 1
+  switchableMode: 0
+  alternateSpeedMultiplier: 1
+  alternateHandlingMultiplier: 1
+  alternateSteeringResponseMultiplier: 1
+  alternateDefense: 0
+  barrierCapacity: 0
+  barrierRecoveryDelay: 4
+  barrierRecoveryPerSecond: 15
+  barrierPrefab: {fileID: 0}
+  barrierVisualScale: 1
+  dodgeCharges: 1
+  postBoostSpeedMultiplier: 1
+  postBoostSlowDuration: 0
