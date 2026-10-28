@@ -136,3 +136,15 @@ Enemy.AwardMaterialDrop เปลี่ยนจำนวนจาก 1 เป�
 Scenes/Repair.unity > MainUi/Repair panel/invent/Scroll View เปิด Horizontal เดิมอยู่แล้ว แต่ Content เป็นความกว้างคงที่และเปิด Vertical ด้วย ล้อเมาส์จึงเลื่อนแกน Y แทน แก้เฉพาะ ScrollRect นี้ให้ Horizontal=true/Vertical=false และเพิ่ม ContentSizeFitter บน Content (849228417) Horizontal Fit=Preferred Size, Vertical Fit=Unconstrained ให้ความกว้างตาม HorizontalLayoutGroup/จำนวนรายการที่ active จริง คง scale, padding, spacing, ขนาดการ์ด, viewport, anchors และตำแหน่งที่ผู้ใช้จัดไว้ ไม่แก้ Scroll View หน้าปรับแต่งหรือ dropdown
 
 ใช้ล้อเมาส์เหนือรายการเพื่อเลื่อนซ้ายขวา หรือคลิกลากบริเวณว่างใน Scroll View การลากเริ่มบนการ์ดวัสดุยังใช้ส่งวัสดุซ่อมตามเดิม ไม่เปลี่ยนการรับ drag ของ RepairMaterialDragItem ไม่มีช่องสคริปต์ใหม่/ไม่ต้องลากเพิ่ม ตรวจ fileID/reference, ค่าฟิต/แกน และโค้ด ScrollRect ของแพ็กเกจที่ติดตั้งยืนยัน wheel Y ส่งไป X เมื่อ horizontal-only แล้ว ยังไม่ได้ทดสอบเลื่อนจริงใน Play Mode
+
+บทสอนใหม่ (2026-10-27): เพิ่ม FirstRepairTutorial ใน Repair ใช้ TutorialManager/TutorialDialog เดิมและ prefab กล่อง UGUI แบบเรียบง่ายที่ผู้ใช้อนุญาต เชื่อม Repair > รอจอด > ลากซ่อมหนึ่งชิ้นจนเสร็จ > Back > Explore เมื่อจบบันทึก PlayerPrefs ไม่สอนซ้ำ ไม่ต้องส่งยาน/ไม่บังคับซ่อมทั้งลำ ไม่แก้สูตร/ของในคลัง/จุดบิน/การพักงาน รายละเอียดสคริปต์/ช่องทั้งหมดใน Scirpt/Tutorial/README.md ผูกครบ ไม่ต้องลากเพิ่ม คอมไพล์ผ่าน ยังไม่ทดสอบภาพ/Play Mode และไม่ได้ Build
+
+### Scrollbar Horizontal แสดงตลอด (2026-10-27)
+
+Scroll View หน้าซ่อมที่ผู้ใช้จัดใหม่ (Content 782792041, Horizontal Scrollbar 2079834192) ตั้ง Horizontal Scrollbar Visibility=Permanent (0) แทน Auto Hide And Expand Viewport (2) จึงไม่ซ่อน GameObject แถบอัตโนมัติเมื่อ Content พอดีหรือช่วงเริ่มเล่น ไม่เปลี่ยนตำแหน่ง/ขนาด/ลำดับ UI ไม่แก้แกนหรือ scrollbar อื่น ไม่มีช่องใหม่และไม่ต้องลากเพิ่ม ตรวจค่าในซีนและ enum จาก ScrollRect ของแพ็กเกจจริงแล้ว ยังไม่ได้ดู Play Mode
+
+### แก้รายการหายหลังเปลี่ยน Permanent (2026-10-27)
+
+Viewport 747346574 เดิม AnchorMin=AnchorMax=(0,0), SizeDelta=(0,0) พึ่ง AutoHideAndExpandViewport ขยาย rect ตอน runtime พอเปลี่ยน Permanent โดยไม่แก้ anchors จึงมี Mask ขนาดศูนย์บัง Content ทั้งหมด แก้เฉพาะ AnchorMax=(1,1) ให้ stretch เต็ม Scroll View เดิม รักษา AnchorMin/SizeDelta/position/pivot เดิมและตำแหน่ง Horizontal Scrollbar ที่ผู้ใช้วาง Y=514 ไม่สำรองขอบล่างเพิ่มเพราะผู้ใช้วางแถบไว้ด้านบนกรอบอยู่แล้ว คง Visibility=Permanent ไม่ซ่อนแถบ
+
+ตรวจ rect sizing/reference ในไฟล์และค่าตำแหน่งแถบคงเดิมแล้ว ไม่มีสคริปต์/ช่องใหม่ ไม่แตะรายการวัสดุหรือเซฟ ยังไม่ได้ดูภาพจริงใน Play Mode ถ้าซีนเดิมเปิดค้าง ให้โหลด Repair ใหม่หลังเซฟงานเพื่อรับ anchors ที่แก้

@@ -19,6 +19,8 @@ namespace SpaceGarage
         [SerializeField] private Button unlockButton = null;
         [SerializeField] private TMP_Text moneyText = null;
         [SerializeField] private TMP_Text selectedNameText = null;
+        [SerializeField, Tooltip("Your detail Image showing the selected part's Icon, including locked parts.")]
+        private Image selectedPartImage = null;
         [SerializeField] private TMP_Text unlockPriceText = null;
         [SerializeField] private RectTransform partContainer = null;
         [SerializeField] private CustomizationPartRow partRowPrefab = null;
@@ -54,6 +56,12 @@ namespace SpaceGarage
             if (customizationPanel != null && customizationPanel != gameObject) customizationPanel.SetActive(open);
             if (openButton != null) openButton.interactable = !open;
             if (moneyText != null) moneyText.text = resources != null ? resources.Money.ToString("N0") : "0";
+            if (selectedPartImage != null)
+            {
+                var part = open ? customization.SelectedPart : null;
+                selectedPartImage.sprite = part != null ? part.icon : null;
+                selectedPartImage.enabled = selectedPartImage.sprite != null;
+            }
             if (!open || resources == null || resources.CustomizationCatalog == null) return;
             var selected = customization.SelectedPart;
             bool unlocked = resources.IsUnlocked(selected);

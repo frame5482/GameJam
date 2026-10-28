@@ -118,3 +118,9 @@ newGame คืนช่อง bool On Start (ชื่อ serialized onStart เ
 แทนเงื่อนไขดู JSON เดิม: newGame.TryInitializeOnce ตรวจ PlayerPrefs key `SpaceGarage.NewGame.Completed` ถ้ายังไม่เป็น 1 จะเรียก ResourceManager.ResetForNewGame แม้มีเซฟเดิม เพื่อเริ่มเงินจริง 3000/Base/Starting Materials (11 ชนิดอย่างละ 10) หลังเริ่มและเขียนเซฟสำเร็จเท่านั้นจึง SetInt=1 และ PlayerPrefs.Save หากล้มเหลว/เซฟถูกป้องกันจะไม่มาร์กสำเร็จ ปุ่ม Start บน StartMenuUI กับ newGame.On Start ใช้เมธอดเดียวกันจึงไม่เริ่มซ้ำ เมื่อ key เป็น 1 จะไม่รีเซ็ตอีกแม้ปิดเปิดเกมใหม่
 
 newGame เพิ่มช่อง **Completed** แสดง bool runtime จาก PlayerPrefs ใน Awake และติ๊ก true ให้ instance ในซีนหลังสำเร็จ ไม่ใช้ checkbox นี้เป็นตัวตัดสินแทน PlayerPrefs ไม่ต้องติ๊ก Completed เอง ผู้ใช้ติ๊ก On Start หากต้องการให้ทำอัตโนมัติ; Repair.unity ปัจจุบัน On Start=1 ที่ผู้ใช้ตั้งไว้คงเดิม ไม่มีการแก้เซฟ/PlayerPrefs จริงระหว่างพัฒนา สถานะ Play Mode แสดงใน Inspector ส่วนการคงสถานะข้ามเปิดเกมมาจาก PlayerPrefs ไม่ใช่การเขียน prefab ตอนเล่น
+
+## รูปชิ้นส่วนที่เลือก (2026-10-27)
+
+CustomizationUI เพิ่มช่อง **Selected Part Image** รับ UGUI Image ในพื้นที่รายละเอียดที่ผู้ใช้จัดไว้ Refresh อัปเดต sprite จาก ShipCustomization.SelectedPart.icon ทุกครั้งที่เลือกชิ้น/เปลี่ยนหมวด/เปิดหน้า รวมของล็อกและของปลดแล้ว เมื่อปิดหน้าหรือไม่มีรูปปิดเฉพาะ Image.enabled และล้าง sprite ไม่ปิด GameObject/ไม่ปรับตำแหน่ง ขนาด aspect ratio หรือ layout ไม่กระทบการทดลองโมเดล ซื้อ Equip หรือเซฟ
+
+ผู้ใช้ต้องลาก Image ที่ต้องการแสดงลงช่อง Selected Part Image บน CustomizationUI และกำหนด Icon บน ShipPartStats ของแต่ละชิ้น (ตรวจพบข้อมูลทั้ง 20 ชิ้นมี icon อยู่แล้ว) ไม่สร้าง Image/หน้าตาสำรองและยังไม่เลือก Image ในซีนแทนผู้ใช้ ไม่มีช่องใหม่บน ShipPartStats คอมไพล์ Assembly-CSharp ผ่าน ยังไม่ได้ดูภาพ/คลิกจริงใน Play Mode ไม่ได้ Build
